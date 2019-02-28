@@ -8,12 +8,14 @@
   },
   "include": [
     "../../3rdparty/ibas/index.d.ts",
-    "./3rdparty/initialfantasy/index.d.ts",
+    "../../3rdparty/shell/index.d.ts",
+    "../../3rdparty/initialfantasy/index.d.ts",
     "./3rdparty/materials/index.d.ts",
     "../../index.d.ts"
   ],
   "files": [
     "./HelloWorld.ts",
+    "./HelloWorld2.ts",
     "./SyncMaterials.ts"
   ]
 }

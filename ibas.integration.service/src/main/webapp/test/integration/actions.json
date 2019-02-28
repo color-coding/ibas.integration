@@ -23,15 +23,19 @@
     "type": "Action",
     "name": "Hello World 2",
     "activated": true,
-    "path": "HelloWorld.ts",
+    "path": "HelloWorld2.ts",
     "configs": [
       {
-        "key": "REP_URL",
-        "value": "${repositoryAddress|BORepositoryShell}"
+        "key": "address|Target",
+        "value": "http://localhost:8080"
       },
       {
-        "key": "REP_TOKEN",
-        "value": "${userToken}"
+        "key": "user|Target",
+        "value": "admin"
+      },
+      {
+        "key": "password|Target",
+        "value": "1q2w3e"
       },
       {
         "key": "CHS_USER",
