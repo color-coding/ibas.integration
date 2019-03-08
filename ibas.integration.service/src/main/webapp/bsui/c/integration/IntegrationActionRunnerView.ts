@@ -51,13 +51,74 @@ namespace integration {
                                     }
                                 }),
                                 new sap.m.ToolbarSeparator(""),
-                                new sap.m.Button("", {
+                                new sap.m.MenuButton("", {
                                     text: ibas.i18n.prop("integration_clear_log"),
                                     type: sap.m.ButtonType.Transparent,
                                     icon: "sap-icon://eraser",
-                                    press: function (): void {
+                                    buttonMode: sap.m.MenuButtonMode.Split,
+                                    useDefaultActionOnly: true,
+                                    defaultAction(): void {
+                                        that.messages = undefined;
                                         that.layoutMessage.destroyContent();
-                                    }
+                                    },
+                                    menu: new sap.m.Menu("", {
+                                        items: [
+                                            new sap.m.MenuItem("", {
+                                                text: ibas.i18n.prop("integration_save_log"),
+                                                icon: "sap-icon://notes",
+                                                press: function (): void {
+                                                    jQuery.sap.require("sap.ui.core.util.Export");
+                                                    jQuery.sap.require("sap.ui.core.util.ExportTypeCSV");
+                                                    let oExport: sap.ui.core.util.Export = new sap.ui.core.util.Export("", {
+                                                        exportType: new sap.ui.core.util.ExportTypeCSV("", {
+                                                            separatorChar: ","
+                                                        }),
+                                                        models: new sap.ui.model.json.JSONModel({ rows: that.messages }),
+                                                        rows: {
+                                                            path: "/rows"
+                                                        },
+                                                        columns: [
+                                                            {
+                                                                name: "type",
+                                                                template: {
+                                                                    content: {
+                                                                        parts: ["type"],
+                                                                        formatter(data: any): any {
+                                                                            return ibas.enums.toString(ibas.emMessageType, data);
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            {
+                                                                name: "content",
+                                                                template: {
+                                                                    content: "{content}"
+                                                                }
+                                                            },
+                                                        ]
+                                                    });
+                                                    let name: ibas.StringBuilder = new ibas.StringBuilder();
+                                                    name.append("action_log");
+                                                    if (that.messages[1] && that.messages[1].content) {
+                                                        let tmp: string = that.messages[1].content;
+                                                        if (tmp.indexOf(":") > 0) {
+                                                            name.append("_");
+                                                            name.append(tmp.split(":")[0].toLowerCase());
+                                                        }
+                                                    }
+                                                    oExport.saveFile(name.toString()).catch(function (error: Error): void {
+                                                        that.application.viewShower.messages({
+                                                            title: that.title,
+                                                            type: ibas.emMessageType.ERROR,
+                                                            message: "Error when downloading data. Browser might not be supported!\n\n" + error,
+                                                        });
+                                                    }).then(function (): void {
+                                                        oExport.destroy();
+                                                    });
+                                                }
+                                            }),
+                                        ],
+                                    })
                                 }),
                             ]
                         }),
@@ -229,7 +290,19 @@ namespace integration {
                         showIcon: true,
                         showCloseButton: false
                     }).setText(message), 0);
+                    if (!(this.messages instanceof Array)) {
+                        this.messages = new Array<IMessage>();
+                    }
+                    this.messages.push({
+                        type: type,
+                        content: message
+                    });
                 }
+                private messages: Array<IMessage>;
+            }
+            interface IMessage {
+                type: ibas.emMessageType;
+                content: string;
             }
         }
     }

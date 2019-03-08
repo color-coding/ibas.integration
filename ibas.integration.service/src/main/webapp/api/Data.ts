@@ -171,17 +171,29 @@ namespace integration {
             /** 运行 */
             protected run(): boolean {
                 // 加载资源文件
+                let token: string = ibas.config.get(ibas.CONFIG_ITEM_USER_TOKEN, "");
+                let group: string = this.getConfig(CONFIG_ACTION_GROUP);
+                if (!ibas.strings.isWith(group, undefined, "/")) {
+                    group = group + "/";
+                }
                 for (let item of ibas.arrays.create(this.resources())) {
+                    let url: ibas.StringBuilder = new ibas.StringBuilder();
                     if (!ibas.strings.isWith(item, "http", undefined)) {
-                        let url: string = this.getConfig(CONFIG_ACTION_GROUP);
-                        if (!ibas.strings.isWith(url, undefined, "/")
-                            && !ibas.strings.isWith(item, "/", undefined)) {
-                            url = url + "/";
-                        }
-                        ibas.i18n.load(url + item);
-                    } else {
-                        ibas.i18n.load(item);
+                        url.append(group);
                     }
+                    url.append(item);
+                    // 口令
+                    if (!ibas.strings.isEmpty(token)) {
+                        if (item.indexOf("?") >= 0) {
+                            url.append("&");
+                        } else {
+                            url.append("?");
+                        }
+                        url.append("token");
+                        url.append("=");
+                        url.append(token);
+                    }
+                    ibas.i18n.load(url.toString());
                 }
                 // 执行逻辑
                 let value: any = this.execute();
@@ -273,7 +285,13 @@ namespace integration {
             // 口令
             configKey = CONFIG_KEY(type,
                 ibas.strings.format(ibas.CONFIG_ITEM_TEMPLATE_USER_TOKEN, name));
-            configValue = action.getConfig(configKey, true);
+            // 业务仓库口令
+            configValue = action.getConfig(configKey);
+            if (ibas.objects.isNull(configValue)) {
+                configKey = CONFIG_KEY(type, ibas.CONFIG_ITEM_USER_TOKEN);
+                // 目标口令
+                configValue = action.getConfig(configKey, true);
+            }
             if (!ibas.objects.isNull(configValue)) {
                 boRepository.token = configValue;
                 ibas.logger.log(ibas.emMessageLevel.DEBUG, "action: [{0}] changed token [{1}].", ibas.objects.getTypeName(boRepository), boRepository.token);
