@@ -109,7 +109,14 @@ namespace integration {
                     bo.actionFactory.create({
                         action: item,
                         onError(error: Error): void {
-                            that.messages(error);
+                            if ((<any>error).requireType === "scripterror") {
+                                that.messages({
+                                    type: ibas.emMessageType.ERROR,
+                                    message: ibas.i18n.prop("integration_not_found_action", item.name),
+                                });
+                            } else {
+                                that.messages(error);
+                            }
                         },
                         onCompleted(action: ibas.Action): void {
                             // 添加额外运行数据

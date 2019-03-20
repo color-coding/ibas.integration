@@ -138,6 +138,10 @@ namespace integration {
                 if (path.indexOf(".") > 0) {
                     path = path.substring(0, path.lastIndexOf("."));
                 }
+                // 如果已加载，则卸载
+                if (actionRequire.defined(path)) {
+                    actionRequire.undef(path);
+                }
                 actionRequire(
                     [
                         path

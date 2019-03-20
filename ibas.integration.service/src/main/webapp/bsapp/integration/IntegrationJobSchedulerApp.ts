@@ -87,6 +87,10 @@ namespace integration {
                                     let type: ibas.emMessageType = bo.DataConverter.toMessageType(level);
                                     let message: string = ibas.strings.format(tmpArgs[0], tmpArgs.slice(1));
                                     that.proceeding(type, message);
+                                    if (level === ibas.emMessageLevel.FATAL) {
+                                        // 严重错误，显示对话框
+                                        that.messages(ibas.emMessageType.ERROR, message);
+                                    }
                                 }
                             };
                             let builder: ibas.StringBuilder = new ibas.StringBuilder();
@@ -96,10 +100,7 @@ namespace integration {
                                 if (item.integrationJobActions.length === 0) {
                                     continue;
                                 }
-                                let task: TaskAction = new TaskAction();
-                                task.job = item;
-                                task.id = task.job.toString();
-                                task.name = task.job.name;
+                                let task: TaskAction = new TaskAction(item);
                                 task.activated = true;
                                 task.setLogger(logger);
                                 jobs.add(task);
@@ -168,6 +169,14 @@ namespace integration {
         }
         /** 任务动作 */
         export class TaskAction extends ibas.Action {
+            constructor(job: bo.IntegrationJob = undefined) {
+                super();
+                if (!ibas.objects.isNull(job)) {
+                    this.job = job;
+                    this.id = ibas.strings.valueOf(this.job.objectKey);
+                    this.name = ibas.strings.format("{0}-{1}", this.job.objectKey, this.job.name);
+                }
+            }
             /** 工作 */
             job: bo.IntegrationJob;
             /** 上次运行时间 */
@@ -195,7 +204,30 @@ namespace integration {
                 if (ibas.dates.now().getTime() < (this.lastRunTime + this.job.frequency * 1000)) {
                     return;
                 }
-                super.do();
+                // 检查任务是否更新
+                if (this.lastRunTime > 0) {
+                    let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
+                    let criteria: ibas.ICriteria = new ibas.Criteria();
+                    let condition: ibas.ICondition = criteria.conditions.create();
+                    condition.alias = bo.IntegrationJob.PROPERTY_OBJECTKEY_NAME;
+                    condition.operation = ibas.emConditionOperation.EQUAL;
+                    condition.value = this.job.objectKey.toString();
+                    boRepository.fetchIntegrationJob({
+                        criteria: criteria,
+                        onCompleted: (opRslt) => {
+                            let job: bo.IntegrationJob = opRslt.resultObjects.firstOrDefault();
+                            if (ibas.objects.isNull(job) || job.logInst !== this.job.logInst) {
+                                // 集成任务不存在，或已被修改
+                                this.log(ibas.emMessageLevel.FATAL, ibas.i18n.prop("integration_background_integrationjob_updated"));
+                                this.activated = false;
+                            } else {
+                                super.do();
+                            }
+                        }
+                    });
+                } else {
+                    super.do();
+                }
             }
             protected done(): void {
                 super.done();
