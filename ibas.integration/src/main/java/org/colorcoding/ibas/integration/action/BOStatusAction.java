@@ -128,6 +128,17 @@ public class BOStatusAction extends Action {
 					}
 					// 设置参数
 					this.applyConfigs(property.getConditions());
+					// 设置值
+					if (property.getValue() != null && property.getValue().startsWith("${")
+							&& property.getValue().endsWith("}")) {
+						Object value = this
+								.getConfig(property.getValue().substring(2, property.getValue().length() - 1));
+						if (value == null) {
+							property.setValue(null);
+						} else {
+							property.setValue(String.valueOf(value));
+						}
+					}
 					this.setPropertyValue(bo, property.getProperty(), property.getValue(), property.getConditions());
 				}
 				if (!bo.isDirty()) {
@@ -141,7 +152,9 @@ public class BOStatusAction extends Action {
 			if (trans) {
 				boRepository.commitTransaction();
 			}
-		} catch (Exception e) {
+		} catch (
+
+		Exception e) {
 			if (trans) {
 				boRepository.rollbackTransaction();
 			}
