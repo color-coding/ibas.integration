@@ -76,5 +76,13 @@
         "bo_integrationjobactioncfg_value": "配置项值",
         "bo_integrationjobactioncfg_remark": "配置项说明",
         "bo_integrationjob_closing_delimiter": "----结束----"
+    },
+    {
+        "em_actionrelationship_and": "与",
+        "em_actionrelationship_or": "或"
+    },
+    {
+        "em_sourcetarget_source": "来源",
+        "em_sourcetarget_target": "目标"
     }
 ]

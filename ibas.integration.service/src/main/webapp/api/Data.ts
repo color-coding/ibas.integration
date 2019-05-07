@@ -240,7 +240,7 @@ namespace integration {
         export function repositoryName(boRepository: ibas.BORepositoryApplication | string): string {
             let name: string;
             if (boRepository instanceof ibas.BORepositoryApplication) {
-                name = ibas.objects.getTypeName(boRepository);
+                name = ibas.objects.nameOf(boRepository);
             } else {
                 name = ibas.strings.valueOf(boRepository);
             }
@@ -280,7 +280,7 @@ namespace integration {
             configValue = action.getConfig(configKey, true);
             if (!ibas.objects.isNull(configValue)) {
                 boRepository.address = configValue;
-                ibas.logger.log(ibas.emMessageLevel.DEBUG, "action: [{0}] changed address [{1}].", ibas.objects.getTypeName(boRepository), boRepository.address);
+                ibas.logger.log(ibas.emMessageLevel.DEBUG, "action: [{0}] changed address [{1}].", ibas.objects.nameOf(boRepository), boRepository.address);
             }
             // 口令
             configKey = CONFIG_KEY(type,
@@ -294,7 +294,7 @@ namespace integration {
             }
             if (!ibas.objects.isNull(configValue)) {
                 boRepository.token = configValue;
-                ibas.logger.log(ibas.emMessageLevel.DEBUG, "action: [{0}] changed token [{1}].", ibas.objects.getTypeName(boRepository), boRepository.token);
+                ibas.logger.log(ibas.emMessageLevel.DEBUG, "action: [{0}] changed token [{1}].", ibas.objects.nameOf(boRepository), boRepository.token);
             }
             // 离线
             configKey = CONFIG_KEY(type,
@@ -302,7 +302,7 @@ namespace integration {
             configValue = action.getConfig(configKey, true);
             if (!ibas.objects.isNull(configValue)) {
                 boRepository.offline = configValue;
-                ibas.logger.log(ibas.emMessageLevel.DEBUG, "action: [{0}] changed offline [{1}].", ibas.objects.getTypeName(boRepository), boRepository.offline);
+                ibas.logger.log(ibas.emMessageLevel.DEBUG, "action: [{0}] changed offline [{1}].", ibas.objects.nameOf(boRepository), boRepository.offline);
             }
         }
         /**
@@ -415,7 +415,8 @@ namespace integration {
             action.addConfig(CONFIG_KEY(emSourceTarget.TARGET,
                 ibas.strings.format(ibas.CONFIG_ITEM_TEMPLATE_REMOTE_REPOSITORY_ADDRESS, name)
             ), address);
-            ibas.logger.log(ibas.emMessageLevel.DEBUG, "action: register [{0}]'s address [{1}].", ibas.objects.getTypeName(boRepository), address);
+            ibas.logger.log(ibas.emMessageLevel.DEBUG, "action: register [{0}]'s address [{1}]."
+                , typeof boRepository === "string" ? boRepository : ibas.objects.nameOf(boRepository), address);
             return address;
         }
     }

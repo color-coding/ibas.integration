@@ -25,58 +25,60 @@ namespace integration {
                 /** 绘制视图 */
                 draw(): any {
                     let that: this = this;
-                    this.form = new sap.ui.layout.form.SimpleForm("");
-                    this.table = new sap.ui.table.Table("", {
+                    this.table = new sap.extension.table.Table("", {
                         enableSelectAll: false,
-                        selectionBehavior: sap.ui.table.SelectionBehavior.Row,
-                        visibleRowCount: ibas.config.get(openui5.utils.CONFIG_ITEM_LIST_TABLE_VISIBLE_ROW_COUNT, 15),
+                        visibleRowCount: sap.extension.table.visibleRowCount(15),
                         visibleRowCountMode: sap.ui.table.VisibleRowCountMode.Interactive,
                         rows: "{/rows}",
                         columns: [
-                            new sap.ui.table.Column("", {
+                            new sap.extension.table.Column("", {
                                 label: ibas.i18n.prop("bo_action_id"),
-                                template: new sap.m.Text("", {
-                                    wrapping: false
-                                }).bindProperty("text", {
-                                    path: "id"
+                                width: "16rem",
+                                template: new sap.extension.m.Text("", {
+                                }).bindProperty("bindingValue", {
+                                    path: "id",
+                                    type: new sap.extension.data.Alphanumeric()
                                 })
                             }),
-                            new sap.ui.table.Column("", {
+                            new sap.extension.table.Column("", {
                                 label: ibas.i18n.prop("bo_action_name"),
-                                template: new sap.m.Text("", {
-                                    wrapping: false
-                                }).bindProperty("text", {
-                                    path: "name"
+                                width: "16rem",
+                                template: new sap.extension.m.Text("", {
+                                }).bindProperty("bindingValue", {
+                                    path: "name",
+                                    type: new sap.extension.data.Alphanumeric()
                                 })
                             }),
-                            new sap.ui.table.Column("", {
+                            new sap.extension.table.Column("", {
                                 label: ibas.i18n.prop("bo_action_group"),
-                                template: new sap.m.Text("", {
-                                    wrapping: false
-                                }).bindProperty("text", {
-                                    path: "group"
+                                width: "16rem",
+                                template: new sap.extension.m.Text("", {
+                                }).bindProperty("bindingValue", {
+                                    path: "group",
+                                    type: new sap.extension.data.Alphanumeric()
                                 })
                             }),
-                            new sap.ui.table.Column("", {
+                            new sap.extension.table.Column("", {
                                 label: ibas.i18n.prop("bo_action_path"),
-                                template: new sap.m.Text("", {
-                                    wrapping: false
-                                }).bindProperty("text", {
-                                    path: "path"
+                                width: "16rem",
+                                template: new sap.extension.m.Text("", {
+                                }).bindProperty("bindingValue", {
+                                    path: "path",
+                                    type: new sap.extension.data.Alphanumeric()
                                 })
                             }),
-                            new sap.ui.table.Column("", {
+                            new sap.extension.table.Column("", {
                                 label: ibas.i18n.prop("bo_action_remark"),
-                                template: new sap.m.Text("", {
-                                    wrapping: false
-                                }).bindProperty("text", {
-                                    path: "remark"
+                                width: "20rem",
+                                template: new sap.extension.m.Text("", {
+                                }).bindProperty("bindingValue", {
+                                    path: "remark",
+                                    type: new sap.extension.data.Alphanumeric()
                                 })
                             }),
                         ]
                     });
-                    this.form.addContent(this.table);
-                    this.page = new sap.m.Page("", {
+                    return new sap.m.Page("", {
                         showHeader: false,
                         subHeader: new sap.m.Toolbar("", {
                             content: [
@@ -85,10 +87,7 @@ namespace integration {
                                     type: sap.m.ButtonType.Transparent,
                                     icon: "sap-icon://delete",
                                     press: function (): void {
-                                        that.fireViewEvents(that.deleteDataEvent,
-                                            // 获取表格选中的对象
-                                            openui5.utils.getSelecteds<bo.Action>(that.table)
-                                        );
+                                        that.fireViewEvents(that.deleteDataEvent, that.table.getSelecteds());
                                     }
                                 }),
                                 new sap.m.Button("", {
@@ -96,10 +95,7 @@ namespace integration {
                                     type: sap.m.ButtonType.Transparent,
                                     icon: "sap-icon://source-code",
                                     press: function (): void {
-                                        that.fireViewEvents(that.viewCodeEvent,
-                                            // 获取表格选中的对象
-                                            openui5.utils.getSelecteds<bo.Action>(that.table)
-                                        );
+                                        that.fireViewEvents(that.viewCodeEvent, that.table.getSelecteds().firstOrDefault());
                                     }
                                 }),
                                 new sap.m.ToolbarSeparator(""),
@@ -135,16 +131,15 @@ namespace integration {
                                 }),
                             ]
                         }),
-                        content: [this.form]
+                        content: [
+                            this.table
+                        ]
                     });
-                    return this.page;
                 }
-                private page: sap.m.Page;
-                private form: sap.ui.layout.form.SimpleForm;
-                private table: sap.ui.table.Table;
+                private table: sap.extension.table.Table;
                 /** 显示数据 */
                 showData(datas: bo.Action[]): void {
-                    this.table.setModel(new sap.ui.model.json.JSONModel({ rows: datas }));
+                    this.table.setModel(new sap.extension.model.JSONModel({ rows: datas }));
                 }
                 /** 显示代码 */
                 showCode(code: Blob): void {

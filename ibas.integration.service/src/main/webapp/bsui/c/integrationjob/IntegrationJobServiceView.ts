@@ -17,48 +17,44 @@ namespace integration {
                 /** 绘制视图 */
                 draw(): any {
                     let that: this = this;
-                    this.table = new sap.ui.table.Table("", {
-                        enableSelectAll: false,
-                        selectionBehavior: sap.ui.table.SelectionBehavior.Row,
-                        selectionMode: sap.ui.table.SelectionMode.MultiToggle,
+                    this.table = new sap.extension.table.Table("", {
+                        chooseType: ibas.emChooseType.SINGLE,
                         visibleRowCount: 5,
                         rows: "{/rows}",
                         columns: [
-                            new sap.ui.table.Column("", {
+                            new sap.extension.table.Column("", {
                                 label: ibas.i18n.prop("bo_integrationjob_objectkey"),
-                                template: new sap.m.Text("", {
-                                    wrapping: false
-                                }).bindProperty("text", {
-                                    path: "objectKey"
+                                template: new sap.extension.m.Text("", {
+                                }).bindProperty("bindingValue", {
+                                    path: "objectKey",
+                                    type: new sap.extension.data.Alphanumeric()
                                 })
                             }),
-                            new sap.ui.table.Column("", {
+                            new sap.extension.table.Column("", {
                                 label: ibas.i18n.prop("bo_integrationjob_name"),
-                                template: new sap.m.Text("", {
-                                    wrapping: false
-                                }).bindProperty("text", {
-                                    path: "name"
+                                template: new sap.extension.m.Text("", {
+                                }).bindProperty("bindingValue", {
+                                    path: "name",
+                                    type: new sap.extension.data.Alphanumeric()
                                 })
                             }),
                         ]
                     });
-                    openui5.utils.changeSelectionStyle(this.table, ibas.emChooseType.SINGLE);
                     return new sap.m.Dialog("", {
                         title: this.title,
                         type: sap.m.DialogType.Standard,
                         state: sap.ui.core.ValueState.None,
-                        stretchOnPhone: true,
                         horizontalScrolling: true,
                         verticalScrolling: true,
-                        content: [this.table],
+                        content: [
+                            this.table
+                        ],
                         buttons: [
                             new sap.m.Button("", {
                                 text: ibas.i18n.prop("shell_call"),
                                 type: sap.m.ButtonType.Transparent,
                                 press: function (): void {
-                                    that.fireViewEvents(that.runJobEvent,
-                                        // 获取表格选中的对象
-                                        openui5.utils.getSelecteds<bo.IntegrationJob>(that.table).firstOrDefault(), false
+                                    that.fireViewEvents(that.runJobEvent, that.table.getSelecteds().firstOrDefault(), false
                                     );
                                 }
                             }),
@@ -66,9 +62,7 @@ namespace integration {
                                 text: ibas.i18n.prop("shell_run"),
                                 type: sap.m.ButtonType.Transparent,
                                 press: function (): void {
-                                    that.fireViewEvents(that.runJobEvent,
-                                        // 获取表格选中的对象
-                                        openui5.utils.getSelecteds<bo.IntegrationJob>(that.table).firstOrDefault(), true
+                                    that.fireViewEvents(that.runJobEvent, that.table.getSelecteds().firstOrDefault(), true
                                     );
                                 }
                             }),
@@ -82,10 +76,10 @@ namespace integration {
                         ]
                     });
                 }
-                private table: sap.ui.table.Table;
+                private table: sap.extension.table.Table;
                 /** 显示数据 */
                 showJobs(datas: bo.IntegrationJob[]): void {
-                    this.table.setModel(new sap.ui.model.json.JSONModel({ rows: datas }));
+                    this.table.setModel(new sap.extension.model.JSONModel({ rows: datas }));
                 }
 
             }

@@ -8,7 +8,6 @@
 namespace integration {
     export namespace ui {
         export namespace c {
-
             /**
              * 列表视图-开发终端
              */
@@ -22,12 +21,18 @@ namespace integration {
                 /** 绘制视图 */
                 draw(): any {
                     let that: this = this;
-                    this.form = new sap.ui.layout.form.SimpleForm("");
+                    let checkbox: sap.m.CheckBox, combobox: sap.m.ComboBox;
                     this.table = new sap.ui.table.Table("", {
-                        title: ibas.i18n.prop("bo_action"),
                         selectionMode: sap.ui.table.SelectionMode.None,
                         visibleRowCount: ibas.config.get(openui5.utils.CONFIG_ITEM_LIST_TABLE_VISIBLE_ROW_COUNT, 13),
                         visibleRowCountMode: sap.ui.table.VisibleRowCountMode.Interactive,
+                        toolbar: new sap.m.Toolbar("", {
+                            content: [
+                                new sap.m.Title("", {
+                                    text: ibas.i18n.prop("bo_action"),
+                                })
+                            ]
+                        }),
                         rows: "{/rows}",
                         rowActionCount: 1,
                         rowActionTemplate: new sap.ui.table.RowAction("", {
@@ -61,39 +66,27 @@ namespace integration {
                             }),
                         ]
                     });
-                    this.combobox = new sap.m.ComboBox("", {
-                        width: "100%",
-                        items: [
-                            new sap.ui.core.Item("", {
-                                key: "demo",
-                                text: ".../../test/apps/integration/test/integration/actions.json",
-                            }),
-                            new sap.ui.core.Item("", {
-                                key: "dev",
-                                text: ".../../test/apps/datainteraction/integration/actions.json",
-                            })
-                        ]
-                    });
-                    this.checkbox = new sap.m.CheckBox("", {
-                        text: ibas.i18n.prop("integrationdevelopment_display_console"),
-                        selected: false,
-                    });
                     this.tableConfig = new sap.ui.table.Table("", {
-                        title: ibas.i18n.prop("bo_action"),
                         selectionMode: sap.ui.table.SelectionMode.None,
                         visibleRowCount: ibas.config.get(openui5.utils.CONFIG_ITEM_LIST_TABLE_VISIBLE_ROW_COUNT, 15),
                         visibleRowCountMode: sap.ui.table.VisibleRowCountMode.Interactive,
                         rows: "{/rows}",
                         toolbar: new sap.m.Toolbar("", {
                             content: [
+                                this.tableTitle = new sap.m.Title("", {
+                                    text: ibas.i18n.prop("bo_action"),
+                                }),
                                 new sap.m.ToolbarSpacer(""),
-                                this.checkbox,
+                                checkbox = new sap.m.CheckBox("", {
+                                    text: ibas.i18n.prop("integrationdevelopment_display_console"),
+                                    selected: false,
+                                }),
                                 new sap.m.Button("", {
                                     text: ibas.i18n.prop("shell_run"),
                                     type: sap.m.ButtonType.Transparent,
                                     icon: "sap-icon://begin",
                                     press: function (): void {
-                                        that.fireViewEvents(that.runActionEvent, !that.checkbox.getSelected());
+                                        that.fireViewEvents(that.runActionEvent, !checkbox.getSelected());
                                     }
                                 }),
                                 new sap.m.Button("", {
@@ -101,6 +94,7 @@ namespace integration {
                                     type: sap.m.ButtonType.Transparent,
                                     icon: "sap-icon://nav-back",
                                     press: function (): void {
+                                        that.tableTitle.setText(ibas.i18n.prop("bo_action"));
                                         that.splitContainer.backToTopDetail(null, null);
                                     }
                                 }),
@@ -124,15 +118,7 @@ namespace integration {
                             }),
                         ]
                     });
-                    this.splitContainer = new sap.m.SplitContainer("", {
-                        mode: sap.m.SplitAppMode.HideMode,
-                        detailPages: [
-                            this.table,
-                            this.tableConfig
-                        ]
-                    });
-                    this.form.addContent(this.splitContainer);
-                    this.page = new sap.m.Page("", {
+                    return new sap.m.Page("", {
                         showHeader: false,
                         subHeader: new sap.m.Toolbar("", {
                             content: [
@@ -140,29 +126,45 @@ namespace integration {
                                     text: ibas.i18n.prop("integrationdevelopment_actions_url"),
                                     width: "auto"
                                 }),
-                                this.combobox,
+                                combobox = new sap.m.ComboBox("", {
+                                    width: "100%",
+                                    items: [
+                                        new sap.ui.core.Item("", {
+                                            key: "demo",
+                                            text: ".../../test/apps/integration/test/integration/actions.json",
+                                        }),
+                                        new sap.ui.core.Item("", {
+                                            key: "dev",
+                                            text: ".../../test/apps/datainteraction/integration/actions.json",
+                                        })
+                                    ]
+                                }),
                                 new sap.m.ToolbarSeparator(""),
                                 new sap.m.Button("", {
                                     text: ibas.i18n.prop("shell_refresh"),
                                     type: sap.m.ButtonType.Transparent,
                                     icon: "sap-icon://refresh",
                                     press: function (): void {
-                                        that.fireViewEvents(that.loadActionsEvent, that.combobox.getValue());
+                                        that.fireViewEvents(that.loadActionsEvent, combobox.getValue());
                                     }
                                 }),
                             ]
                         }),
-                        content: [this.form]
+                        content: [
+                            this.splitContainer = new sap.m.SplitContainer("", {
+                                mode: sap.m.SplitAppMode.HideMode,
+                                detailPages: [
+                                    this.table,
+                                    this.tableConfig
+                                ]
+                            })
+                        ]
                     });
-                    return this.page;
                 }
-                private page: sap.m.Page;
-                private form: sap.ui.layout.form.SimpleForm;
                 private table: sap.ui.table.Table;
                 private tableConfig: sap.ui.table.Table;
-                private combobox: sap.m.ComboBox;
-                private checkbox: sap.m.CheckBox;
                 private splitContainer: sap.m.SplitContainer;
+                private tableTitle: sap.m.Title;
                 /** 显示动作 */
                 showActions(datas: bo.Action[]): void {
                     this.splitContainer.backToTopDetail(null, null);
@@ -170,7 +172,7 @@ namespace integration {
                 }
                 /** 显示动作 */
                 showAction(data: bo.Action): void {
-                    this.tableConfig.setTitle(data.name);
+                    this.tableTitle.setText(data.name);
                     this.splitContainer.toDetail(this.tableConfig.getId(), null, null, null);
                 }
                 /** 显示动作配置 */

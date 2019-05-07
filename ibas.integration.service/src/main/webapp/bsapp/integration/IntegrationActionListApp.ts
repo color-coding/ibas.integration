@@ -83,14 +83,8 @@ namespace integration {
                 });
                 this.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_uploading_file"));
             }
-            protected viewCode(data: bo.Action | bo.Action[]): void {
-                let action: bo.Action = undefined;
-                if (data instanceof Array) {
-                    action = data[0];
-                } else {
-                    action = data;
-                }
-                if (ibas.objects.isNull(action)) {
+            protected viewCode(data: bo.Action): void {
+                if (ibas.objects.isNull(data)) {
                     this.messages(ibas.emMessageType.WARNING, ibas.i18n.prop("shell_please_chooose_data",
                         ibas.i18n.prop("shell_data_view")
                     ));
@@ -100,7 +94,7 @@ namespace integration {
                 let that: this = this;
                 let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
                 boRepository.downloadCode({
-                    action: action,
+                    action: data,
                     onCompleted(opRslt: ibas.IOperationResult<Blob>): void {
                         try {
                             that.busy(false);

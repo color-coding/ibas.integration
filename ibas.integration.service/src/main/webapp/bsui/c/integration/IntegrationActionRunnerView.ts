@@ -29,7 +29,7 @@ namespace integration {
                         width: "100%",
                     });
                     let height: string = ibas.strings.format("{0}px", window.innerHeight - 200);
-                    this.page = new sap.m.Page("", {
+                    return new sap.m.Page("", {
                         showHeader: false,
                         subHeader: new sap.m.Toolbar("", {
                             content: [
@@ -151,9 +151,7 @@ namespace integration {
                             })
                         ]
                     });
-                    return this.page;
                 }
-                private page: sap.m.Page;
                 private layoutMessage: sap.ui.layout.VerticalLayout;
                 private layoutAction: sap.ui.layout.VerticalLayout;
                 /** 显示数据 */
