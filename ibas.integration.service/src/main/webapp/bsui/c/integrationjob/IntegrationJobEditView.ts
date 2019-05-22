@@ -219,6 +219,7 @@ namespace integration {
                                 width: "20rem",
                                 template: new sap.extension.m.Input("", {
                                     showValueHelp: true,
+                                    valueHelpOnly: false,
                                     valueHelpRequest: function (): void {
                                         that.fireViewEvents(that.chooseJobActionCfgConfigItemEvent,
                                             // 获取当前对象
