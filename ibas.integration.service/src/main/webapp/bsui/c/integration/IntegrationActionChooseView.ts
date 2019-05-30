@@ -25,8 +25,17 @@ namespace integration {
                         rows: "{/rows}",
                         columns: [
                             new sap.extension.table.Column("", {
-                                label: ibas.i18n.prop("bo_action_name"),
+                                label: ibas.i18n.prop("bo_action_id"),
                                 width: "16rem",
+                                template: new sap.extension.m.Text("", {
+                                }).bindProperty("bindingValue", {
+                                    path: "id",
+                                    type: new sap.extension.data.Alphanumeric()
+                                })
+                            }),
+                            new sap.extension.table.Column("", {
+                                label: ibas.i18n.prop("bo_action_name"),
+                                width: "12rem",
                                 template: new sap.extension.m.Text("", {
                                 }).bindProperty("bindingValue", {
                                     path: "name",
