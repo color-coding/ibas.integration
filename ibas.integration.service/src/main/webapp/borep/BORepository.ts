@@ -236,7 +236,7 @@ namespace integration {
             beDeleted: string;
         }
         /** 代码下载仓库 */
-        export class CodeRepositoryDownloadAjax extends ibas.RemoteRepositoryXhr {
+        export class CodeRepositoryDownloadAjax extends ibas.RemoteRepositoryAjax {
             constructor() {
                 super();
                 this.autoParsing = false;
@@ -261,12 +261,11 @@ namespace integration {
                 };
                 this.callRemoteMethod(method, undefined, methodCaller);
             }
-            protected createHttpRequest(method: string, data: any): XMLHttpRequest {
+            protected createHttpRequest(method: string): XMLHttpRequest {
                 let methodUrl: string = this.methodUrl(method);
                 let xhr: XMLHttpRequest = new XMLHttpRequest();
                 xhr.open("GET", methodUrl, true);
                 xhr.responseType = "blob";
-                xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
                 return xhr;
             }
         }
@@ -289,7 +288,7 @@ namespace integration {
              * @param fetcher 读取者
              */
             loadActions(loader: IActionsLoader): void {
-                let boRepository: ibas.BOFileRepositoryAjax = new ibas.BOFileRepositoryAjax();
+                let boRepository: ibas.FileRepositoryAjax = new ibas.FileRepositoryAjax();
                 boRepository.address = this.address;
                 boRepository.token = this.token;
                 boRepository.autoParsing = true;
