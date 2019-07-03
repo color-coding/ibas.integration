@@ -26,6 +26,10 @@
     "path": "HelloWorld2.ts",
     "configs": [
       {
+        "key": "rewriteAddress",
+        "value": "localhost => think-niuren; localhost => 127.0.0.1"
+      },
+      {
         "key": "address|Target",
         "value": "http://localhost:8080"
       },

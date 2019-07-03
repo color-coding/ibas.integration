@@ -42,6 +42,7 @@ namespace integration {
                             }),
                             new sap.extension.table.DataColumn("", {
                                 label: ibas.i18n.prop("bo_integrationjob_name"),
+                                width: "30rem",
                                 template: new sap.extension.m.Text("", {
                                 }).bindProperty("bindingValue", {
                                     path: "name",

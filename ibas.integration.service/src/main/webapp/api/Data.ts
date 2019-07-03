@@ -89,6 +89,8 @@ namespace integration {
         export const CONFIG_PASSWORD_TARGET: string = CONFIG_KEY(emSourceTarget.TARGET, CONFIG_PASSWORD);
         /** 配置项-目标地址 */
         export const CONFIG_ADDRESS_TARGET: string = CONFIG_KEY(emSourceTarget.TARGET, CONFIG_ADDRESS);
+        /** 配置项-重新地址表达式 */
+        export const CONFIG_REWRITE_ADDRESS: string = "rewriteAddress";
         /**
          * 集成动作
          */
@@ -303,6 +305,26 @@ namespace integration {
             if (!ibas.objects.isNull(configValue)) {
                 boRepository.offline = configValue;
                 ibas.logger.log(ibas.emMessageLevel.DEBUG, "action: [{0}] changed offline [{1}].", ibas.objects.nameOf(boRepository), boRepository.offline);
+            }
+            // 重写地址
+            configKey = CONFIG_REWRITE_ADDRESS;
+            configValue = action.getConfig(configKey);
+            if (!ibas.objects.isNull(configValue) && !ibas.strings.isEmpty(boRepository.address)) {
+                let values: string = ibas.strings.valueOf(configValue);
+                if (!ibas.strings.isEmpty(values) && boRepository.offline !== true) {
+                    for (let value of values.split(";")) {
+                        let index: number = value.indexOf("=>");
+                        if (index > 0) {
+                            let sValue: string = ibas.strings.trim(value.substring(0, index));
+                            let tValue: string = ibas.strings.trim(value.substring(index + 2));
+                            if (boRepository.address.indexOf(sValue) >= 0) {
+                                boRepository.address = ibas.strings.replace(boRepository.address, sValue, tValue);
+                                ibas.logger.log(ibas.emMessageLevel.DEBUG, "action: [{0}] rewrite address [{1}].", ibas.objects.nameOf(boRepository), boRepository.address);
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
         /**
