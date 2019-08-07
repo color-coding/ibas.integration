@@ -3,6 +3,7 @@ package org.colorcoding.ibas.integration.repository;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.Enumeration;
@@ -78,11 +79,10 @@ public class FileRepositoryAction extends FileRepositoryService
 
 	@Override
 	public OperationResult<Action> registerAction(File file, String token) {
-		try {
+		try (JarFile jarFile = new JarFile(file)) {
 			this.setCurrentUser(token);
 			Logger.log(MessageLevel.DEBUG, "the package [%s] begins to be registered.", file.getName());
 			ArrayList<JarEntry> jarEntryList = new ArrayList<>();
-			JarFile jarFile = new JarFile(file);
 			Enumeration<JarEntry> jarEntries = jarFile.entries();
 			if (jarEntries != null) {
 				// 获取集成目录下所有文件
@@ -102,24 +102,22 @@ public class FileRepositoryAction extends FileRepositoryService
 					this.getRepository().getRepositoryFolder() + File.separator + EncryptMD5.md5(file.getPath()));
 			// 读取内容
 			for (JarEntry jarEntry : jarEntryList) {
-				InputStream inputStream = jarFile.getInputStream(jarEntry);
-				FileData fileData = new FileData();
-				fileData.setOriginalName(jarEntry.getName());
-				fileData.setStream(inputStream);
-				fileData.setFileName(folder.getName() + File.separator
-						+ jarEntry.getName()
-								.substring(jarEntry.getName().toLowerCase().indexOf(PACKAGE_INTEGRATION_ACTIONS_FOLDER)
-										+ PACKAGE_INTEGRATION_ACTIONS_FOLDER.length()));
-				IOperationResult<FileData> opRsltFile = this.getRepository().save(fileData);
-				inputStream.close();
-				if (opRsltFile.getError() != null) {
-					// 发生错误，清理已释放文件
-					this.deleteFiles(folder);
-					jarFile.close();
-					throw opRsltFile.getError();
+				try (InputStream inputStream = jarFile.getInputStream(jarEntry)) {
+					FileData fileData = new FileData();
+					fileData.setOriginalName(jarEntry.getName());
+					fileData.setStream(inputStream);
+					fileData.setFileName(folder.getName() + File.separator
+							+ jarEntry.getName().substring(
+									jarEntry.getName().toLowerCase().indexOf(PACKAGE_INTEGRATION_ACTIONS_FOLDER)
+											+ PACKAGE_INTEGRATION_ACTIONS_FOLDER.length()));
+					IOperationResult<FileData> opRsltFile = this.getRepository().save(fileData);
+					if (opRsltFile.getError() != null) {
+						// 发生错误，清理已释放文件
+						this.deleteFiles(folder);
+						throw opRsltFile.getError();
+					}
 				}
 			}
-			jarFile.close();
 			Logger.log(MessageLevel.DEBUG, "the package [%s] release [%s] files.", file.getName(), jarEntryList.size());
 			// 获取注册的动作
 			ICriteria criteria = new Criteria();
@@ -233,28 +231,32 @@ public class FileRepositoryAction extends FileRepositoryService
 		if (!file.exists() || !file.isFile()) {
 			return actions;
 		}
-		String group = file.getParentFile().getName();
-		ISerializer<?> serializer = SerializerFactory.create().createManager().create(TYPE_JSON_NO_ROOT);
-		Object values = serializer.deserialize(new FileInputStream(file), Action.class);
-		if (values != null) {
-			if (values instanceof Action) {
-				actions.add((Action) values);
-			} else if (values instanceof Iterable) {
-				for (Object value : (Iterable<?>) values) {
-					if (value instanceof Action) {
-						actions.add((Action) value);
+		try (InputStream stream = new FileInputStream(file)) {
+			ISerializer<?> serializer = SerializerFactory.create().createManager().create(TYPE_JSON_NO_ROOT);
+			Object values = serializer.deserialize(stream, Action.class);
+			if (values != null) {
+				if (values instanceof Action) {
+					actions.add((Action) values);
+				} else if (values instanceof Iterable) {
+					for (Object value : (Iterable<?>) values) {
+						if (value instanceof Action) {
+							actions.add((Action) value);
+						}
 					}
-				}
-			} else if (values.getClass().isArray()) {
-				for (int i = 0; i < Array.getLength(values); i++) {
-					Object value = Array.get(values, i);
-					if (value instanceof Action) {
-						actions.add((Action) value);
+				} else if (values.getClass().isArray()) {
+					for (int i = 0; i < Array.getLength(values); i++) {
+						Object value = Array.get(values, i);
+						if (value instanceof Action) {
+							actions.add((Action) value);
+						}
 					}
 				}
 			}
+		} catch (IOException e) {
+			throw new SerializationException(e);
 		}
 		// 检查动作
+		String group = file.getParentFile().getName();
 		for (Action action : actions) {
 			if (!action.isActivated()) {
 				continue;

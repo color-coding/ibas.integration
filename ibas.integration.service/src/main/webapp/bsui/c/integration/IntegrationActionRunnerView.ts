@@ -249,7 +249,7 @@ namespace integration {
                             headerToolbar: new sap.m.Toolbar("", {
                                 content: [
                                     new sap.m.Title("", {
-                                        text: ibas.strings.format("{0} · {1}", data.name, ibas.strings.isEmpty(data.remark) ? data.path : data.remark),
+                                        text: ibas.strings.format("{1} · {0}", data.name, ibas.strings.isEmpty(data.remark) ? data.path : data.remark),
                                     }),
                                     new sap.m.ToolbarSpacer(""),
                                     new sap.m.Button("", {
