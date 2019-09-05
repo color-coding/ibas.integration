@@ -9,7 +9,9 @@
   "include": [
     "../../3rdparty/ibas/index.d.ts",
     "../../3rdparty/shell/index.d.ts",
+    "../../3rdparty/openui5/index.d.ts",
     "../../3rdparty/initialfantasy/index.d.ts",
+    "./3rdparty/jquery.soap/index.d.ts",
     "./3rdparty/materials/index.d.ts",
     "../../index.d.ts"
   ],

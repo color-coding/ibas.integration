@@ -5,8 +5,7 @@
  * Use of this source code is governed by an Apache License, Version 2.0
  * that can be found in the LICENSE file at http://www.apache.org/licenses/LICENSE-2.0
  */
-import * as b1 from "./b1/index";
-import { BORepositoryDataInteraction } from "./BORepository";
+import * as di from "./b1/index";
 
 /** 配置项-业务仓库地址 */
 const CONFIG_REPOSITORY_URL: string = "REPOSITORY_URL";
@@ -15,7 +14,7 @@ const CONFIG_REPOSITORY_TOKEN: string = "REPOSITORY_TOKEN";
 /** 配置项-检索数据量（避免太多数据拖死服务） */
 const CONFIG_FETCH_DATA_COUNT: string = "FETCH_DATA_COUNT";
 /** 最后检索的数据 */
-let LAST_FETCHED_DATA: b1.IItems = null;
+let LAST_FETCHED_DATA: sap.b1.IItems = null;
 /** 数据交互 */
 export default class SyncMaterials extends integration.action.IntegrationAction {
     /**
@@ -23,7 +22,7 @@ export default class SyncMaterials extends integration.action.IntegrationAction 
      * @returns true, 操作完成；false， 异步操作
      */
     protected execute(goOn: boolean = false): boolean {
-        let b1Repository: BORepositoryDataInteraction = new BORepositoryDataInteraction();
+        let b1Repository: di.BORepositoryDataInteraction = new di.BORepositoryDataInteraction();
         b1Repository.address = this.getConfig(CONFIG_REPOSITORY_URL);
         b1Repository.token = this.getConfig(CONFIG_REPOSITORY_TOKEN);
         let criteria: ibas.ICriteria = new ibas.Criteria();
@@ -37,7 +36,7 @@ export default class SyncMaterials extends integration.action.IntegrationAction 
         let that: this = this;
         b1Repository.fetchItems({
             criteria: criteria,
-            async onCompleted(opRsltB1: ibas.IOperationResult<b1.IItems>): Promise<void> {
+            async onCompleted(opRsltB1: ibas.IOperationResult<sap.b1.IItems>): Promise<void> {
                 try {
                     if (opRsltB1.resultCode !== 0) {
                         throw new Error(opRsltB1.message);
@@ -63,7 +62,7 @@ export default class SyncMaterials extends integration.action.IntegrationAction 
         return false;
     }
 
-    private async processing(data: b1.IItems): Promise<boolean> {
+    private async processing(data: sap.b1.IItems): Promise<boolean> {
         let criteria: ibas.ICriteria = new ibas.Criteria();
         criteria.result = 1;
         let condition: ibas.ICondition = criteria.conditions.create();
@@ -85,8 +84,8 @@ export default class SyncMaterials extends integration.action.IntegrationAction 
                             material.code = data.itemCode;
                         }
                         material.name = data.itemName;
-                        material.batchManagement = data.manageBatchNumbers === b1.BoYesNoEnum.tYES ? ibas.emYesNo.YES : ibas.emYesNo.NO;
-                        material.serialManagement = data.manageSerialNumbers === b1.BoYesNoEnum.tYES ? ibas.emYesNo.YES : ibas.emYesNo.NO;
+                        material.batchManagement = data.manageBatchNumbers === di.sap.b1.BoYesNoEnum.tYES ? ibas.emYesNo.YES : ibas.emYesNo.NO;
+                        material.serialManagement = data.manageSerialNumbers === di.sap.b1.BoYesNoEnum.tYES ? ibas.emYesNo.YES : ibas.emYesNo.NO;
                         if (material.isDirty) {
                             boRepository.saveMaterial({
                                 beSaved: material,

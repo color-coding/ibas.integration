@@ -5,7 +5,6 @@
  * Use of this source code is governed by an Apache License, Version 2.0
  * that can be found in the LICENSE file at http://www.apache.org/licenses/LICENSE-2.0
  */
-import * as b1 from "./b1/index";
 /** 业务仓库 */
 export class BORepositoryDataInteraction extends ibas.BORepositoryApplication {
     /** 创建此模块的后端与前端数据的转换者 */
@@ -16,7 +15,7 @@ export class BORepositoryDataInteraction extends ibas.BORepositoryApplication {
      * 查询 Items
      * @param fetcher 查询者
      */
-    fetchItems(fetcher: ibas.IFetchCaller<b1.IItems>): void {
+    fetchItems(fetcher: ibas.IFetchCaller<sap.b1.IItems>): void {
         super.fetch("Items", fetcher);
     }
 
