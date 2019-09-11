@@ -66,5 +66,33 @@
         "value": "60"
       }
     ]
+  },
+  {
+    "type": "Action",
+    "name": "Sync Byd SalesOrder",
+    "activated": true,
+    "path": "SyncSalesOrder.ts",
+    "dependencies": [
+      "./3rdparty/jquerysoap/index",
+      "./3rdparty/jqueryxml2json/index"
+    ],
+    "configs": [
+      {
+        "key": "REPOSITORY_USER",
+        "value": "_ZZX"
+      },
+      {
+        "key": "REPOSITORY_PASSWORD",
+        "value": "1qaz!QAZ"
+      },
+      {
+        "key": "REPOSITORY_URL",
+        "value": ".../../cn/my600265/sap/bc/srt/scs/sap/"
+      },
+      {
+        "key": "FETCH_DATA_COUNT",
+        "value": "60"
+      }
+    ]
   }
 ]

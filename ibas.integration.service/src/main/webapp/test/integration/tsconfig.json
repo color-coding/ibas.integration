@@ -11,13 +11,16 @@
     "../../3rdparty/shell/index.d.ts",
     "../../3rdparty/openui5/index.d.ts",
     "../../3rdparty/initialfantasy/index.d.ts",
-    "./3rdparty/jquery.soap/index.d.ts",
+    "./3rdparty/jquery/index.d.ts",
+    "./3rdparty/jquerysoap/index.d.ts",
+    "./3rdparty/jqueryxml2json/index.d.ts",
     "./3rdparty/materials/index.d.ts",
     "../../index.d.ts"
   ],
   "files": [
     "./HelloWorld.ts",
     "./HelloWorld2.ts",
-    "./SyncMaterials.ts"
+    "./SyncMaterials.ts",
+    "./SyncSalesOrder.ts"
   ]
 }

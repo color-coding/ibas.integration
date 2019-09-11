@@ -112,6 +112,18 @@ public class Action extends Serializable {
 		return configs;
 	}
 
+	@XmlElementWrapper(name = "dependencies")
+	@XmlElement(name = "dependencies", type = String.class)
+	private String[] dependencies;
+
+	public final String[] getDependencies() {
+		return dependencies;
+	}
+
+	public final void setDependencies(String[] value) {
+		this.dependencies = value;
+	}
+
 	@Override
 	public String toString() {
 		return String.format("{action: %s %s}", this.getName() != null ? this.getName() : this.getId(), this.getPath());

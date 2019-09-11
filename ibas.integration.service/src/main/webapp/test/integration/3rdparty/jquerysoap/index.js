@@ -37,15 +37,15 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 
 ======================*/
 
-(function(factory) {
-	if(typeof module === 'object' && typeof module.exports === 'object') {
-	  module.exports = factory(require('jquery'));
+(function (factory) {
+	if (typeof module === 'object' && typeof module.exports === 'object') {
+		module.exports = factory(require('jquery'));
 	} else if (jQuery) {
-	  factory(jQuery);
+		factory(jQuery);
 	} else {
 		console.error('no jQuery found!')
 	}
-})(function($) {
+})(function ($) {
 	var enableLogging;
 	var globalConfig = { // this setup once, defaults go here
 		appendMethodToURL: true,
@@ -78,7 +78,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 			data: config.data,
 			name: (!!config.elementName) ? config.elementName : config.method,
 			context: config.context,
-			prefix: (!!config.namespaceQualifier && !config.noPrefix) ? config.namespaceQualifier+':' : ''
+			prefix: (!!config.namespaceQualifier && !config.noPrefix) ? config.namespaceQualifier + ':' : ''
 		});
 
 		if (!!config.namespaceQualifier && !!config.namespaceURL) {
@@ -123,26 +123,26 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 				}
 			}
 			// append Method?
-			if(!!config.appendMethodToURL && !!config.method){
+			if (!!config.appendMethodToURL && !!config.method) {
 				config.url += config.method;
 			}
 			return soapEnvelope.send({
 				url: config.url,
 				context: config.context,
-				timeout:config.timeout,
+				timeout: config.timeout,
 				async: config.async,
 				headers: (config.HTTPHeaders) ? config.HTTPHeaders : {},
 				action: (!!config.SOAPAction) ? config.SOAPAction : config.method,
 				soap12: config.soap12,
 				beforeSend: config.beforeSend,
 				statusCode: config.statusCode,
-			}).done(function(data, textStatus, jqXHR) {
+			}).done(function (data, textStatus, jqXHR) {
 				var response = new SOAPResponse(textStatus, jqXHR);
 				log('jquery.soap - receive:', response.toString());
 				if ($.isFunction(config.success)) {
 					config.success.call(this, response);
 				}
-			}).fail(function(jqXHR, textStatus, errorThrown) {
+			}).fail(function (jqXHR, textStatus, errorThrown) {
 				log('jquery.soap - error:', errorThrown);
 				if ($.isFunction(config.error)) {
 					config.error.call(this, new SOAPResponse(textStatus, jqXHR));
@@ -150,7 +150,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 			});
 		} else {
 			var errDeferred = new $.Deferred(),
-			    errmsg;
+				errmsg;
 
 			if (!soapObject) {
 				errmsg = 'jquery.soap - no soapObject';
@@ -167,7 +167,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 	};
 
 	//Soap request - this is what being sent
-	function SOAPEnvelope (soapObject) {
+	function SOAPEnvelope(soapObject) {
 		this.typeOf = "SOAPEnvelope";
 		this.prefix = 'soap';
 		this.soapConfig = null;
@@ -177,7 +177,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 
 		// let's get the soap namespace prefix
 		var parts = soapObject.name.split(':'),
-		    len;
+			len;
 		if (parts[1] === 'Envelope' || parts[1] === 'Body') {
 			this.prefix = parts[0];
 			if (soapObject.attr('xmlns:' + this.prefix) === SOAPTool.SOAP11.namespaceURL) {
@@ -221,21 +221,21 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 	}
 
 	SOAPEnvelope.prototype = {
-		addAttribute: function(name, value) {
+		addAttribute: function (name, value) {
 			this.attributes[name] = value;
 		},
-		addNamespace: function(name, uri) {
+		addNamespace: function (name, uri) {
 			this.addAttribute('xmlns:' + name, uri);
 		},
-		addHeader: function(soapObject) {
+		addHeader: function (soapObject) {
 			this.headers.push(soapObject);
 		},
-		addBody: function(soapObject) {
+		addBody: function (soapObject) {
 			this.bodies.push(soapObject);
 		},
-		toString: function() {
+		toString: function () {
 			var soapEnv = new SOAPObject(this.prefix + ':Envelope'),
-			    len;
+				len;
 			//Add attributes
 			for (var name in this.attributes) {
 				soapEnv.attr(name, this.attributes[name]);
@@ -268,7 +268,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 			}
 			return '<?xml version="1.0" encoding="UTF-8"?>' + soapEnv.toString();
 		},
-		send: function(options) {
+		send: function (options) {
 			var self = this;
 			if (!this.soapConfig) {
 				this.soapConfig = (options.soap12) ? SOAPTool.SOAP12 : SOAPTool.SOAP11;
@@ -286,7 +286,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 				async: options.async,
 				headers: options.headers,
 				timeout: options.timeout,
-			//	crossDomain: true,
+				crossDomain: options.crossDomain,
 				dataType: "xml",
 				processData: false,
 				data: this.toString(),
@@ -321,7 +321,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 					return xhr;
 				},
 				*/
-				beforeSend: function() {
+				beforeSend: function () {
 					if ($.isFunction(options.beforeSend)) {
 						return options.beforeSend.call(options.context, self);
 					}
@@ -331,7 +331,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 	};
 
 	// SOAPObject - an abstraction layer to build SOAP Objects.
-	var SOAPObject = function(name) {
+	var SOAPObject = function (name) {
 		this.typeOf = 'SOAPObject';
 		this.name = name;
 		this.ns = {};
@@ -342,7 +342,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 	}
 
 	SOAPObject.prototype = {
-		attr: function(name, value) {
+		attr: function (name, value) {
 			if (!!name && !!value || !!name && value === "") {
 				this.attributes[name] = value;
 				return this;
@@ -352,7 +352,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 				return this.attributes;
 			}
 		},
-		val: function(value) {
+		val: function (value) {
 			if (value === undefined) {
 				if (this.attr('xsi:nil') === 'true') {
 					return null;
@@ -360,37 +360,37 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 					return this.value;
 				}
 			} else if (value === null) {
-				this.attr("xsi:nil","true");
+				this.attr("xsi:nil", "true");
 				return this;
 			} else {
 				this.value = value;
 				return this;
 			}
 		},
-		addNamespace: function(name, url) {
+		addNamespace: function (name, url) {
 			this.ns[name] = url;
 			return this;
 		},
-		appendChild: function(obj) {
+		appendChild: function (obj) {
 			obj._parent = this;
 			this.children.push(obj);
 			return obj;
 		},
-		newChild: function(name) {
+		newChild: function (name) {
 			var obj = new SOAPObject(name);
 			this.appendChild(obj);
 			return obj;
 		},
-		addParameter: function(name, value) {
+		addParameter: function (name, value) {
 			var obj = new SOAPObject(name);
 			obj.val(value);
 			this.appendChild(obj);
 			return this;
 		},
-		hasChildren: function() {
+		hasChildren: function () {
 			return (this.children.length > 0) ? true : false;
 		},
-		find: function(name) {
+		find: function (name) {
 			if (this.name === name) {
 				return this;
 			} else {
@@ -402,54 +402,54 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 				}
 			}
 		},
-		end: function() {
+		end: function () {
 			return this.parent();
 		},
-		parent: function() {
+		parent: function () {
 			return this._parent;
 		},
-		toString: function() {
+		toString: function () {
 			var out = [], encodedValue;
-			out.push('<'+this.name);
+			out.push('<' + this.name);
 			//Namespaces
 			for (var name in this.ns) {
 				out.push(' xmlns:' + name + '="' + this.ns[name] + '"');
 			}
 			//Node Attributes
 			for (var attr in this.attributes) {
-				if (typeof(this.attributes[attr]) === 'string') {
+				if (typeof (this.attributes[attr]) === 'string') {
 					out.push(' ' + attr + '="' + SOAPTool.encodeXmlValue(this.attributes[attr]) + '"');
 				}
 			}
 			out.push('>');
 			//Node children
-			if(this.hasChildren()) {
-				for(var cPos in this.children) {
+			if (this.hasChildren()) {
+				for (var cPos in this.children) {
 					var cObj = this.children[cPos];
-					if ((typeof(cObj) === 'object') && (cObj.typeOf === 'SOAPObject')) {
+					if ((typeof (cObj) === 'object') && (cObj.typeOf === 'SOAPObject')) {
 						out.push(cObj.toString());
 					}
 				}
 			}
 			//Node Value
 			if (this.value !== undefined) {
-				if (typeof(this.value) === 'string') {
-					switch(this.value.indexOf('<![CDATA[')){
-						case -1 :
+				if (typeof (this.value) === 'string') {
+					switch (this.value.indexOf('<![CDATA[')) {
+						case -1:
 							// no CDATA blocks => encode everything
 							encodedValue = SOAPTool.encodeXmlValue(this.value);
 							break;
-						case  0 :
-							if(this.value.indexOf(']]>') === this.value.length - 3){
+						case 0:
+							if (this.value.indexOf(']]>') === this.value.length - 3) {
 								// entire value wrapped in one single CDATA block => no encoding required
 								encodedValue = this.value;
 								break;
 							}
-						default :
+						default:
 							// encode with more advanced CDATA check
 							encodedValue = SOAPTool.encodeXmlValueWithCDataCheck(this.value);
 					}
-				} else if (typeof(this.value) === 'number') {
+				} else if (typeof (this.value) === 'number') {
 					encodedValue = this.value.toString();
 				}
 				out.push(encodedValue);
@@ -461,14 +461,14 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 	};
 
 	//Soap response - this will be passed to the callback from SOAPEnvelope.send
-	var SOAPResponse = function(status, xhr) {
+	var SOAPResponse = function (status, xhr) {
 		this.typeOf = "SOAPResponse";
 		this.status = status;
 		this.headers = xhr.getAllResponseHeaders().split('\n');
 		this.httpCode = xhr.status;
 		this.httpText = xhr.statusText;
 		this.content = (xhr.responseXML === undefined || xhr.responseXML === null) ? xhr.responseText : xhr.responseXML;
-		this.toString = function(){
+		this.toString = function () {
 			if (typeof this.content === 'string') {
 				return this.content;
 			}
@@ -477,13 +477,13 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 			}
 			throw new Error("Unexpected Content: " + $.type(this.content));
 		};
-		this.toXML = function(){
+		this.toXML = function () {
 			if ($.isXMLDoc(this.content)) {
 				return this.content;
 			}
 			return $.parseXML(this.content);
 		};
-		this.toJSON = function(){
+		this.toJSON = function () {
 			if ($.xml2json) {
 				return $.xml2json(this.content);
 			}
@@ -501,7 +501,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 			type: 'application/soap+xml',
 			namespaceURL: 'http://www.w3.org/2003/05/soap-envelope'
 		},
-		processData: function(options) {
+		processData: function (options) {
 			var soapObject;
 			if ($.type(options.data) === "string") {
 				// if data is XML string, parse to XML DOM
@@ -530,36 +530,36 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 			}
 			return soapObject;
 		},
-		encodeXmlValue: function(value) {
+		encodeXmlValue: function (value) {
 			var encodedValue,
-					xmlCharMap = {
-						'<': '&lt;',
-						'>': '&gt;',
-						'&': '&amp;',
-						'"': '&quot;',
-						"'": '&apos;'
-					},
-					encodedValue;
+				xmlCharMap = {
+					'<': '&lt;',
+					'>': '&gt;',
+					'&': '&amp;',
+					'"': '&quot;',
+					"'": '&apos;'
+				},
+				encodedValue;
 
 			encodedValue = value.replace(/[<>&"']/g, function (ch) {
 				return xmlCharMap[ch];
 			});
 			return encodedValue;
 		},
-		encodeXmlValueWithCDataCheck: function(value){
+		encodeXmlValueWithCDataCheck: function (value) {
 			// This function will only encode the parts within value that are not inside a CDATA section, allowing multiple usages of CDATA-blocks
 			//  ie. "encoding here <!CDATA[[ no encoding here ]]> encoding here <!CDATA[[ no encoding here ]]>"
-			var cdata		= false,
-				valueArray	= value.split(''),
-				encoded		= [],
+			var cdata = false,
+				valueArray = value.split(''),
+				encoded = [],
 				char;
 
-			for(var i = 0, j = valueArray.length; i < j; i++){
-				switch(valueArray[i]){
-					case '<' :
-						if(cdata){
+			for (var i = 0, j = valueArray.length; i < j; i++) {
+				switch (valueArray[i]) {
+					case '<':
+						if (cdata) {
 							encoded.push('<');
-						} else if(value.substr(i, 9) === '<![CDATA[') { // if no CDATA section started, check if current char is part of CDATA start
+						} else if (value.substr(i, 9) === '<![CDATA[') { // if no CDATA section started, check if current char is part of CDATA start
 							encoded.push('<![CDATA[');
 							i += 8; // skip CDATA start chars
 							cdata = true;
@@ -568,8 +568,8 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 						}
 						break;
 
-					case ']' :
-						if(cdata && value.substr(i, 3) === ']]>'){ // if CDATA section started, check if current char is part of CDATA end
+					case ']':
+						if (cdata && value.substr(i, 3) === ']]>') { // if CDATA section started, check if current char is part of CDATA end
 							encoded.push(']]>');
 							i += 2; // skip CDATA end chars
 							cdata = false;
@@ -578,11 +578,11 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 						}
 						break;
 
-					case '>' : encoded.push(cdata ? '>' : '&gt;');		break;
-					case '&' : encoded.push(cdata ? '&' : '&amp;');		break;
-					case '"' : encoded.push(cdata ? '"' : '&quot;');	break;
-					case "'" : encoded.push(cdata ? "'" : '&apos;');	break;
-					default	 : encoded.push(valueArray[i]);
+					case '>': encoded.push(cdata ? '>' : '&gt;'); break;
+					case '&': encoded.push(cdata ? '&' : '&amp;'); break;
+					case '"': encoded.push(cdata ? '"' : '&quot;'); break;
+					case "'": encoded.push(cdata ? "'" : '&apos;'); break;
+					default: encoded.push(valueArray[i]);
 				}
 			}
 			return encoded.join('');
@@ -591,45 +591,51 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 			var soapObject;
 			var childObject;
 			if (params === null) {
-				soapObject = new SOAPObject(prefix+name);
+				soapObject = new SOAPObject(prefix + name);
 				soapObject.attr('xsi:nil', 'true');
 			} else if (typeof params == 'object') {
 				// added by DT - check if object is in fact an Array and treat accordingly
-				if(params.constructor.toString().indexOf("Array") > -1) { // type is array
-					for(var i = 0, len = params.length; i < len; i++) {
+				if (params.constructor.toString().indexOf("Array") > -1) { // type is array
+					for (var i = 0, len = params.length; i < len; i++) {
 						childObject = this.json2soap(name, params[i], prefix, parentNode);
 						parentNode.appendChild(childObject);
 					}
 				} else if (params.constructor.toString().indexOf("String") > -1) { // type is string
 					// handle String objects as string primitive value
-					soapObject = new SOAPObject(prefix+name);
+					soapObject = new SOAPObject(prefix + name);
 					soapObject.val(params);
 				} else if (params.constructor.toString().indexOf("Date") > -1) { // type is Date
 					// handle Date objects as ISO8601 formated value
-					soapObject = new SOAPObject(prefix+name);
+					soapObject = new SOAPObject(prefix + name);
 					soapObject.val(params.toISOString());
 				} else {
-					soapObject = new SOAPObject(prefix+name);
-					for(var y in params) {
-						childObject = this.json2soap(y, params[y], prefix, soapObject);
-						if (childObject) {
-							soapObject.appendChild(childObject);
+					soapObject = new SOAPObject(prefix + name);
+					for (var y in params) {
+						if (y.startsWith("$")) {
+							// xml attribute
+							soapObject.attr(y.substring(1), params[y]);
+						} else {
+							// xml element
+							childObject = this.json2soap(y, params[y], prefix, soapObject);
+							if (childObject) {
+								soapObject.appendChild(childObject);
+							}
 						}
 					}
 				}
 			} else if (typeof params == 'boolean') {
-				soapObject = new SOAPObject(prefix+name);
+				soapObject = new SOAPObject(prefix + name);
 				soapObject.val(params ? 'true' : 'false');
 			} else {
-				soapObject = new SOAPObject(prefix+name);
+				soapObject = new SOAPObject(prefix + name);
 				soapObject.val(params);
 			}
 			return soapObject;
 		},
 		dom2soap: function (xmldom) {
 			var whitespace = /^\s+$/,
-			    soapObject = new SOAPObject(xmldom.nodeName),
-			    len;
+				soapObject = new SOAPObject(xmldom.nodeName),
+				len;
 
 			len = xmldom.attributes.length;
 			for (var i = 0; i < len; i++) {
@@ -646,13 +652,13 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 				if (child.nodeType === 3 && !whitespace.test(child.nodeValue)) {
 					soapObject.val(child.nodeValue);
 				}
-				if (child.nodeType === 4){
-				  soapObject.val('<![CDATA[' + child.nodeValue + ']]>');
+				if (child.nodeType === 4) {
+					soapObject.val('<![CDATA[' + child.nodeValue + ']]>');
 				}
 			}
 			return soapObject;
 		},
-		array2soap: function(options) {
+		array2soap: function (options) {
 			soapObject = new SOAPObject(options.name);
 			for (var index = 0, len = options.data.length; index < len; index++) {
 				if ($.isArray(options.data[index])) {
@@ -667,15 +673,15 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 			}
 			return soapObject;
 		},
-		dom2string: function(dom) {
-			if (typeof XMLSerializer!=="undefined") {
+		dom2string: function (dom) {
+			if (typeof XMLSerializer !== "undefined") {
 				return new window.XMLSerializer().serializeToString(dom);
 			} else {
 				return dom.xml;
 			}
 		},
-		createWSS: function(wssValues) {
-			if  (!!wssValues.username && !!wssValues.password) {
+		createWSS: function (wssValues) {
+			if (!!wssValues.username && !!wssValues.password) {
 				var wssConst = {
 					security: "wsse:Security",
 					securityNS: "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd",
@@ -694,32 +700,32 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 					.addNamespace('wsse', wssConst.securityNS)
 					.addNamespace('wsu', wssConst.usernameTokenNS)
 					.newChild(wssConst.usernameToken)
-						.newChild(wssConst.username)
-							.attr('Type', wssConst.usernameType)
-							.val(wssValues.username)
-						.end()
-						.newChild(wssConst.password)
-							.attr('Type', wssConst.passwordType)
-							.val(wssValues.password)
-						.end()
+					.newChild(wssConst.username)
+					.attr('Type', wssConst.usernameType)
+					.val(wssValues.username)
+					.end()
+					.newChild(wssConst.password)
+					.attr('Type', wssConst.passwordType)
+					.val(wssValues.password)
+					.end()
 					.end();
 				var userTokenObj = WSSObj.find(wssConst.usernameToken);
 				if (!!wssValues.nonce) {
 					userTokenObj
 						.newChild(wssConst.nonce)
-							.attr('Type', wssConst.nonceType)
-							.val(wssValues.nonce);
+						.attr('Type', wssConst.nonceType)
+						.val(wssValues.nonce);
 				}
 				if (!!wssValues.created) {
 					userTokenObj
 						.newChild(wssConst.wsuCreated)
-							.attr('Type', wssConst.wsuCreatedType)
-							.val(wssValues.created);
+						.attr('Type', wssConst.wsuCreatedType)
+						.val(wssValues.created);
 				}
 				return WSSObj;
 			}
 		},
-		fallbackDeprecated: function(config) {
+		fallbackDeprecated: function (config) {
 			// fallbacks for changed properties: (the old names will deprecate at version 2.0.0!)
 			var deprecated = {
 				// usage -> oldParam: 'newParam'
@@ -738,7 +744,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 		}
 	};
 	function log() {
-		if (enableLogging && typeof(console)==='object') {
+		if (enableLogging && typeof (console) === 'object') {
 			if ($.isFunction(console.log)) {
 				if (arguments.length == 1) {
 					console.log(arguments[0]);
@@ -749,7 +755,7 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 		}
 	}
 	function warn() {
-		if (typeof(console)==='object') {
+		if (typeof (console) === 'object') {
 			if ($.isFunction(console.warn)) {
 				if (arguments.length == 1) {
 					console.warn(arguments[0]);

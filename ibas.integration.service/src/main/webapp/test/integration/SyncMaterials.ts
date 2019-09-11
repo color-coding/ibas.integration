@@ -5,7 +5,7 @@
  * Use of this source code is governed by an Apache License, Version 2.0
  * that can be found in the LICENSE file at http://www.apache.org/licenses/LICENSE-2.0
  */
-import * as di from "./b1/index";
+import * as b1 from "./b1/BORepository";
 
 /** 配置项-业务仓库地址 */
 const CONFIG_REPOSITORY_URL: string = "REPOSITORY_URL";
@@ -22,7 +22,7 @@ export default class SyncMaterials extends integration.action.IntegrationAction 
      * @returns true, 操作完成；false， 异步操作
      */
     protected execute(goOn: boolean = false): boolean {
-        let b1Repository: di.BORepositoryDataInteraction = new di.BORepositoryDataInteraction();
+        let b1Repository: b1.BORepositoryDataInteraction = new b1.BORepositoryDataInteraction();
         b1Repository.address = this.getConfig(CONFIG_REPOSITORY_URL);
         b1Repository.token = this.getConfig(CONFIG_REPOSITORY_TOKEN);
         let criteria: ibas.ICriteria = new ibas.Criteria();
@@ -84,8 +84,8 @@ export default class SyncMaterials extends integration.action.IntegrationAction 
                             material.code = data.itemCode;
                         }
                         material.name = data.itemName;
-                        material.batchManagement = data.manageBatchNumbers === di.sap.b1.BoYesNoEnum.tYES ? ibas.emYesNo.YES : ibas.emYesNo.NO;
-                        material.serialManagement = data.manageSerialNumbers === di.sap.b1.BoYesNoEnum.tYES ? ibas.emYesNo.YES : ibas.emYesNo.NO;
+                        material.batchManagement = data.manageBatchNumbers === b1.BoYesNoEnum.tYES ? ibas.emYesNo.YES : ibas.emYesNo.NO;
+                        material.serialManagement = data.manageSerialNumbers === b1.BoYesNoEnum.tYES ? ibas.emYesNo.YES : ibas.emYesNo.NO;
                         if (material.isDirty) {
                             boRepository.saveMaterial({
                                 beSaved: material,

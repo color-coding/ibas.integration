@@ -27,6 +27,7 @@ namespace integration {
                             newData.configs.add(newItem);
                         }
                     }
+                    newData.dependencies = data.dependencies;
                     return newData;
                 } else {
                     return super.parsing(data, sign);
@@ -118,7 +119,10 @@ namespace integration {
                     baseUrl = ibas.urls.normalize(ibas.urls.ROOT_URL_SIGN) + baseUrl;
                 }
                 let token: string = ibas.config.get(ibas.CONFIG_ITEM_USER_TOKEN, "");
-                let rtVersion: string = ibas.dates.now().getTime().toString();
+                let rtVersion: string = undefined;
+                if (!ibas.config.get(ibas.CONFIG_ITEM_DEBUG_MODE, false)) {
+                    rtVersion = ibas.dates.now().getTime().toString();
+                }
                 let actionRequire: Require = ibas.requires.create({
                     baseUrl: baseUrl,
                     context: caller.action.name.trim(),
@@ -128,7 +132,8 @@ namespace integration {
                             return "";
                         }
                         // 允许多次调用
-                        return (url.indexOf("?") === -1 ? "?" : "&") + "token=" + token + "&_=" + rtVersion;
+                        return (url.indexOf("?") === -1 ? "?" : "&") + "token=" + token
+                            + (rtVersion ? ("&_=" + rtVersion) : "");
                     }
                 });
                 let path: string = caller.action.path;
@@ -138,15 +143,14 @@ namespace integration {
                 if (path.indexOf(".") > 0) {
                     path = path.substring(0, path.lastIndexOf("."));
                 }
-                // 如果已加载，则卸载
-                if (actionRequire.defined(path)) {
-                    actionRequire.undef(path);
-                }
-                actionRequire(
-                    [
+                let todo: Function = function (): void {
+                    // 如果已加载，则卸载
+                    if (actionRequire.defined(path)) {
+                        actionRequire.undef(path);
+                    }
+                    actionRequire([
                         path
-                    ],
-                    function (library: any): void {
+                    ], function (library: any): void {
                         // 库加载成功
                         try {
                             if (ibas.objects.isNull(library)) {
@@ -166,13 +170,26 @@ namespace integration {
                                 caller.onError(error);
                             }
                         }
-                    },
-                    function (): void {
+                    }, function (): void {
                         if (caller.onError instanceof Function) {
                             caller.onError(arguments[0]);
                         }
-                    }
-                );
+                    });
+                };
+                if (caller.action.dependencies instanceof Array && caller.action.dependencies.length > 0) {
+                    actionRequire(
+                        caller.action.dependencies,
+                        function (): void {
+                            todo();
+                        }, function (): void {
+                            if (caller.onError instanceof Function) {
+                                caller.onError(arguments[0]);
+                            }
+                        }
+                    );
+                } else {
+                    todo();
+                }
             }
             create(caller: IActionClassCreater): void {
                 this.classOf({

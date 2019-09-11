@@ -73,6 +73,7 @@ declare namespace JQuerySOAP {
         timeout?: number;
         url?: string;
         wss?: Object;
+        crossDomain?: boolean;
     }
     interface SOAP {
         (options?: Options): JQueryXHR;
