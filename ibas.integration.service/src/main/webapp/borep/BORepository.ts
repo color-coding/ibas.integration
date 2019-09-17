@@ -154,7 +154,9 @@ namespace integration {
                 boRepository.token = this.token;
                 boRepository.converter = this.createConverter();
                 let method: string = ibas.strings.format("deletePackage?group={0}&token={1}", deleter.beDeleted, this.token);
-                boRepository.callRemoteMethod(method, undefined, deleter);
+                boRepository.callRemoteMethod(method, undefined, (opRslt) => {
+                    deleter.onCompleted.call(ibas.objects.isNull(deleter.caller) ? deleter : deleter.caller, opRslt);
+                });
             }
             /**
              * 上传程序包
@@ -221,8 +223,9 @@ namespace integration {
                         formData.append(item.key, item.value);
                     }
                 }
-                boRepository.callRemoteMethod(
-                    ibas.strings.format("goAction?token={0}", this.token), formData, caller);
+                boRepository.callRemoteMethod(ibas.strings.format("goAction?token={0}", this.token), formData, (opRslt) => {
+                    caller.onCompleted.call(ibas.objects.isNull(caller.caller) ? caller : caller.caller, opRslt);
+                });
             }
         }
         /** 代码下载者 */
@@ -247,19 +250,16 @@ namespace integration {
              * @param caller 调用者
              */
             download<T>(method: string, caller: ibas.IMethodCaller<any>): void {
-                let methodCaller: ibas.IMethodCaller<any> = {
-                    onCompleted(data: any): void {
-                        let opRslt: ibas.IOperationResult<any> = null;
-                        if (data instanceof ibas.OperationResult) {
-                            opRslt = data;
-                        } else {
-                            opRslt = new ibas.OperationResult();
-                            opRslt.resultObjects.add(data);
-                        }
-                        caller.onCompleted.call(ibas.objects.isNull(caller.caller) ? caller : caller.caller, opRslt);
+                this.callRemoteMethod(method, undefined, (data) => {
+                    let opRslt: ibas.IOperationResult<any> = null;
+                    if (data instanceof ibas.OperationResult) {
+                        opRslt = data;
+                    } else {
+                        opRslt = new ibas.OperationResult();
+                        opRslt.resultObjects.add(data);
                     }
-                };
-                this.callRemoteMethod(method, undefined, methodCaller);
+                    caller.onCompleted.call(ibas.objects.isNull(caller.caller) ? caller : caller.caller, opRslt);
+                });
             }
             protected createHttpRequest(method: string): XMLHttpRequest {
                 let methodUrl: string = this.methodUrl(method);
