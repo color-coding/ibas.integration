@@ -16,7 +16,7 @@ class BORepositoryQuerySalesOrderIn extends common.BORepositoryByDesign {
         sap.byd.querysalesorderin.SalesOrderByElementsQuerySelectionByElements,
         sap.byd.querysalesorderin.SalesOrderByElementsResponse>): void {
         this.fetch<sap.byd.querysalesorderin.SalesOrderByElementsQuery_sync, sap.byd.querysalesorderin.SalesOrderByElementsResponse_sync>(
-            "FindByElementsRequest",
+            "FindByElements",
             "SalesOrderByElementsQuery_sync",
             {
                 criteria: {
