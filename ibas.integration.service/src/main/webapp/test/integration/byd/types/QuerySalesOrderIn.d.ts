@@ -62,7 +62,7 @@ declare namespace sap {
                 $salesOrderTransmissionRequestCode?: TransmissionRequestCode;
             }
 
-            type SalesOrderByElementsQueryRequestedElementsSalesOrder = string;
+            type SalesOrderByElementsQueryRequestedElementsSalesOrder = string | { Content: string, $itemTransmissionRequestCode?: TransmissionRequestCode, $salesAndServiceBusinessAreaTransmissionRequestCode?: TransmissionRequestCode, $billToPartyTransmissionRequestCode?: TransmissionRequestCode, $accountPartyTransmissionRequestCode?: TransmissionRequestCode, $payerPartyTransmissionRequestCode?: TransmissionRequestCode, $productRecipientPartyTransmissionRequestCode?: TransmissionRequestCode, $salesPartnerPartyTransmissionRequestCode?: TransmissionRequestCode, $freightForwarderPartyTransmissionRequestCode?: TransmissionRequestCode, $employeeResponsiblePartyTransmissionRequestCode?: TransmissionRequestCode, $sellerPartyTransmissionRequestCode?: TransmissionRequestCode, $salesUnitPartyTransmissionRequestCode?: TransmissionRequestCode, $serviceExecutionTeamPartyTransmissionRequestCode?: TransmissionRequestCode, $servicePerformerPartyTransmissionRequestCode?: TransmissionRequestCode, $salesEmployerPartyTransmissionRequestCode?: TransmissionRequestCode, $billFromPartyTransmissionRequestCode?: TransmissionRequestCode, $requestedFulfillmentPeriodPeriodTerms?: TransmissionRequestCode, $deliveryTermsTransmissionRequestCode?: TransmissionRequestCode, $pricingTermsTransmissionRequestCode?: TransmissionRequestCode, $salesTermsTransmissionRequestCode?: TransmissionRequestCode, $invoiceTermsTransmissionRequestCode?: TransmissionRequestCode, $cashDiscountTermsTransmissionRequestCode?: TransmissionRequestCode, $paymentControlTransmissionRequestCode?: TransmissionRequestCode, $priceAndTaxCalculationTransmissionRequestCode?: TransmissionRequestCode, $textCollectionTransmissionRequestCode?: TransmissionRequestCode, $attachmentFolderTransmissionRequestCode?: TransmissionRequestCode };
 
             interface SalesOrderByElementsQuerySelectionByApprovalStatusCode {
                 InclusionExclusionCode?: InclusionExclusionCode;
@@ -782,7 +782,7 @@ declare namespace sap {
                 UsageDeniedIndicator?: Indicator;
             }
 
-            type SalesOrderPartyStandardIdentifier = SalesOrderPartyStandardIdentifier_Content;
+            type SalesOrderPartyStandardIdentifier = SalesOrderPartyStandardIdentifier_Content | { Content: SalesOrderPartyStandardIdentifier_Content, $schemeAgencyID: undefined };
 
             type SalesOrderPartyStandardIdentifier_Content = token;
 
@@ -837,13 +837,13 @@ declare namespace sap {
                 IntegerValue?: IntegerValue;
             }
 
-            type AddressRepresentationCode = AddressRepresentationCode_Content;
+            type AddressRepresentationCode = AddressRepresentationCode_Content | { Content: AddressRepresentationCode_Content, $listAgencyID?: undefined };
 
             type AddressRepresentationCode_Content = token;
 
             type AgencyIdentificationCode = token;
 
-            type Amount = Amount_Content;
+            type Amount = Amount_Content | { Content: Amount_Content, $currencyCode: CurrencyCode };
 
             type Amount_Content = decimal;
 
@@ -853,7 +853,7 @@ declare namespace sap {
 
             type AuthorisationStatusCode = "1" | "2" | "3" | "4";
 
-            type BankAccountInternalID = BankAccountInternalID_Content;
+            type BankAccountInternalID = BankAccountInternalID_Content | { Content: BankAccountInternalID_Content, $schemeAgencyID?: undefined };
 
             type BankAccountInternalID_Content = token;
 
@@ -869,7 +869,7 @@ declare namespace sap {
 
             type BusinessTransactionDocumentGroupID = token;
 
-            type BusinessTransactionDocumentID = BusinessTransactionDocumentID_Content;
+            type BusinessTransactionDocumentID = BusinessTransactionDocumentID_Content | { Content: BusinessTransactionDocumentID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined, $schemeAgencySchemeAgencyID?: AgencyIdentificationCode };
 
             type BusinessTransactionDocumentID_Content = token;
 
@@ -896,7 +896,7 @@ declare namespace sap {
 
             type BusinessTransactionDocumentRelationshipRoleCode = token;
 
-            type BusinessTransactionDocumentTypeCode = BusinessTransactionDocumentTypeCode_Content;
+            type BusinessTransactionDocumentTypeCode = BusinessTransactionDocumentTypeCode_Content | { Content: BusinessTransactionDocumentTypeCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type BusinessTransactionDocumentTypeCode_Content = token;
 
@@ -907,19 +907,19 @@ declare namespace sap {
 
             type CalculationStatusCode = "1" | "2" | "3" | "4" | "5" | "6";
 
-            type CancellationReasonCode = CancellationReasonCode_Content;
+            type CancellationReasonCode = CancellationReasonCode_Content | { Content: CancellationReasonCode_Content, $listAgencyID?: undefined };
 
             type CancellationReasonCode_Content = token;
 
             type CancellationStatusCode = "1" | "2" | "3" | "4" | "5" | "6";
 
-            type CashDiscountTermsCode = CashDiscountTermsCode_Content;
+            type CashDiscountTermsCode = CashDiscountTermsCode_Content | { Content: CashDiscountTermsCode_Content, $listAgencyID?: undefined };
 
             type CashDiscountTermsCode_Content = token;
 
             type ChangeStateID = token;
 
-            type ClearingHouseAccountID = ClearingHouseAccountID_Content;
+            type ClearingHouseAccountID = ClearingHouseAccountID_Content | { Content: ClearingHouseAccountID_Content, $schemeAgencyID?: undefined };
 
             type ClearingHouseAccountID_Content = token;
 
@@ -937,13 +937,13 @@ declare namespace sap {
 
             type CustomerTransactionDocumentFulfilmentBlockingReasonCode = token;
 
-            type CustomerTransactionDocumentServiceConfirmationCreationCode = CustomerTransactionDocumentServiceConfirmationCreationCode_Content;
+            type CustomerTransactionDocumentServiceConfirmationCreationCode = CustomerTransactionDocumentServiceConfirmationCreationCode_Content | { Content: CustomerTransactionDocumentServiceConfirmationCreationCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type CustomerTransactionDocumentServiceConfirmationCreationCode_Content = token;
 
             type DataCompletenessStatusCode = "1" | "2" | "3";
 
-            type DataOriginTypeCode = DataOriginTypeCode_Content;
+            type DataOriginTypeCode = DataOriginTypeCode_Content | { Content: DataOriginTypeCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type DataOriginTypeCode_Content = token;
 
@@ -955,19 +955,19 @@ declare namespace sap {
 
             type DecimalValue = decimal;
 
-            type Description = string;
+            type Description = string | { Content: string, $languageCode?: LanguageCode };
 
-            type DeviceID = DeviceID_Content;
+            type DeviceID = DeviceID_Content | { Content: DeviceID_Content, $schemeAgencyID?: undefined };
 
             type DeviceID_Content = token;
 
-            type DistributionChannelCode = DistributionChannelCode_Content;
+            type DistributionChannelCode = DistributionChannelCode_Content | { Content: DistributionChannelCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type DistributionChannelCode_Content = token;
 
             type DocumentCategoryCode = token;
 
-            type DocumentTypeCode = DocumentTypeCode_Content;
+            type DocumentTypeCode = DocumentTypeCode_Content | { Content: DocumentTypeCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined, $listAgencySchemeID?: undefined, $listAgencySchemeAgencyID?: AgencyIdentificationCode };
 
             type DocumentTypeCode_Content = token;
 
@@ -975,11 +975,11 @@ declare namespace sap {
 
             type Duration = duration;
 
-            type EXTENDED_Name = EXTENDED_Name_Content;
+            type EXTENDED_Name = EXTENDED_Name_Content | { Content: EXTENDED_Name_Content, $languageCode?: LanguageCode };
 
             type EXTENDED_Name_Content = string;
 
-            type EmailURI = anyURI;
+            type EmailURI = anyURI | { Content: anyURI, $schemeID?: undefined };
 
             interface ExchangeRate {
                 UnitCurrency: CurrencyCode;
@@ -992,11 +992,11 @@ declare namespace sap {
 
             type FloorID = token;
 
-            type FormOfAddressCode = FormOfAddressCode_Content;
+            type FormOfAddressCode = FormOfAddressCode_Content | { Content: FormOfAddressCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined, $listAgencySchemeID?: undefined, $listAgencySchemeAgencyID?: AgencyIdentificationCode };
 
             type FormOfAddressCode_Content = token;
 
-            type FulfilmentPartyCategoryCode = FulfilmentPartyCategoryCode_Content;
+            type FulfilmentPartyCategoryCode = FulfilmentPartyCategoryCode_Content | { Content: FulfilmentPartyCategoryCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type FulfilmentPartyCategoryCode_Content = token;
 
@@ -1015,7 +1015,7 @@ declare namespace sap {
 
             type Indicator = boolean;
 
-            type IndustrialSectorCode = IndustrialSectorCode_Content;
+            type IndustrialSectorCode = IndustrialSectorCode_Content | { Content: IndustrialSectorCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type IndustrialSectorCode_Content = token;
 
@@ -1037,21 +1037,21 @@ declare namespace sap {
 
             type LANGUAGEINDEPENDENT_Text = string;
 
-            type LOCALNORMALISED_DateTime = LOCALNORMALISED_DateTime_Content;
+            type LOCALNORMALISED_DateTime = LOCALNORMALISED_DateTime_Content | { Content: LOCALNORMALISED_DateTime_Content, $timeZoneCode: TimeZoneCode };
 
             type LOCALNORMALISED_DateTime_Content = dateTime;
 
-            type LONG_Name = LONG_Name_Content;
+            type LONG_Name = LONG_Name_Content | { Content: LONG_Name_Content, $languageCode?: LanguageCode };
 
             type LONG_Name_Content = string;
 
             type LegallyRequiredPhraseText = string;
 
-            type LocationID = LocationID_Content;
+            type LocationID = LocationID_Content | { Content: LocationID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined, $schemeAgencySchemeID?: undefined, $schemeAgencySchemeAgencyID?: AgencyIdentificationCode };
 
             type LocationID_Content = token;
 
-            type LocationInternalID = LocationInternalID_Content;
+            type LocationInternalID = LocationInternalID_Content | { Content: LocationInternalID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined };
 
             type LocationInternalID_Content = token;
 
@@ -1073,7 +1073,7 @@ declare namespace sap {
                 WebURI?: WebURI;
             }
 
-            type LogItemCategoryCode = LogItemCategoryCode_Content;
+            type LogItemCategoryCode = LogItemCategoryCode_Content | { Content: LogItemCategoryCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined, $listAgencySchemeID?: undefined, $listAgencySchemeAgencyID?: AgencyIdentificationCode };
 
             type LogItemCategoryCode_Content = token;
 
@@ -1100,33 +1100,33 @@ declare namespace sap {
 
             type LogItemTypeID = token;
 
-            type MEDIUM_Name = MEDIUM_Name_Content;
+            type MEDIUM_Name = MEDIUM_Name_Content | { Content: MEDIUM_Name_Content, $languageCode?: LanguageCode };
 
             type MEDIUM_Name_Content = string;
 
-            type MEDIUM_Note = MEDIUM_Note_Content;
+            type MEDIUM_Note = MEDIUM_Note_Content | { Content: MEDIUM_Note_Content, $languageCode?: LanguageCode };
 
             type MEDIUM_Note_Content = string;
 
             type MIMECode = token;
 
-            type Measure = Measure_Content;
+            type Measure = Measure_Content | { Content: Measure_Content, $unitCode: MeasureUnitCode };
 
             type Measure_Content = decimal;
 
             type MeasureUnitCode = token;
 
-            type NOCONVERSION_ProductID = NOCONVERSION_ProductID_Content;
+            type NOCONVERSION_ProductID = NOCONVERSION_ProductID_Content | { Content: NOCONVERSION_ProductID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined };
 
             type NOCONVERSION_ProductID_Content = token;
 
-            type Name = string;
+            type Name = string | { Content: string, $languageCode?: LanguageCode };
 
-            type NamespaceURI = anyURI;
+            type NamespaceURI = anyURI | { Content: anyURI, $schemeID?: undefined };
 
             type NumberValue = int;
 
-            type ObjectID = ObjectID_Content;
+            type ObjectID = ObjectID_Content | { Content: ObjectID_Content, $schemeID?: undefined, $schemeVersionID?: undefined, $schemeAgencyID?: undefined, $schemeAgencySchemeID?: undefined, $schemeAgencySchemeAgencyID?: AgencyIdentificationCode };
 
             type ObjectID_Content = token;
 
@@ -1150,13 +1150,13 @@ declare namespace sap {
 
             type PartialDeliveryControlCode = token;
 
-            type PartyID = PartyID_Content;
+            type PartyID = PartyID_Content | { Content: PartyID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined, $schemeAgencySchemeID?: undefined, $schemeAgencySchemeAgencyID?: AgencyIdentificationCode };
 
             type PartyID_Content = token;
 
             type PartyPartyID = token;
 
-            type PartyTaxID = PartyTaxID_Content;
+            type PartyTaxID = PartyTaxID_Content | { Content: PartyTaxID_Content, $schemeID: undefined };
 
             type PartyTaxID_Content = token;
 
@@ -1167,39 +1167,39 @@ declare namespace sap {
                 CreationDateTime?: GLOBAL_DateTime;
             }
 
-            type PaymentBlockingReasonCode = PaymentBlockingReasonCode_Content;
+            type PaymentBlockingReasonCode = PaymentBlockingReasonCode_Content | { Content: PaymentBlockingReasonCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type PaymentBlockingReasonCode_Content = token;
 
             type PaymentCardAddressVerificationResultCode = token;
 
-            type PaymentCardHolderAuthenticationID = PaymentCardHolderAuthenticationID_Content;
+            type PaymentCardHolderAuthenticationID = PaymentCardHolderAuthenticationID_Content | { Content: PaymentCardHolderAuthenticationID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined };
 
             type PaymentCardHolderAuthenticationID_Content = token;
 
-            type PaymentCardHolderAuthenticationResultCode = PaymentCardHolderAuthenticationResultCode_Content;
+            type PaymentCardHolderAuthenticationResultCode = PaymentCardHolderAuthenticationResultCode_Content | { Content: PaymentCardHolderAuthenticationResultCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type PaymentCardHolderAuthenticationResultCode_Content = token;
 
             type PaymentCardHolderAuthenticationTokenText = string;
 
-            type PaymentCardID = PaymentCardID_Content;
+            type PaymentCardID = PaymentCardID_Content | { Content: PaymentCardID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined };
 
             type PaymentCardID_Content = token;
 
-            type PaymentCardPaymentAuthorisationPartyID_V1 = PaymentCardPaymentAuthorisationPartyID_V1_Content;
+            type PaymentCardPaymentAuthorisationPartyID_V1 = PaymentCardPaymentAuthorisationPartyID_V1_Content | { Content: PaymentCardPaymentAuthorisationPartyID_V1_Content, $schemeID?: undefined, $schemeAgencyID?: undefined };
 
             type PaymentCardPaymentAuthorisationPartyID_V1_Content = token;
 
             type PaymentCardTransactionTypeCode = token;
 
-            type PaymentCardTypeCode = PaymentCardTypeCode_Content;
+            type PaymentCardTypeCode = PaymentCardTypeCode_Content | { Content: PaymentCardTypeCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type PaymentCardTypeCode_Content = token;
 
             type PaymentCardVerificationResultCode = token;
 
-            type PaymentCardVerificationValueAvailabilityCode = PaymentCardVerificationValueAvailabilityCode_Content;
+            type PaymentCardVerificationValueAvailabilityCode = PaymentCardVerificationValueAvailabilityCode_Content | { Content: PaymentCardVerificationValueAvailabilityCode_Content, $listVersionID?: undefined };
 
             type PaymentCardVerificationValueAvailabilityCode_Content = token;
 
@@ -1252,15 +1252,15 @@ declare namespace sap {
 
             type PriceSpecificationBaseCode = token;
 
-            type PriceSpecificationElementCategoryCode = PriceSpecificationElementCategoryCode_Content;
+            type PriceSpecificationElementCategoryCode = PriceSpecificationElementCategoryCode_Content | { Content: PriceSpecificationElementCategoryCode_Content, $listVersionID?: undefined };
 
             type PriceSpecificationElementCategoryCode_Content = token;
 
-            type PriceSpecificationElementPurposeCode = PriceSpecificationElementPurposeCode_Content;
+            type PriceSpecificationElementPurposeCode = PriceSpecificationElementPurposeCode_Content | { Content: PriceSpecificationElementPurposeCode_Content, $listVersionID?: undefined };
 
             type PriceSpecificationElementPurposeCode_Content = token;
 
-            type PriceSpecificationElementTypeCode = PriceSpecificationElementTypeCode_Content;
+            type PriceSpecificationElementTypeCode = PriceSpecificationElementTypeCode_Content | { Content: PriceSpecificationElementTypeCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type PriceSpecificationElementTypeCode_Content = token;
 
@@ -1270,25 +1270,25 @@ declare namespace sap {
 
             type ProcessingStatusCode = "1" | "2" | "3" | "4" | "5";
 
-            type ProductAvailabilityConfirmationCommitmentCode = ProductAvailabilityConfirmationCommitmentCode_Content;
+            type ProductAvailabilityConfirmationCommitmentCode = ProductAvailabilityConfirmationCommitmentCode_Content | { Content: ProductAvailabilityConfirmationCommitmentCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type ProductAvailabilityConfirmationCommitmentCode_Content = token;
 
             type ProductAvailabilityConfirmationStatusCode = "1" | "2" | "3" | "4";
 
-            type ProductID = ProductID_Content;
+            type ProductID = ProductID_Content | { Content: ProductID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined };
 
             type ProductID_Content = token;
 
             type ProductIdentifierTypeCode = token;
 
-            type ProductInternalID = ProductInternalID_Content;
+            type ProductInternalID = ProductInternalID_Content | { Content: ProductInternalID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined };
 
             type ProductInternalID_Content = token;
 
             type ProductPartyID = token;
 
-            type ProductStandardID = ProductStandardID_Content;
+            type ProductStandardID = ProductStandardID_Content | { Content: ProductStandardID_Content, $schemeID?: undefined, $schemeAgencyID: undefined };
 
             type ProductStandardID_Content = token;
 
@@ -1324,25 +1324,25 @@ declare namespace sap {
                 ExchangeRate?: ExchangeRate;
             }
 
-            type ProductTaxEventTypeCode = ProductTaxEventTypeCode_Content;
+            type ProductTaxEventTypeCode = ProductTaxEventTypeCode_Content | { Content: ProductTaxEventTypeCode_Content, $listID: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type ProductTaxEventTypeCode_Content = token;
 
-            type ProductTaxStandardClassificationCode = ProductTaxStandardClassificationCode_Content;
+            type ProductTaxStandardClassificationCode = ProductTaxStandardClassificationCode_Content | { Content: ProductTaxStandardClassificationCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type ProductTaxStandardClassificationCode_Content = token;
 
-            type ProductTaxStandardClassificationSystemCode = ProductTaxStandardClassificationSystemCode_Content;
+            type ProductTaxStandardClassificationSystemCode = ProductTaxStandardClassificationSystemCode_Content | { Content: ProductTaxStandardClassificationSystemCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type ProductTaxStandardClassificationSystemCode_Content = token;
 
-            type ProductTaxationCharacteristicsCode = ProductTaxationCharacteristicsCode_Content;
+            type ProductTaxationCharacteristicsCode = ProductTaxationCharacteristicsCode_Content | { Content: ProductTaxationCharacteristicsCode_Content, $listID: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type ProductTaxationCharacteristicsCode_Content = token;
 
             type ProductTypeCode = token;
 
-            type ProjectElementID = ProjectElementID_Content;
+            type ProjectElementID = ProjectElementID_Content | { Content: ProjectElementID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined };
 
             type ProjectElementID_Content = token;
 
@@ -1350,11 +1350,11 @@ declare namespace sap {
 
             type PropertyMovementDirectionCode = token;
 
-            type Quantity = Quantity_Content;
+            type Quantity = Quantity_Content | { Content: Quantity_Content, $unitCode?: MeasureUnitCode };
 
             type Quantity_Content = decimal;
 
-            type QuantityTypeCode = QuantityTypeCode_Content;
+            type QuantityTypeCode = QuantityTypeCode_Content | { Content: QuantityTypeCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined, $listAgencySchemeID?: undefined, $listAgencySchemeAgencyID?: AgencyIdentificationCode };
 
             type QuantityTypeCode_Content = token;
 
@@ -1373,17 +1373,17 @@ declare namespace sap {
                 BaseCurrencyCode?: CurrencyCode;
             }
 
-            type RegionCode = RegionCode_Content;
+            type RegionCode = RegionCode_Content | { Content: RegionCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined, $listAgencySchemeID?: undefined, $listAgencySchemeAgencyID?: AgencyIdentificationCode };
 
             type RegionCode_Content = token;
 
             type ReleaseStatusCode = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
 
-            type RequirementSpecificationID = RequirementSpecificationID_Content;
+            type RequirementSpecificationID = RequirementSpecificationID_Content | { Content: RequirementSpecificationID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined };
 
             type RequirementSpecificationID_Content = token;
 
-            type ResourceID = ResourceID_Content;
+            type ResourceID = ResourceID_Content | { Content: ResourceID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined };
 
             type ResourceID_Content = token;
 
@@ -1395,11 +1395,11 @@ declare namespace sap {
 
             type RoomID = token;
 
-            type SHORT_Description = SHORT_Description_Content;
+            type SHORT_Description = SHORT_Description_Content | { Content: SHORT_Description_Content, $languageCode?: LanguageCode };
 
             type SHORT_Description_Content = string;
 
-            type ServiceWorkingConditionsCode = ServiceWorkingConditionsCode_Content;
+            type ServiceWorkingConditionsCode = ServiceWorkingConditionsCode_Content | { Content: ServiceWorkingConditionsCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type ServiceWorkingConditionsCode_Content = token;
 
@@ -1412,7 +1412,7 @@ declare namespace sap {
                 LastChangeIdentityUUID?: UUID;
             }
 
-            type TaxDeductibilityCode = TaxDeductibilityCode_Content;
+            type TaxDeductibilityCode = TaxDeductibilityCode_Content | { Content: TaxDeductibilityCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type TaxDeductibilityCode_Content = token;
 
@@ -1425,41 +1425,41 @@ declare namespace sap {
                 ReasonCode?: TaxExemptionReasonCode;
             }
 
-            type TaxExemptionCertificateID = TaxExemptionCertificateID_Content;
+            type TaxExemptionCertificateID = TaxExemptionCertificateID_Content | { Content: TaxExemptionCertificateID_Content, $schemeAgencyID?: undefined };
 
             type TaxExemptionCertificateID_Content = token;
 
-            type TaxExemptionReasonCode = TaxExemptionReasonCode_Content;
+            type TaxExemptionReasonCode = TaxExemptionReasonCode_Content | { Content: TaxExemptionReasonCode_Content, $listID: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type TaxExemptionReasonCode_Content = token;
 
-            type TaxIdentificationNumberTypeCode = TaxIdentificationNumberTypeCode_Content;
+            type TaxIdentificationNumberTypeCode = TaxIdentificationNumberTypeCode_Content | { Content: TaxIdentificationNumberTypeCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type TaxIdentificationNumberTypeCode_Content = token;
 
-            type TaxJurisdictionCode = TaxJurisdictionCode_Content;
+            type TaxJurisdictionCode = TaxJurisdictionCode_Content | { Content: TaxJurisdictionCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type TaxJurisdictionCode_Content = token;
 
-            type TaxJurisdictionSubdivisionCode = TaxJurisdictionSubdivisionCode_Content;
+            type TaxJurisdictionSubdivisionCode = TaxJurisdictionSubdivisionCode_Content | { Content: TaxJurisdictionSubdivisionCode_Content, $listID?: undefined, $listAgencyID?: undefined };
 
             type TaxJurisdictionSubdivisionCode_Content = token;
 
-            type TaxJurisdictionSubdivisionTypeCode = TaxJurisdictionSubdivisionTypeCode_Content;
+            type TaxJurisdictionSubdivisionTypeCode = TaxJurisdictionSubdivisionTypeCode_Content | { Content: TaxJurisdictionSubdivisionTypeCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type TaxJurisdictionSubdivisionTypeCode_Content = token;
 
-            type TaxRateTypeCode = TaxRateTypeCode_Content;
+            type TaxRateTypeCode = TaxRateTypeCode_Content | { Content: TaxRateTypeCode_Content, $listID: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type TaxRateTypeCode_Content = token;
 
-            type TaxTypeCode = TaxTypeCode_Content;
+            type TaxTypeCode = TaxTypeCode_Content | { Content: TaxTypeCode_Content, $listID: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type TaxTypeCode_Content = token;
 
             type TaxationCharacteristicsDeterminationMethodCode = token;
 
-            type TextCollectionTextTypeCode = TextCollectionTextTypeCode_Content;
+            type TextCollectionTextTypeCode = TextCollectionTextTypeCode_Content | { Content: TextCollectionTextTypeCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined, $listAgencySchemeID?: undefined, $listAgencySchemeAgencyID?: AgencyIdentificationCode };
 
             type TextCollectionTextTypeCode_Content = token;
 
@@ -1472,9 +1472,9 @@ declare namespace sap {
                 EndDateTime?: LOCALNORMALISED_DateTime;
             }
 
-            type URI = anyURI;
+            type URI = anyURI | { Content: anyURI, $schemeID?: undefined };
 
-            type UUID = UUID_Content;
+            type UUID = UUID_Content | { Content: UUID_Content, $schemeID?: undefined, $schemeAgencyID?: undefined };
 
             type UUID_Content = token;
 
@@ -1500,15 +1500,15 @@ declare namespace sap {
                 IncomeTypeCode?: WithholdingTaxIncomeTypeCode;
             }
 
-            type WithholdingTaxEventTypeCode = WithholdingTaxEventTypeCode_Content;
+            type WithholdingTaxEventTypeCode = WithholdingTaxEventTypeCode_Content | { Content: WithholdingTaxEventTypeCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type WithholdingTaxEventTypeCode_Content = token;
 
-            type WithholdingTaxIncomeTypeCode = WithholdingTaxIncomeTypeCode_Content;
+            type WithholdingTaxIncomeTypeCode = WithholdingTaxIncomeTypeCode_Content | { Content: WithholdingTaxIncomeTypeCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type WithholdingTaxIncomeTypeCode_Content = token;
 
-            type WithholdingTaxationCharacteristicsCode = WithholdingTaxationCharacteristicsCode_Content;
+            type WithholdingTaxationCharacteristicsCode = WithholdingTaxationCharacteristicsCode_Content | { Content: WithholdingTaxationCharacteristicsCode_Content, $listID: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type WithholdingTaxationCharacteristicsCode_Content = token;
 
@@ -1516,7 +1516,7 @@ declare namespace sap {
 
             type LanguageCode = language;
 
-            type CroatiaPaymentMethodCode = CroatiaPaymentMethodCode_Content;
+            type CroatiaPaymentMethodCode = CroatiaPaymentMethodCode_Content | { Content: CroatiaPaymentMethodCode_Content, $listID?: undefined, $listVersionID?: undefined, $listAgencyID?: undefined };
 
             type CroatiaPaymentMethodCode_Content = token;
 

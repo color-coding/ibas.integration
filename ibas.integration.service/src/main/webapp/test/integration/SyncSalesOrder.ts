@@ -76,6 +76,12 @@ export default class SyncSalesOrder extends integration.action.IntegrationAction
                         },
                     }
                 ],
+                PaymentControl: {
+                    PaymentAmount: {
+                        Content: 1000,
+                        $currencyCode: "CNY"
+                    }
+                }
             },
             onCompleted: (opRslt) => {
                 try {

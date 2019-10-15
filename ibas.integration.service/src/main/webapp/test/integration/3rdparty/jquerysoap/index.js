@@ -618,6 +618,12 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 							// xml element
 							childObject = this.json2soap(y, params[y], prefix, soapObject);
 							if (childObject) {
+								if (childObject.children.length === 1
+									&& childObject.children[0].name === "Content"
+									&& Object.getOwnPropertyNames(childObject.attributes).length > 0) {
+									childObject.value = childObject.children[0].value;
+									childObject.children = [];
+								}
 								soapObject.appendChild(childObject);
 							}
 						}
