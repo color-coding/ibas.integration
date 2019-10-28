@@ -187,9 +187,7 @@ namespace integration {
             }
             /** 添加集成任务-动作事件 */
             private addIntegrationJobAction(): void {
-                this.editData.integrationJobActions.create();
-                // 仅显示没有标记删除的
-                this.view.showIntegrationJobActions(this.editData.integrationJobActions.filterDeleted());
+                this.chooseJobAction(undefined);
             }
             /** 删除集成任务-动作事件 */
             private removeIntegrationJobAction(items: bo.IntegrationJobAction[]): void {
@@ -262,7 +260,7 @@ namespace integration {
                 let criteria: ibas.ICriteria = new ibas.Criteria();
                 criteria.noChilds = true;
                 let condition: ibas.ICondition = criteria.conditions.create();
-                condition.alias =initialfantasy.bo.BOInformation.PROPERTY_CODE_NAME;
+                condition.alias = initialfantasy.bo.BOInformation.PROPERTY_CODE_NAME;
                 condition.value = ".";
                 condition.operation = ibas.emConditionOperation.NOT_CONTAIN;
                 ibas.servicesManager.runChooseService<initialfantasy.bo.IBOInformation>({
