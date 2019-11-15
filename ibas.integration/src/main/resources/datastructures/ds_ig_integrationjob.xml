@@ -41,7 +41,7 @@
     <Property Name="UpdateActionId" Description="更新动作标识" DataType="Alphanumeric" DataSubType="Default" EditSize="36" Mapped="UpdateActId"/>
     <Property Name="Relationship" Description="与上一个动作的关系" DataType="Alphanumeric" DataSubType="Default" EditSize="3" DeclaredType="emActionRelationship" Mapped="Relationship"/>
     <Property Name="ActionId" Description="任务项标识" DataType="Alphanumeric" DataSubType="Default" EditSize="36" Mapped="ActionId"/>
-    <Property Name="ActionName" Description="任务项名称" DataType="Alphanumeric" DataSubType="Default" EditSize="60" Mapped="ActionName"/>   
+    <Property Name="ActionName" Description="任务项名称" DataType="Alphanumeric" DataSubType="Default" EditSize="60" Mapped="ActionName"/>
     <Property Name="ActionRemark" Description="任务项说明" DataType="Alphanumeric" DataSubType="Default" EditSize="100" Mapped="ActionRemark"/>
   </Model>
   <Model Name="IntegrationJobActionCfg" Description="集成任务-动作-配置" ModelType="SimpleLine" Mapped="${Company}_IG_JOB2">
@@ -60,7 +60,7 @@
     <Property Name="UpdateActionId" Description="更新动作标识" DataType="Alphanumeric" DataSubType="Default" EditSize="36" Mapped="UpdateActId"/>
     <Property Name="ActionLineId" Description="动作行号" DataType="Numeric" DataSubType="Default" EditSize="8" Mapped="ActionLine"/>
     <Property Name="Key" Description="配置项健" DataType="Alphanumeric" DataSubType="Default" EditSize="60" Mapped="CfgKey"/>
-    <Property Name="Value" Description="配置项值" DataType="Alphanumeric" DataSubType="Default" EditSize="250" Mapped="CfgValue"/>    
+    <Property Name="Value" Description="配置项值" DataType="Alphanumeric" DataSubType="Default" EditSize="600" Mapped="CfgValue"/>
     <Property Name="Remark" Description="配置说明" DataType="Alphanumeric" DataSubType="Default" EditSize="100" Mapped="CfgRemark"/>
   </Model>
   <BusinessObject MappedModel="IntegrationJob" ShortName="${Company}_IG_INTERGRATIONJOB">

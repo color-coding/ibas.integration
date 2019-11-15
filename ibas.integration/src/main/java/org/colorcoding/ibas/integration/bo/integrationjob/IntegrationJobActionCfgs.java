@@ -93,7 +93,7 @@ public class IntegrationJobActionCfgs extends BusinessObjects<IIntegrationJobAct
 	}
 
 	@Override
-	public void onParentPropertyChanged(PropertyChangeEvent evt) {
+	protected void onParentPropertyChanged(PropertyChangeEvent evt) {
 		super.onParentPropertyChanged(evt);
 		if (evt.getPropertyName().equals(IntegrationJobAction.PROPERTY_LINEID.getName())) {
 			for (IIntegrationJobActionCfg item : this) {

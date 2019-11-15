@@ -26,7 +26,7 @@ namespace integration {
                         columns: [
                             new sap.extension.table.Column("", {
                                 label: ibas.i18n.prop("bo_action_id"),
-                                width: "16rem",
+                                width: "8rem",
                                 template: new sap.extension.m.Text("", {
                                 }).bindProperty("bindingValue", {
                                     path: "id",
@@ -35,7 +35,7 @@ namespace integration {
                             }),
                             new sap.extension.table.Column("", {
                                 label: ibas.i18n.prop("bo_action_name"),
-                                width: "12rem",
+                                width: "16rem",
                                 template: new sap.extension.m.Text("", {
                                 }).bindProperty("bindingValue", {
                                     path: "name",
@@ -52,22 +52,6 @@ namespace integration {
                                 })
                             }),
                         ],
-                        nextDataSet(event: sap.ui.base.Event): void {
-                            // 查询下一个数据集
-                            let data: any = event.getParameter("data");
-                            if (ibas.objects.isNull(data)) {
-                                return;
-                            }
-                            if (ibas.objects.isNull(that.lastCriteria)) {
-                                return;
-                            }
-                            let criteria: ibas.ICriteria = that.lastCriteria.next(data);
-                            if (ibas.objects.isNull(criteria)) {
-                                return;
-                            }
-                            ibas.logger.log(ibas.emMessageLevel.DEBUG, "result: {0}", criteria.toString());
-                            that.fireViewEvents(that.fetchDataEvent, criteria);
-                        }
                     });
                     return new sap.extension.m.Dialog("", {
                         title: this.title,
@@ -115,7 +99,6 @@ namespace integration {
                     super.query(criteria);
                     // 清除历史数据
                     if (this.isDisplayed) {
-                        this.table.setBusy(true);
                         this.table.setFirstVisibleRow(0);
                         this.table.setModel(null);
                     }

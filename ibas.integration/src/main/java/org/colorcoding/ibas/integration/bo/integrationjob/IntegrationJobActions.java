@@ -76,7 +76,7 @@ public class IntegrationJobActions extends BusinessObjects<IIntegrationJobAction
 	}
 
 	@Override
-	public void onParentPropertyChanged(PropertyChangeEvent evt) {
+	protected void onParentPropertyChanged(PropertyChangeEvent evt) {
 		super.onParentPropertyChanged(evt);
 	}
 }

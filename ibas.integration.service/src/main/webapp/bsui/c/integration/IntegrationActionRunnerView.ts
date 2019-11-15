@@ -242,7 +242,7 @@ namespace integration {
                         }
                         let panel: sap.m.Panel = new sap.m.Panel("", {
                             expandable: true,
-                            expanded: false,
+                            expanded: true,
                             width: "auto",
                             backgroundDesign: sap.m.BackgroundDesign.Translucent,
                             accessibleRole: sap.m.PanelAccessibleRole.Form,
