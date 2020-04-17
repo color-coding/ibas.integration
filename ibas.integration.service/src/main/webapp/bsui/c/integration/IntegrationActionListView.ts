@@ -38,7 +38,8 @@ namespace integration {
                                 }).bindProperty("bindingValue", {
                                     path: "id",
                                     type: new sap.extension.data.Alphanumeric()
-                                })
+                                }),
+                                sortProperty: "id",
                             }),
                             new sap.extension.table.Column("", {
                                 label: ibas.i18n.prop("bo_action_name"),
@@ -47,7 +48,9 @@ namespace integration {
                                 }).bindProperty("bindingValue", {
                                     path: "name",
                                     type: new sap.extension.data.Alphanumeric()
-                                })
+                                }),
+                                filterProperty: "name",
+                                sortProperty: "name",
                             }),
                             new sap.extension.table.Column("", {
                                 label: ibas.i18n.prop("bo_action_group"),
@@ -74,7 +77,9 @@ namespace integration {
                                 }).bindProperty("bindingValue", {
                                     path: "remark",
                                     type: new sap.extension.data.Alphanumeric()
-                                })
+                                }),
+                                filterProperty: "remark",
+                                sortProperty: "remark",
                             }),
                         ]
                     });
