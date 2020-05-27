@@ -7,6 +7,8 @@
  */
 namespace integration {
     export namespace app {
+        /** 配置项目-自动运行默认项 */
+        const CONFIG_ITEM_JOB_SCHEDULER_DEFAULT_ACTION: string = "jobDefaultAction";
         /** 集成任务调度者 */
         export class IntegrationJobSchedulerApp extends ibas.ResidentApplication<IIntegrationJobSchedulerView> {
             /** 应用标识 */
@@ -94,8 +96,11 @@ namespace integration {
                                 }
                             };
                             let builder: ibas.StringBuilder = new ibas.StringBuilder();
+                            builder.append("<p><strong>");
+                            builder.append(ibas.i18n.prop("integration_app_integrationjob_list"));
+                            builder.append("</strong></p>");
                             builder.append("\n");
-                            builder.append("(");
+                            builder.append("<ul>");
                             for (let item of opRslt.resultObjects) {
                                 if (item.integrationJobActions.length === 0) {
                                     continue;
@@ -104,19 +109,25 @@ namespace integration {
                                 task.activated = true;
                                 task.setLogger(logger);
                                 jobs.add(task);
-                                if (builder.length > 2) {
-                                    builder.append(",");
-                                }
+                                builder.append("<li>");
+                                builder.append(task.job.objectKey);
+                                builder.append(" - ");
                                 builder.append(task.job.name);
+                                builder.append("</li>");
                             }
-                            builder.append(")");
+                            builder.append("</ul>");
                             that.jobs = jobs;
                             if (that.jobs.length > 0) {
                                 that.messages({
                                     title: that.description,
                                     type: ibas.emMessageType.QUESTION,
-                                    actions: [ibas.emMessageAction.YES, ibas.emMessageAction.NO],
-                                    message: ibas.i18n.prop("integration_running_background_integrationjob", that.jobs.length) + builder.toString(),
+                                    actions: [
+                                        ibas.emMessageAction.YES, ibas.emMessageAction.NO
+                                    ],
+                                    initialFocus: config.get(CONFIG_ITEM_JOB_SCHEDULER_DEFAULT_ACTION, ibas.emMessageAction.NO),
+                                    message: ibas.i18n.prop("integration_running_background_integrationjob", that.jobs.length),
+                                    details: builder.toString(),
+                                    latencyTime: 30,
                                     onCompleted(action: ibas.emMessageAction): void {
                                         if (action !== ibas.emMessageAction.YES) {
                                             return;
