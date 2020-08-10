@@ -10,7 +10,7 @@ namespace integration {
         /** 配置项目-自动运行默认项 */
         const CONFIG_ITEM_JOB_SCHEDULER_DEFAULT_ACTION: string = "jobDefaultAction";
         /** 集成任务调度者 */
-        export class IntegrationJobSchedulerApp extends ibas.ResidentApplication<IIntegrationJobSchedulerView> {
+        export class IntegrationJobSchedulerApp extends ibas.Application<IIntegrationJobSchedulerView> {
             /** 应用标识 */
             static APPLICATION_ID: string = "c2f09054-8692-47ee-b3ec-099d313421c3";
             /** 应用名称 */
@@ -32,17 +32,6 @@ namespace integration {
             /** 视图显示后 */
             protected viewShowed(): void {
                 // 视图加载完成
-                this.view.showJobs(this.jobs);
-            }
-            /** 工具条显示后 */
-            protected barShowed(): void {
-                // 10秒后检查，任务
-                setTimeout(() => this.schedule(), 10000);
-            }
-            private activated: boolean = true;
-            private jobs: ibas.ArrayList<TaskAction>;
-            private schedule(auto: boolean = true): void {
-                this.busy(true);
                 let criteria: ibas.ICriteria = new ibas.Criteria();
                 let condition: ibas.ICondition = criteria.conditions.create();
                 condition.alias = bo.IntegrationJob.PROPERTY_ACTIVATED_NAME;
@@ -54,129 +43,101 @@ namespace integration {
                 condition.alias = bo.IntegrationJob.PROPERTY_FREQUENCY_NAME;
                 condition.operation = ibas.emConditionOperation.GRATER_THAN;
                 condition.value = "0";
-                let that: this = this;
                 let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
                 boRepository.fetchIntegrationJob({
                     criteria: criteria,
-                    onCompleted(opRslt: ibas.IOperationResult<bo.IntegrationJob>): void {
+                    onCompleted: (opRslt) => {
                         try {
-                            that.busy(false);
                             if (opRslt.resultCode !== 0) {
                                 throw new Error(opRslt.message);
                             }
+                            let that: this = this;
                             let jobs: ibas.ArrayList<TaskAction> = new ibas.ArrayList<TaskAction>();
-                            let logger: ibas.ILogger = {
-                                level: ibas.config.get(ibas.CONFIG_ITEM_DEBUG_MODE) === true ? ibas.emMessageLevel.DEBUG : ibas.emMessageLevel.INFO,
-                                log(): void {
-                                    let tmpArgs: Array<any> = new Array();
-                                    for (let item of arguments) {
-                                        tmpArgs.push(item);
-                                    }
-                                    // 控制台日志
-                                    ibas.logger.log.apply(ibas.logger, tmpArgs);
-                                    // 界面日志
-                                    let level: number;
-                                    if (typeof tmpArgs[0] === "number" && tmpArgs.length > 1) {
-                                        level = tmpArgs[0];
-                                        tmpArgs = tmpArgs.slice(1);
-                                    } else {
-                                        level = ibas.emMessageLevel.INFO;
-                                    }
-                                    if (level > this.level) {
-                                        // 超过日志输出的级别
-                                        return;
-                                    }
-                                    let type: ibas.emMessageType = bo.DataConverter.toMessageType(level);
-                                    let message: string = ibas.strings.format(tmpArgs[0], tmpArgs.slice(1));
-                                    that.proceeding(type, message);
-                                    if (level === ibas.emMessageLevel.FATAL) {
-                                        // 严重错误，显示对话框
-                                        that.messages(ibas.emMessageType.ERROR, message);
-                                    }
-                                }
-                            };
-                            let builder: ibas.StringBuilder = new ibas.StringBuilder();
-                            builder.append("<p><strong>");
-                            builder.append(ibas.i18n.prop("integration_app_integrationjob_list"));
-                            builder.append("</strong></p>");
-                            builder.append("\n");
-                            builder.append("<ul>");
                             for (let item of opRslt.resultObjects) {
                                 if (item.integrationJobActions.length === 0) {
                                     continue;
                                 }
                                 let task: TaskAction = new TaskAction(item);
-                                task.activated = true;
-                                task.setLogger(logger);
-                                jobs.add(task);
-                                builder.append("<li>");
-                                builder.append(task.job.objectKey);
-                                builder.append(" - ");
-                                builder.append(task.job.name);
-                                builder.append("</li>");
-                            }
-                            builder.append("</ul>");
-                            that.jobs = jobs;
-                            if (that.jobs.length > 0) {
-                                that.messages({
-                                    title: that.description,
-                                    type: ibas.emMessageType.QUESTION,
-                                    actions: [
-                                        ibas.emMessageAction.YES, ibas.emMessageAction.NO
-                                    ],
-                                    initialFocus: config.get(CONFIG_ITEM_JOB_SCHEDULER_DEFAULT_ACTION, ibas.emMessageAction.NO),
-                                    message: ibas.i18n.prop("integration_running_background_integrationjob", that.jobs.length),
-                                    details: builder.toString(),
-                                    latencyTime: 30,
-                                    onCompleted(action: ibas.emMessageAction): void {
-                                        if (action !== ibas.emMessageAction.YES) {
+                                task.setLogger({
+                                    level: ibas.config.get(ibas.CONFIG_ITEM_DEBUG_MODE) === true ? ibas.emMessageLevel.DEBUG : ibas.emMessageLevel.INFO,
+                                    log(): void {
+                                        let tmpArgs: Array<any> = new Array();
+                                        for (let item of arguments) {
+                                            tmpArgs.push(item);
+                                        }
+                                        // 界面日志
+                                        let level: number;
+                                        if (typeof tmpArgs[0] === "number" && tmpArgs.length > 1) {
+                                            level = tmpArgs[0];
+                                            tmpArgs = tmpArgs.slice(1);
+                                        } else {
+                                            level = ibas.emMessageLevel.INFO;
+                                        }
+                                        if (level > this.level) {
+                                            // 超过日志输出的级别
                                             return;
                                         }
-                                        that.view.showJobs(that.jobs);
-                                        setInterval(function (): void {
-                                            if (!that.activated) {
-                                                return;
-                                            }
-                                            for (let item of that.jobs) {
-                                                item.do();
-                                            }
-                                        }, 10000);
+                                        that.view.showLogs(bo.DataConverter.toMessageType(level), ibas.strings.format(tmpArgs[0], tmpArgs.slice(1)));
                                     }
                                 });
-                            } else {
-                                if (auto) {
-                                    ibas.logger.log(ibas.emMessageLevel.INFO, ibas.i18n.prop("integration_not_found_user_integrationjob"));
-                                } else {
-                                    that.proceeding(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_not_found_user_integrationjob"));
-                                }
+                                task.activated = true;
+                                jobs.add(task);
                             }
+                            this.jobs = jobs;
+                            this.view.showJobs(this.jobs);
                         } catch (error) {
-                            that.messages(error);
+                            this.messages(error);
                         }
                     }
                 });
             }
+            /** 工具条显示后 */
+            public run(): void {
+                super.run();
+            }
+            private jobs: ibas.ArrayList<TaskAction>;
+            private jobHandler: number;
             private reset(): void {
-                this.schedule(false);
+                if (this.jobHandler > 0) {
+                    clearInterval(this.jobHandler);
+                }
+                this.viewShowed();
             }
             private suspend(suspend: boolean): void {
-                if (suspend === true) {
-                    this.activated = false;
-                    this.proceeding(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_background_integrationjob_stop"));
+                if (suspend === false) {
+                    if (!(this.jobHandler > 0)) {
+                        this.jobHandler = setInterval(() => {
+                            for (let item of this.jobs) {
+                                item.do();
+                            }
+                            this.view.showStatus(undefined);
+                        }, 10000);
+                    }
                 } else {
-                    this.activated = true;
-                    this.proceeding(ibas.emMessageType.SUCCESS, ibas.i18n.prop("integration_background_integrationjob_running"));
+                    if (this.jobHandler > 0) {
+                        clearInterval(this.jobHandler);
+                    }
                 }
+            }
+            public close(): void {
+                if (this.jobHandler > 0) {
+                    clearInterval(this.jobHandler);
+                }
+                super.close();
             }
         }
         /** 视图-集成任务调度者 */
-        export interface IIntegrationJobSchedulerView extends ibas.IResidentView {
+        export interface IIntegrationJobSchedulerView extends ibas.IView {
             /** 显示任务 */
             showJobs(datas: TaskAction[]): void;
             /** 暂停运行事件 */
             suspendEvent: Function;
             /** 重置事件 */
             resetEvent: Function;
+            /** 显示日志 */
+            showLogs(type: ibas.emMessageType, content: string): void;
+            /** 显示状态 */
+            showStatus(content: string): void;
         }
         /** 任务动作 */
         export class TaskAction extends ibas.Action {
@@ -185,9 +146,26 @@ namespace integration {
                 if (!ibas.objects.isNull(job)) {
                     this.job = job;
                     this.id = ibas.strings.valueOf(this.job.objectKey);
-                    this.name = ibas.strings.format("{0}-{1}", this.job.objectKey, this.job.name);
+                    this.name = ibas.strings.format("{0} - {1}", this.job.objectKey, this.job.name);
+                    let builder: ibas.StringBuilder = new ibas.StringBuilder();
+                    for (let index: number = 0; index < this.job.integrationJobActions.length; index++) {
+                        let item: bo.IntegrationJobAction = this.job.integrationJobActions[index];
+                        if (builder.length > 0) {
+                            builder.append("; ");
+                        }
+                        builder.append(String.fromCharCode(index + 97));
+                        builder.append(".");
+                        if (!ibas.strings.isEmpty(item.actionRemark)) {
+                            builder.append(item.actionRemark);
+                        } else {
+                            builder.append(item.actionName);
+                        }
+                    }
+                    this.description = builder.toString();
                 }
             }
+            /** 描述 */
+            description: string;
             /** 工作 */
             job: bo.IntegrationJob;
             /** 上次运行时间 */
@@ -231,6 +209,7 @@ namespace integration {
                                 // 集成任务不存在，或已被修改
                                 this.log(ibas.emMessageLevel.FATAL, ibas.i18n.prop("integration_background_integrationjob_updated"));
                                 this.activated = false;
+                                this.done();
                             } else {
                                 super.do();
                             }
@@ -266,6 +245,7 @@ namespace integration {
                                         onError(error: Error): void {
                                             that.activated = false;
                                             that.log(ibas.emMessageLevel.ERROR, error.message);
+                                            that.done();
                                         },
                                         onCompleted(action: ibas.Action): void {
                                             if (ibas.objects.isNull(that.actions)) {
@@ -285,6 +265,7 @@ namespace integration {
                                 // 出错，不在运行
                                 that.activated = false;
                                 that.log(ibas.emMessageLevel.ERROR, error.message);
+                                that.done();
                             }
                         }
                     });

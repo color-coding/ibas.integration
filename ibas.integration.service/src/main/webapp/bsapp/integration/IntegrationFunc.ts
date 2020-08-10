@@ -28,5 +28,26 @@ namespace integration {
                 return app;
             }
         }
+
+        export class IntegrationSchedulerFunc extends ibas.ModuleFunction {
+
+            /** 功能标识 */
+            static FUNCTION_ID = "d624c421-a9d8-42df-97fb-02f65de5995c";
+            /** 功能名称 */
+            static FUNCTION_NAME = "integration_func_integrationjob_scheduler";
+            /** 构造函数 */
+            constructor() {
+                super();
+                this.id = IntegrationSchedulerFunc.FUNCTION_ID;
+                this.name = IntegrationSchedulerFunc.FUNCTION_NAME;
+                this.description = ibas.i18n.prop(this.name);
+            }
+            /** 默认功能 */
+            default(): ibas.IApplication<ibas.IView> {
+                let app: IntegrationJobSchedulerApp = new IntegrationJobSchedulerApp();
+                app.navigation = this.navigation;
+                return app;
+            }
+        }
     }
 }

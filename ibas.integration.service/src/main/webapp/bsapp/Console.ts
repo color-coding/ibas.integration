@@ -31,6 +31,7 @@ namespace integration {
             protected registers(): void {
                 // 注册功能
                 this.register(new IntegrationJobFunc());
+                this.register(new IntegrationSchedulerFunc());
                 if (ibas.variablesManager.getValue(ibas.VARIABLE_NAME_USER_SUPER) === true) {
                     // 仅管理员加载
                     this.register(new IntegrationActionFunc());
@@ -41,7 +42,6 @@ namespace integration {
                 this.register(new IntegrationJobAppMapping());
                 this.register(new IntegrationJobServiceMapping());
                 // 注册常驻应用
-                this.register(new IntegrationJobSchedulerApp());
             }
             /** 运行 */
             run(): void {

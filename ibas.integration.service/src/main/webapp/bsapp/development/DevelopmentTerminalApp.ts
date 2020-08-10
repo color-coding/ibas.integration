@@ -47,7 +47,7 @@ namespace integration {
                 let that: this = this;
                 let boRepository: bo.BORepositoryIntegrationDevelopment = new bo.BORepositoryIntegrationDevelopment();
                 boRepository.loadActions({
-                    url: url,
+                    url: ibas.strings.format("{0}{1}_={2}", url, url.indexOf("?") > 0 ? "&" : "?", ibas.dates.now().getTime()),
                     onCompleted(opRslt: ibas.IOperationResult<bo.Action>): void {
                         try {
                             that.busy(false);
