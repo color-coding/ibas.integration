@@ -38,6 +38,7 @@ import org.colorcoding.ibas.integration.MyConfiguration;
 import org.colorcoding.ibas.integration.action.BOPropertyValue;
 import org.colorcoding.ibas.integration.action.BOStatusAction;
 import org.colorcoding.ibas.integration.bo.integration.Action;
+import org.colorcoding.ibas.integration.bo.integration.ActionPackage;
 import org.colorcoding.ibas.integration.repository.FileRepositoryAction;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -94,7 +95,7 @@ public class ActionService extends FileRepositoryAction {
 	@Path("uploadPackage")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public OperationResult<Action> uploadPackage(@FormDataParam("file") InputStream fileStream,
+	public OperationResult<ActionPackage> uploadPackage(@FormDataParam("file") InputStream fileStream,
 			@FormDataParam("file") FormDataContentDisposition fileDisposition, @QueryParam("token") String token) {
 		try {
 			FileData fileData = new FileData();
@@ -110,7 +111,7 @@ public class ActionService extends FileRepositoryAction {
 			if (fileData == null) {
 				throw new Exception(I18N.prop("msg_ig_package_parsing_failure"));
 			}
-			return this.registerAction(new File(fileData.getLocation()), token);
+			return this.registerPackage(new File(fileData.getLocation()), token);
 		} catch (Exception e) {
 			return new OperationResult<>(e);
 		}
@@ -129,6 +130,14 @@ public class ActionService extends FileRepositoryAction {
 	@Path("deletePackage")
 	public OperationMessage deletePackage(@QueryParam("group") String group, @QueryParam("token") String token) {
 		return super.deletePackage(group, token);
+	}
+
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("fetchPackage")
+	public OperationResult<ActionPackage> fetchPackage(Criteria criteria, @QueryParam("token") String token) {
+		return super.fetchPackage(criteria, token);
 	}
 
 	// --------------------------------------------------------------------------------------------//

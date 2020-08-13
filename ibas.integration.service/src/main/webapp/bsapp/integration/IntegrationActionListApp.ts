@@ -26,23 +26,24 @@ namespace integration {
             protected registerView(): void {
                 super.registerView();
                 // 其他事件
-                this.view.fetchDataEvent = this.fetchData;
-                this.view.deleteDataEvent = this.deleteData;
-                this.view.uploadActionPackageEvent = this.uploadActionPackage;
-                this.view.viewCodeEvent = this.viewCode;
+                this.view.fetchPackageEvent = this.fetchPackage;
+                this.view.deletePackageEvent = this.deletePackage;
+                this.view.uploadPackageEvent = this.uploadPackage;
+                this.view.viewActionEvent = this.viewAction;
             }
             /** 视图显示后 */
             protected viewShowed(): void {
                 // 视图加载完成
+                this.fetchPackage(new ibas.Criteria());
             }
             /** 查询数据 */
-            protected fetchData(criteria: ibas.ICriteria): void {
+            protected fetchPackage(criteria: ibas.ICriteria): void {
                 this.busy(true);
                 let that: this = this;
                 let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
-                boRepository.fetchAction({
+                boRepository.fetchActionPackage({
                     criteria: criteria,
-                    onCompleted(opRslt: ibas.IOperationResult<bo.Action>): void {
+                    onCompleted(opRslt: ibas.IOperationResult<bo.ActionPackage>): void {
                         try {
                             that.busy(false);
                             if (opRslt.resultCode !== 0) {
@@ -51,7 +52,7 @@ namespace integration {
                             if (opRslt.resultObjects.length === 0) {
                                 that.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_data_fetched_none"));
                             }
-                            that.view.showData(opRslt.resultObjects);
+                            that.view.showPackages(opRslt.resultObjects);
                         } catch (error) {
                             that.messages(error);
                         }
@@ -60,13 +61,13 @@ namespace integration {
                 this.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_fetching_data"));
             }
             /** 上传程序包 */
-            protected uploadActionPackage(formData: FormData): void {
+            protected uploadPackage(formData: FormData): void {
                 this.busy(true);
                 let that: this = this;
                 let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
                 boRepository.uploadActionPackage({
                     fileData: formData,
-                    onCompleted(opRslt: ibas.IOperationResult<bo.Action>): void {
+                    onCompleted(opRslt: ibas.IOperationResult<bo.ActionPackage>): void {
                         try {
                             that.busy(false);
                             if (opRslt.resultCode !== 0) {
@@ -75,7 +76,8 @@ namespace integration {
                             if (opRslt.resultObjects.length === 0) {
                                 that.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_data_fetched_none"));
                             }
-                            that.view.showData(opRslt.resultObjects);
+                            that.messages(ibas.emMessageType.SUCCESS, ibas.i18n.prop("integration_upload_package") + ibas.i18n.prop("shell_sucessful"));
+                            that.view.showPackages(opRslt.resultObjects);
                         } catch (error) {
                             that.messages(error);
                         }
@@ -83,58 +85,20 @@ namespace integration {
                 });
                 this.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_uploading_file"));
             }
-            protected viewCode(data: bo.Action): void {
-                if (ibas.objects.isNull(data)) {
-                    this.messages(ibas.emMessageType.WARNING, ibas.i18n.prop("shell_please_chooose_data",
-                        ibas.i18n.prop("shell_data_view")
-                    ));
-                    return;
-                }
-                this.busy(true);
-                let that: this = this;
-                let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
-                boRepository.downloadCode({
-                    action: data,
-                    onCompleted(opRslt: ibas.IOperationResult<Blob>): void {
-                        try {
-                            that.busy(false);
-                            if (opRslt.resultCode !== 0) {
-                                throw new Error(opRslt.message);
-                            }
-                            that.view.showCode(opRslt.resultObjects.firstOrDefault());
-                        } catch (error) {
-                            that.messages(error);
-                        }
-                    }
-                });
-                this.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_downloading_file"));
-            }
             /** 删除数据，参数：目标数据集合 */
-            protected deleteData(data: bo.Action | bo.Action[]): void {
+            protected deletePackage(data: bo.ActionPackage | bo.ActionPackage[]): void {
                 // 检查目标数据
                 let beDeleteds: ibas.ArrayList<string> = new ibas.ArrayList<string>();
-                if (data instanceof Array) {
-                    for (let item of data) {
-                        let value: string = item.group;
-                        if (ibas.strings.isEmpty(value)) {
-                            continue;
-                        }
-                        if (value.indexOf("/") > 0) {
-                            value = value.substring(value.lastIndexOf("/") + 1);
-                        }
-                        if (!beDeleteds.contain(value)) {
-                            beDeleteds.add(value);
-                        }
+                for (let item of ibas.arrays.create(data)) {
+                    let value: string = item.id;
+                    if (ibas.strings.isEmpty(value)) {
+                        continue;
                     }
-                } else if (!ibas.objects.isNull(data)) {
-                    let value: string = data.group;
-                    if (!ibas.strings.isEmpty(value)) {
-                        if (value.indexOf("/") > 0) {
-                            value = value.substring(value.lastIndexOf("/") + 1);
-                        }
-                        if (!beDeleteds.contain(value)) {
-                            beDeleteds.add(value);
-                        }
+                    if (value.indexOf("/") > 0) {
+                        value = value.substring(value.lastIndexOf("/") + 1);
+                    }
+                    if (!beDeleteds.contain(value)) {
+                        beDeleteds.add(value);
                     }
                 }
                 // 没有选择删除的对象
@@ -184,19 +148,30 @@ namespace integration {
                     }
                 });
             }
+            protected viewAction(data: bo.Action): void {
+                if (ibas.objects.isNull(data)) {
+                    this.messages(ibas.emMessageType.WARNING, ibas.i18n.prop("shell_please_chooose_data",
+                        ibas.i18n.prop("shell_data_view")
+                    ));
+                    return;
+                }
+                this.view.showAction(data);
+            }
         }
         /** 视图-集成任务 */
-        export interface IIntegrationActionListView extends ibas.IBOQueryView {
+        export interface IIntegrationActionListView extends ibas.IView {
+            /** 查询包 */
+            fetchPackageEvent: Function;
             /** 上传包 */
-            uploadActionPackageEvent: Function;
+            uploadPackageEvent: Function;
             /** 删除数据事件，参数：删除对象集合 */
-            deleteDataEvent: Function;
-            /** 查看代码 */
-            viewCodeEvent: Function;
-            /** 显示数据 */
-            showData(datas: bo.Action[]): void;
-            /** 显示代码 */
-            showCode(code: Blob): void;
+            deletePackageEvent: Function;
+            /** 显示包 */
+            showPackages(datas: bo.ActionPackage[]): void;
+            /** 查看动作 */
+            viewActionEvent: Function;
+            /** 显示动作 */
+            showAction(action: bo.Action): void;
         }
     }
 }

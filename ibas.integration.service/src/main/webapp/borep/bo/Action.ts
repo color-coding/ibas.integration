@@ -58,5 +58,17 @@ namespace integration {
             /** 说明 */
             remark: string;
         }
+        /** 集成-动作 */
+        export class ActionPackage implements IActionPackage {
+            constructor() {
+                this.actions = new ibas.ArrayList<Action>();
+            }
+            /** 标识 */
+            id: string;
+            /** 时间 */
+            dateTime: Date;
+            /** 动作 */
+            actions: Action[];
+        }
     }
 }

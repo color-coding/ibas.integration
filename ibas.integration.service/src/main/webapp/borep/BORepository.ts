@@ -162,13 +162,31 @@ namespace integration {
              * 上传程序包
              * @param caller 调用者
              */
-            uploadActionPackage(caller: ibas.IUploadFileCaller<bo.Action>): void {
+            uploadActionPackage(caller: ibas.IUploadFileCaller<bo.ActionPackage>): void {
                 if (!this.address.endsWith("/")) { this.address += "/"; }
                 let fileRepository: ibas.FileRepositoryUploadAjax = new ibas.FileRepositoryUploadAjax();
                 fileRepository.address = this.address.replace("/services/rest/data/", "/services/rest/action/");
                 fileRepository.token = this.token;
                 fileRepository.converter = this.createConverter();
                 fileRepository.upload("uploadPackage", caller);
+            }
+            /**
+             * 查询程序包
+             * @param fetcher 调用者
+             */
+            fetchActionPackage(fetcher: ibas.IFetchCaller<bo.ActionPackage>): void {
+                if (!this.address.endsWith("/")) { this.address += "/"; }
+                let boRepository: ibas.BORepositoryAjax = new ibas.BORepositoryAjax();
+                boRepository.address = this.address.replace("/services/rest/data/", "/services/rest/action/");
+                boRepository.token = this.token;
+                boRepository.converter = this.createConverter();
+                let method: string = ibas.strings.format("fetchPackage?token={0}", this.token);
+                if (ibas.objects.isNull(fetcher.criteria)) {
+                    fetcher.criteria = new ibas.Criteria();
+                }
+                boRepository.callRemoteMethod(method, JSON.stringify(boRepository.converter.convert(fetcher.criteria, method)), (opRslt) => {
+                    fetcher.onCompleted.call(ibas.objects.isNull(fetcher.caller) ? fetcher : fetcher.caller, opRslt);
+                });
             }
             /**
              * 获取动作地址

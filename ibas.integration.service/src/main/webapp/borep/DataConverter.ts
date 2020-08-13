@@ -18,16 +18,30 @@ namespace integration {
                     newData.activated = data.activated;
                     newData.path = data.path;
                     newData.remark = data.remark;
-                    if (!ibas.objects.isNull(data.configs)) {
+                    if (data.configs instanceof Array) {
                         for (let item of data.configs) {
-                            let newItem: bo.ActionConfig = new bo.ActionConfig;
-                            newItem.key = item.key;
-                            newItem.value = item.value;
-                            newItem.remark = item.remark;
-                            newData.configs.add(newItem);
+                            item.type = bo.ActionConfig.name;
+                            newData.configs.add(this.parsing(item, sign));
                         }
                     }
                     newData.dependencies = data.dependencies;
+                    return newData;
+                } else if (data.type === bo.ActionConfig.name) {
+                    let newData: bo.ActionConfig = new bo.ActionConfig;
+                    newData.key = data.key;
+                    newData.value = data.value;
+                    newData.remark = data.remark;
+                    return newData;
+                } else if (data.type === bo.ActionPackage.name) {
+                    let newData: bo.ActionPackage = new bo.ActionPackage();
+                    newData.id = data.id;
+                    newData.dateTime = ibas.dates.valueOf(data.dateTime);
+                    if (!ibas.objects.isNull(data.actions)) {
+                        for (let item of data.actions) {
+                            item.type = bo.Action.name;
+                            newData.actions.push(this.parsing(item, sign));
+                        }
+                    }
                     return newData;
                 } else {
                     return super.parsing(data, sign);

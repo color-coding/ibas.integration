@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -32,6 +33,7 @@ import org.colorcoding.ibas.bobas.serialization.SerializerFactory;
 import org.colorcoding.ibas.bobas.util.EncryptMD5;
 import org.colorcoding.ibas.integration.MyConfiguration;
 import org.colorcoding.ibas.integration.bo.integration.Action;
+import org.colorcoding.ibas.integration.bo.integration.ActionPackage;
 
 /**
  * 动作文件管理仓库
@@ -63,8 +65,8 @@ public class FileRepositoryAction extends FileRepositoryService
 	}
 
 	@Override
-	public IOperationResult<Action> registerAction(File file) {
-		return this.registerAction(file, this.getCurrentUser().getToken());
+	public IOperationResult<ActionPackage> registerPackage(File file) {
+		return this.registerPackage(file, this.getCurrentUser().getToken());
 	}
 
 	@Override
@@ -78,7 +80,7 @@ public class FileRepositoryAction extends FileRepositoryService
 	}
 
 	@Override
-	public OperationResult<Action> registerAction(File file, String token) {
+	public OperationResult<ActionPackage> registerPackage(File file, String token) {
 		try (JarFile jarFile = new JarFile(file)) {
 			this.setCurrentUser(token);
 			Logger.log(MessageLevel.DEBUG, "the package [%s] begins to be registered.", file.getName());
@@ -124,17 +126,7 @@ public class FileRepositoryAction extends FileRepositoryService
 			ICondition condition = criteria.getConditions().create();
 			condition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER);
 			condition.setValue(folder.getName());
-			OperationResult<Action> operationResult = this.fetchAction(criteria, token);
-			if (operationResult.getError() != null) {
-				// 发生错误，清理已释放文件
-				Logger.log(operationResult.getError());
-				this.deleteFiles(folder);
-			}
-			if (operationResult.getResultObjects().isEmpty()) {
-				// 未找到动作，清理已释放文件
-				this.deleteFiles(folder);
-			}
-			return operationResult;
+			return this.fetchPackage(criteria, this.getCurrentUser().getToken());
 		} catch (Exception e) {
 			Logger.log(e);
 			return new OperationResult<>(e);
@@ -305,5 +297,54 @@ public class FileRepositoryAction extends FileRepositoryService
 			}
 			file.delete();
 		}
+	}
+
+	@Override
+	public OperationResult<ActionPackage> fetchPackage(ICriteria criteria, String token) {
+		try {
+			this.setCurrentUser(token);
+			if (criteria == null) {
+				criteria = new Criteria();
+			}
+			OperationResult<ActionPackage> opRsltPackage = new OperationResult<ActionPackage>();
+			for (File folder : new File(this.getRepository().getRepositoryFolder()).listFiles()) {
+				if (!folder.isDirectory()) {
+					continue;
+				}
+				ICondition condition = criteria.getConditions()
+						.firstOrDefault(c -> CRITERIA_CONDITION_ALIAS_FOLDER.equalsIgnoreCase(c.getAlias()));
+				if (condition != null) {
+					if (!folder.getName().equalsIgnoreCase(condition.getValue())) {
+						continue;
+					}
+				}
+				File aFile = new File(folder.getPath() + File.separator + PACKAGE_INTEGRATION_ACTIONS_FILE);
+				if (!aFile.exists() || !aFile.isFile()) {
+					continue;
+				}
+				ActionPackage aPackage = new ActionPackage();
+				aPackage.setId(folder.getName());
+				aPackage.setDateTime(folder.lastModified());
+				aPackage.setActions(this.parsing(aFile).toArray(new Action[] {}));
+				opRsltPackage.addResultObjects(aPackage);
+			}
+			// 按日期排序
+			opRsltPackage.getResultObjects().sort(new Comparator<ActionPackage>() {
+
+				@Override
+				public int compare(ActionPackage o1, ActionPackage o2) {
+					return Long.compare(o2.getDateTime(), o1.getDateTime());
+				}
+			});
+			return opRsltPackage;
+		} catch (Exception e) {
+			Logger.log(e);
+			return new OperationResult<>(e);
+		}
+	}
+
+	@Override
+	public IOperationResult<ActionPackage> fetchPackage(ICriteria criteria) {
+		return this.fetchPackage(criteria, this.getCurrentUser().getToken());
 	}
 }

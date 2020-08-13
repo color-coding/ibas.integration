@@ -19,7 +19,6 @@ import org.colorcoding.ibas.integration.action.BOStatusAction;
 import org.colorcoding.ibas.integration.bo.integrationjob.IntegrationJob;
 import org.colorcoding.ibas.integration.bo.integrationjob.IntegrationJobAction;
 import org.colorcoding.ibas.integration.repository.FileRepositoryAction;
-import org.colorcoding.ibas.integration.repository.IFileRepositoryActionApp;
 
 import junit.framework.TestCase;
 
@@ -44,12 +43,12 @@ public class TestIntegrationAction extends TestCase {
 		// 测试对象的保存和查询
 		IOperationResult<?> operationResult = null;
 		ICriteria criteria = null;
-		IFileRepositoryActionApp boRepository = new FileRepositoryAction();
+		FileRepositoryAction boRepository = new FileRepositoryAction();
 		File resFolder = new File(MyConfiguration.getWorkFolder());
 		resFolder = resFolder.getParentFile().getParentFile().getParentFile();
 		File packageFile = new File(
 				resFolder.getPath() + File.separator + "release" + File.separator + "ibas.integration.test-0.1.0.war");
-		operationResult = boRepository.registerAction(packageFile);
+		operationResult = boRepository.registerPackage(packageFile, this.getToken());
 		if (operationResult.getError() != null) {
 			throw operationResult.getError();
 		}

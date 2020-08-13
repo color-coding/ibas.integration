@@ -34,5 +34,14 @@ namespace integration {
             /** 说明 */
             remark: string;
         }
+        /** 集成-动作 */
+        export interface IActionPackage {
+            /** 标识 */
+            id: string;
+            /** 时间 */
+            dateTime: Date;
+            /** 动作 */
+            actions: IAction[];
+        }
     }
 }
