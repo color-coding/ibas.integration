@@ -79,7 +79,7 @@ namespace integration {
                                 new sap.m.ToolbarSpacer(""),
                                 checkbox = new sap.m.CheckBox("", {
                                     text: ibas.i18n.prop("integrationdevelopment_display_console"),
-                                    selected: false,
+                                    selected: true,
                                 }),
                                 new sap.m.Button("", {
                                     text: ibas.i18n.prop("shell_run"),

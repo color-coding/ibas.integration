@@ -9,6 +9,8 @@ namespace integration {
     export namespace app {
         /** 配置项目-自动运行默认项 */
         const CONFIG_ITEM_JOB_SCHEDULER_DEFAULT_ACTION: string = "jobDefaultAction";
+        /** 任务列表队列编号 */
+        let jobHandler: number;
         /** 集成任务调度者 */
         export class IntegrationJobSchedulerApp extends ibas.Application<IIntegrationJobSchedulerView> {
             /** 应用标识 */
@@ -96,32 +98,41 @@ namespace integration {
                 super.run();
             }
             private jobs: ibas.ArrayList<TaskAction>;
-            private jobHandler: number;
             private reset(): void {
-                if (this.jobHandler > 0) {
-                    clearInterval(this.jobHandler);
+                if (jobHandler > 0) {
+                    clearInterval(jobHandler);
+                    jobHandler = undefined;
+                    this.proceeding(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_scheduler_job_list_stoped", jobHandler >= 0 ? jobHandler : -1));
                 }
                 this.viewShowed();
             }
             private suspend(suspend: boolean): void {
                 if (suspend === false) {
-                    if (!(this.jobHandler > 0)) {
-                        this.jobHandler = setInterval(() => {
+                    if (!(jobHandler > 0)) {
+                        jobHandler = setInterval(() => {
                             for (let item of this.jobs) {
                                 item.do();
                             }
                             this.view.showStatus(undefined);
                         }, 10000);
+                        this.proceeding(ibas.emMessageType.SUCCESS, ibas.i18n.prop("integration_scheduler_job_list_started", jobHandler >= 0 ? jobHandler : -1));
+                    } else if (jobHandler > 0) {
+                        this.busy(true);
+                        throw new Error(ibas.i18n.prop("integration_scheduler_job_list_in_running", jobHandler >= 0 ? jobHandler : -1));
                     }
                 } else {
-                    if (this.jobHandler > 0) {
-                        clearInterval(this.jobHandler);
+                    if (jobHandler > 0) {
+                        clearInterval(jobHandler);
+                        jobHandler = undefined;
+                        this.proceeding(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_scheduler_job_list_stoped", jobHandler >= 0 ? jobHandler : -1));
                     }
                 }
             }
             public close(): void {
-                if (this.jobHandler > 0) {
-                    clearInterval(this.jobHandler);
+                if (jobHandler > 0) {
+                    clearInterval(jobHandler);
+                    jobHandler = undefined;
+                    this.proceeding(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_scheduler_job_list_stoped", jobHandler >= 0 ? jobHandler : -1));
                 }
                 super.close();
             }

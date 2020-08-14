@@ -155,7 +155,7 @@ namespace integration {
                             new sap.extension.table.DataColumn("", {
                                 label: ibas.i18n.prop("bo_integrationjobaction_actionname"),
                                 width: "20rem",
-                                template: new sap.extension.m.Input("", {
+                                template: new sap.extension.m.Text("", {
                                 }).bindProperty("bindingValue", {
                                     path: "actionName",
                                     type: new sap.extension.data.Alphanumeric({

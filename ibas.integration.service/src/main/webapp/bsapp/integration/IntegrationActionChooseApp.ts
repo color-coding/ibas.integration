@@ -40,18 +40,26 @@ namespace integration {
                 this.busy(true);
                 let that: this = this;
                 let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
-                boRepository.fetchAction({
+                boRepository.fetchActionPackage({
                     criteria: criteria,
-                    onCompleted(opRslt: ibas.IOperationResult<bo.Action>): void {
+                    onCompleted(opRslt: ibas.IOperationResult<bo.ActionPackage>): void {
                         try {
                             that.busy(false);
                             if (opRslt.resultCode !== 0) {
                                 throw new Error(opRslt.message);
                             }
-                            if (opRslt.resultObjects.length === 1
+                            let actions: ibas.IList<bo.Action> = new ibas.ArrayList<bo.Action>();
+                            for (let pItem of opRslt.resultObjects) {
+                                let group: string = ibas.strings.format("# {0} {1}", pItem.id.substring(0, 8), ibas.dates.toString(pItem.dateTime, "yyyy-MM-dd HH:mm"));
+                                for (let aItem of pItem.actions) {
+                                    aItem.group = group;
+                                    actions.add(aItem);
+                                }
+                            }
+                            if (actions.length === 1
                                 && ibas.config.get(ibas.CONFIG_ITEM_AUTO_CHOOSE_DATA, true) && !that.isViewShowed()) {
                                 // 仅一条数据，直接选择
-                                that.chooseData(opRslt.resultObjects);
+                                that.chooseData(actions);
                             } else {
                                 if (!that.isViewShowed()) {
                                     // 没显示视图，先显示
@@ -60,7 +68,7 @@ namespace integration {
                                 if (opRslt.resultObjects.length === 0) {
                                     that.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_data_fetched_none"));
                                 }
-                                that.view.showData(opRslt.resultObjects);
+                                that.view.showData(actions);
                             }
                         } catch (error) {
                             that.messages(error);
@@ -68,6 +76,12 @@ namespace integration {
                     }
                 });
                 this.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_fetching_data"));
+            }
+            public run(): void {
+                super.run.apply(this, arguments);
+                if (this.isViewShowed()) {
+                    this.fetchData(new ibas.Criteria());
+                }
             }
             /** 新建数据 */
             protected newData(): void {

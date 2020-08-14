@@ -11,52 +11,67 @@ namespace integration {
             /**
              * 选择视图-集成任务
              */
-            export class IntegrationActionChooseView extends ibas.BOChooseView implements app.IIntegrationActionChooseView {
+            export class IntegrationActionChooseView extends ibas.BOQueryDialogViewWithPanel implements app.IIntegrationActionChooseView {
                 /** 返回查询的对象 */
                 get queryTarget(): any {
                     return bo.Action;
                 }
+                chooseDataEvent: Function;
+                newDataEvent: Function;
+                chooseType: ibas.emChooseType;
+                mode: ibas.emViewMode;
+                embedded(view: any): void {
+                }
                 /** 绘制视图 */
                 draw(): any {
                     let that: this = this;
-                    this.table = new sap.extension.table.Table("", {
+                    this.table = new sap.extension.m.Table("", {
                         chooseType: this.chooseType,
-                        visibleRowCount: sap.extension.table.visibleRowCount(15),
-                        rows: "{/rows}",
+                        includeItemInSelection: true,
                         columns: [
-                            new sap.extension.table.Column("", {
-                                label: ibas.i18n.prop("bo_action_id"),
-                                width: "8rem",
-                                template: new sap.extension.m.Text("", {
-                                }).bindProperty("bindingValue", {
-                                    path: "id",
-                                    type: new sap.extension.data.Alphanumeric()
-                                }),
-                                sortProperty: "id",
-                            }),
-                            new sap.extension.table.Column("", {
-                                label: ibas.i18n.prop("bo_action_name"),
-                                width: "16rem",
-                                template: new sap.extension.m.Text("", {
-                                }).bindProperty("bindingValue", {
-                                    path: "name",
-                                    type: new sap.extension.data.Alphanumeric()
-                                }),
-                                filterProperty: "name",
-                                sortProperty: "name",
-                            }),
-                            new sap.extension.table.Column("", {
-                                label: ibas.i18n.prop("bo_action_remark"),
+                            new sap.extension.m.Column("", {
+                                header: ibas.i18n.prop("bo_action_group"),
                                 width: "20rem",
-                                template: new sap.extension.m.Text("", {
-                                }).bindProperty("bindingValue", {
-                                    path: "remark",
-                                    type: new sap.extension.data.Alphanumeric()
-                                }),
-                                filterProperty: "remark",
-                                sortProperty: "remark",
+                                mergeDuplicates: true,
+                            }),
+                            new sap.extension.m.Column("", {
+                                header: ibas.i18n.prop("bo_action_name"),
+                            }),
+                            new sap.extension.m.Column("", {
+                                header: ibas.i18n.prop("bo_action_remark"),
                             }),
                         ],
+                        items: {
+                            path: "/rows",
+                            template: new sap.m.ColumnListItem("", {
+                                cells: [
+                                    new sap.extension.m.ObjectAttribute("", {
+                                        text: {
+                                            path: "group",
+                                            formatter(data: string): string {
+                                                if (typeof data === "string") {
+                                                    return data.substring(data.lastIndexOf("/") + 1);
+                                                }
+                                                return data;
+                                            },
+                                            type: new sap.extension.data.Alphanumeric(),
+                                        }
+                                    }),
+                                    new sap.extension.m.ObjectAttribute("", {
+                                        text: {
+                                            path: "name",
+                                            type: new sap.extension.data.Alphanumeric(),
+                                        }
+                                    }),
+                                    new sap.extension.m.ObjectAttribute("", {
+                                        text: {
+                                            path: "remark",
+                                            type: new sap.extension.data.Alphanumeric(),
+                                        }
+                                    }),
+                                ],
+                            }),
+                        },
                     });
                     return new sap.extension.m.Dialog("", {
                         title: this.title,
@@ -64,6 +79,40 @@ namespace integration {
                         state: sap.ui.core.ValueState.None,
                         horizontalScrolling: true,
                         verticalScrolling: true,
+                        subHeader: new sap.m.Toolbar("", {
+                            content: [
+                                this.search = new sap.m.SearchField("", {
+                                    search(event: sap.ui.base.Event): void {
+                                        let source: any = event.getSource();
+                                        if (source instanceof sap.m.SearchField) {
+                                            let search: string = source.getValue();
+                                            let binding: any = that.table.getBinding("items");
+                                            if (binding instanceof sap.ui.model.ListBinding) {
+                                                binding.filter(
+                                                    !ibas.strings.isEmpty(search) ? [
+                                                        new sap.ui.model.Filter({
+                                                            filters: [
+                                                                new sap.ui.model.Filter("name", sap.ui.model.FilterOperator.Contains, search),
+                                                                new sap.ui.model.Filter("remark", sap.ui.model.FilterOperator.Contains, search),
+                                                            ],
+                                                            and: false,
+                                                        })
+                                                    ] : undefined
+                                                    , sap.ui.model.FilterType.Application);
+                                            }
+                                        }
+                                    }
+                                }),
+                                new sap.m.Button("", {
+                                    type: sap.m.ButtonType.Transparent,
+                                    icon: "sap-icon://refresh",
+                                    press: function (): void {
+                                        that.search.setValue(undefined);
+                                        that.fireViewEvents(that.fetchDataEvent, new ibas.Criteria());
+                                    }
+                                }),
+                            ]
+                        }),
                         content: [
                             this.table
                         ],
@@ -85,18 +134,11 @@ namespace integration {
                         ]
                     });
                 }
-                private table: sap.extension.table.Table;
+                private table: sap.extension.m.Table;
+                private search: sap.m.SearchField;
                 /** 显示数据 */
                 showData(datas: bo.Action[]): void {
-                    let model: sap.ui.model.Model = this.table.getModel();
-                    if (model instanceof sap.extension.model.JSONModel) {
-                        // 已绑定过数据
-                        model.addData(datas);
-                    } else {
-                        // 未绑定过数据
-                        this.table.setModel(new sap.extension.model.JSONModel({ rows: datas }));
-                    }
-                    this.table.setBusy(false);
+                    this.table.setModel(new sap.extension.model.JSONModel({ rows: datas }));
                 }
 
                 /** 记录上次查询条件，表格滚动时自动触发 */
@@ -104,7 +146,6 @@ namespace integration {
                     super.query(criteria);
                     // 清除历史数据
                     if (this.isDisplayed) {
-                        this.table.setFirstVisibleRow(0);
                         this.table.setModel(null);
                     }
                 }

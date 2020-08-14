@@ -260,7 +260,7 @@ namespace integration {
                     if (datas.length > 0) {
                         let time: number = 30;
                         let text: string = this.beginButton.getText();
-                        this.application.viewShower.proceeding(this, ibas.emMessageType.WARNING, ibas.i18n.prop("integration_scheduler_automatically_in_some_time", time, text));
+                        this.application.viewShower.proceeding(this, ibas.emMessageType.WARNING, ibas.i18n.prop("integration_scheduler_job_list_will_be_started", time, text));
                         this.beginButton.addCustomData(new sap.ui.core.CustomData("", {
                             key: "handler",
                             value: setInterval(() => {
