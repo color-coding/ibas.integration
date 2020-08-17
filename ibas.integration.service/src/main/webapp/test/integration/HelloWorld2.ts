@@ -49,6 +49,7 @@ export default class HelloWorld extends integration.action.IntegrationAction {
             if (opRslt.resultCode !== 0) {
                 // 登录不成功，则终止任务
                 this.log(ibas.emMessageLevel.ERROR, opRslt.message);
+                this.done();
             } else {
                 // 调用基类方法，并保持传参
                 super.run.apply(this, arguments);

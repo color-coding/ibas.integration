@@ -40,9 +40,7 @@ namespace integration {
                                 new sap.ui.table.RowActionItem("", {
                                     icon: "sap-icon://slim-arrow-right",
                                     press: function (oEvent: any): void {
-                                        that.fireViewEvents(that.useActionEvent
-                                            , this.getBindingContext().getObject()
-                                        );
+                                        that.fireViewEvents(that.useActionEvent, this.getBindingContext().getObject());
                                     },
                                 }),
                             ]
@@ -128,6 +126,7 @@ namespace integration {
                                 }),
                                 combobox = new sap.m.ComboBox("", {
                                     width: "100%",
+                                    value: sessionStorage.getItem("IG_DEV_INTEGRATION_URL"),
                                     items: [
                                         new sap.ui.core.Item("", {
                                             key: "demo",
@@ -146,6 +145,7 @@ namespace integration {
                                     icon: "sap-icon://refresh",
                                     press: function (): void {
                                         that.fireViewEvents(that.loadActionsEvent, combobox.getValue());
+                                        sessionStorage.setItem("IG_DEV_INTEGRATION_URL", combobox.getValue());
                                     }
                                 }),
                             ]

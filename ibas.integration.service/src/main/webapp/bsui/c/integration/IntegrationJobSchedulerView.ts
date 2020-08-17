@@ -65,7 +65,6 @@ namespace integration {
                             new sap.ui.layout.Splitter("", {
                                 orientation: sap.ui.core.Orientation.Horizontal,
                                 contentAreas: [
-                                    // 头部空白
                                     new sap.ui.layout.Splitter("", {
                                         layoutData: new sap.ui.layout.SplitterLayoutData("", {
                                             resizable: false,
@@ -216,6 +215,32 @@ namespace integration {
                                                                     }
                                                                 }
                                                             }),
+                                                            new sap.m.ToolbarSeparator(""),
+                                                            new sap.m.Button("", {
+                                                                type: sap.m.ButtonType.Transparent,
+                                                                icon: "sap-icon://save",
+                                                                press: function (event: sap.ui.base.Event): void {
+                                                                    let length: number = that.next();
+                                                                    let builder: string[] = [];
+                                                                    for (let index: number = 1; index < length; index++) {
+                                                                        let key: string = that.localStorageKey(index);
+                                                                        let value: string = localStorage.getItem(key);
+                                                                        if (ibas.strings.isEmpty(value)) {
+                                                                            continue;
+                                                                        }
+                                                                        if (builder.length > 0) {
+                                                                            builder.push("\n");
+                                                                        }
+                                                                        builder.push(value);
+                                                                    }
+                                                                    ibas.files.save(new Blob(builder),
+                                                                        ibas.strings.format("ig_logs_{0}.txt", ibas.dates.toString(ibas.dates.now(), "yyyy-MM-dd_HHss")));
+                                                                    for (let index: number = 0; index < length; index++) {
+                                                                        let key: string = that.localStorageKey(index);
+                                                                        localStorage.removeItem(key);
+                                                                    }
+                                                                }
+                                                            }),
                                                             new sap.m.ToolbarSpacer(""),
                                                         ]
                                                     }),
@@ -288,6 +313,22 @@ namespace integration {
                             }).setText(content)
                         ]
                     }), 0);
+                    localStorage.setItem(this.localStorageKey(this.next()), content);
+                }
+
+                private next(): number {
+                    let type: string = "IG_LOG_NEXT_A";
+                    let tValue: string = localStorage.getItem(type);
+                    if (ibas.objects.isNull(tValue)) {
+                        tValue = "0";
+                    }
+                    let index: number = ibas.numbers.valueOf(localStorage.getItem(type));
+                    index = index + 1;
+                    localStorage.setItem(type, index.toString());
+                    return index;
+                }
+                private localStorageKey(id: number): string {
+                    return ibas.strings.format("IG_LOG_A_{0}", ibas.strings.fill(id, 8, "0"));
                 }
             }
         }

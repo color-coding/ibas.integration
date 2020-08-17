@@ -101,8 +101,8 @@ namespace integration {
             private reset(): void {
                 if (jobHandler > 0) {
                     clearInterval(jobHandler);
-                    jobHandler = undefined;
                     this.proceeding(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_scheduler_job_list_stoped", jobHandler >= 0 ? jobHandler : -1));
+                    jobHandler = undefined;
                 }
                 this.viewShowed();
             }
@@ -123,16 +123,16 @@ namespace integration {
                 } else {
                     if (jobHandler > 0) {
                         clearInterval(jobHandler);
-                        jobHandler = undefined;
                         this.proceeding(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_scheduler_job_list_stoped", jobHandler >= 0 ? jobHandler : -1));
+                        jobHandler = undefined;
                     }
                 }
             }
             public close(): void {
                 if (jobHandler > 0) {
                     clearInterval(jobHandler);
-                    jobHandler = undefined;
                     this.proceeding(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_scheduler_job_list_stoped", jobHandler >= 0 ? jobHandler : -1));
+                    jobHandler = undefined;
                 }
                 super.close();
             }
@@ -294,7 +294,6 @@ namespace integration {
                 if (this.actions.length === 0) {
                     return true;
                 }
-                let that: this = this;
                 ibas.queues.execute(this.actions, (action, next) => {
                     action.onDone = function (): void {
                         next();
@@ -302,9 +301,9 @@ namespace integration {
                     action.do();
                 }, (error) => {
                     if (error instanceof Error) {
-                        that.log(ibas.emMessageLevel.ERROR, error.message);
+                        this.log(ibas.emMessageLevel.ERROR, error.message);
                     }
-                    that.done();
+                    this.done();
                 });
                 return false;
             }
