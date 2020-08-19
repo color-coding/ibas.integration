@@ -79,7 +79,12 @@ namespace integration {
                                             // 超过日志输出的级别
                                             return;
                                         }
-                                        that.view.showLogs(bo.DataConverter.toMessageType(level), ibas.strings.format(tmpArgs[0], tmpArgs.slice(1)));
+                                        try {
+                                            that.view.showLogs(bo.DataConverter.toMessageType(level), ibas.strings.format(tmpArgs[0], tmpArgs.slice(1)));
+                                        } catch (error) {
+                                            // 写日志出错
+                                            that.proceeding(error);
+                                        }
                                     }
                                 });
                                 task.activated = true;

@@ -39,6 +39,8 @@
   "integration_scheduler_job_list_stoped": "请注意：任务列表已停止运行，队列号[{0}]",
   "integration_scheduler_job_list_in_running": "请注意：任务列表已在运行中，队列号[{0}]",
   "integration_log_be_auto_cleared": "View: 日志被自动清理",
+  "integration_log_upload": "上传日志",
+  "integration_log_uploaded": "日志已上传，文件名称[{0}]",
   "integration_closing_delimiter": "----结束----",
   "integrationdevelopment": "数据集成-开发",
   "integrationdevelopment_icon": "sap-icon://developer-settings",

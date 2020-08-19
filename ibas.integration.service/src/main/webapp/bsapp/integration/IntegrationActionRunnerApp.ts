@@ -99,7 +99,12 @@ namespace integration {
                         let type: ibas.emMessageType = bo.DataConverter.toMessageType(level);
                         let message: string = ibas.strings.format(tmpArgs[0], tmpArgs.slice(1));
                         if (that.isViewShowed()) {
-                            that.view.showMessages(type, message);
+                            try {
+                                that.view.showMessages(type, message);
+                            } catch (error) {
+                                // 写日志出错
+                                that.proceeding(error);
+                            }
                         } else {
                             that.proceeding(type, message);
                         }

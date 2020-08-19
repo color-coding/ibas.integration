@@ -57,8 +57,29 @@ namespace integration {
                                         that.fireViewEvents(that.resetEvent);
                                     }
                                 }),
-                                new sap.m.ToolbarSeparator(""),
                                 new sap.m.ToolbarSpacer(""),
+                                new sap.m.Button("", {
+                                    text: ibas.i18n.prop("integration_log_upload"),
+                                    type: sap.m.ButtonType.Transparent,
+                                    icon: "sap-icon://upload",
+                                    press: function (): void {
+                                        storages.local.upload((result) => {
+                                            if (result instanceof Error) {
+                                                that.application.viewShower.messages({
+                                                    title: that.title,
+                                                    type: ibas.emMessageType.ERROR,
+                                                    message: result.message,
+                                                });
+                                            } else {
+                                                that.application.viewShower.messages({
+                                                    title: that.title,
+                                                    type: ibas.emMessageType.SUCCESS,
+                                                    message: ibas.i18n.prop("integration_log_uploaded", result.fileName),
+                                                });
+                                            }
+                                        });
+                                    }
+                                }),
                             ]
                         }),
                         content: [
@@ -220,25 +241,8 @@ namespace integration {
                                                                 type: sap.m.ButtonType.Transparent,
                                                                 icon: "sap-icon://save",
                                                                 press: function (event: sap.ui.base.Event): void {
-                                                                    let length: number = that.next();
-                                                                    let builder: string[] = [];
-                                                                    for (let index: number = 1; index < length; index++) {
-                                                                        let key: string = that.localStorageKey(index);
-                                                                        let value: string = localStorage.getItem(key);
-                                                                        if (ibas.strings.isEmpty(value)) {
-                                                                            continue;
-                                                                        }
-                                                                        if (builder.length > 0) {
-                                                                            builder.push("\n");
-                                                                        }
-                                                                        builder.push(value);
-                                                                    }
-                                                                    ibas.files.save(new Blob(builder),
-                                                                        ibas.strings.format("ig_logs_{0}.txt", ibas.dates.toString(ibas.dates.now(), "yyyy-MM-dd_HHss")));
-                                                                    for (let index: number = 0; index < length; index++) {
-                                                                        let key: string = that.localStorageKey(index);
-                                                                        localStorage.removeItem(key);
-                                                                    }
+                                                                    ibas.files.save(storages.local.file(false),
+                                                                        ibas.strings.format("ig_logs_{0}.txt", ibas.dates.toString(ibas.dates.now(), "yyyy-MM-dd_HHmmss")));
                                                                 }
                                                             }),
                                                             new sap.m.ToolbarSpacer(""),
@@ -313,22 +317,23 @@ namespace integration {
                             }).setText(content)
                         ]
                     }), 0);
-                    localStorage.setItem(this.localStorageKey(this.next()), content);
-                }
-
-                private next(): number {
-                    let type: string = "IG_LOG_NEXT_A";
-                    let tValue: string = localStorage.getItem(type);
-                    if (ibas.objects.isNull(tValue)) {
-                        tValue = "0";
+                    try {
+                        storages.local.log(content);
+                    } catch (error) {
+                        storages.local.upload((result) => {
+                            if (result instanceof Error) {
+                                this.application.viewShower.messages({
+                                    title: this.title,
+                                    type: ibas.emMessageType.ERROR,
+                                    message: result.message,
+                                });
+                            } else {
+                                this.application.viewShower.proceeding(this, ibas.emMessageType.SUCCESS,
+                                    ibas.i18n.prop("integration_log_uploaded", result.fileName));
+                            }
+                        });
+                        storages.local.log(content);
                     }
-                    let index: number = ibas.numbers.valueOf(localStorage.getItem(type));
-                    index = index + 1;
-                    localStorage.setItem(type, index.toString());
-                    return index;
-                }
-                private localStorageKey(id: number): string {
-                    return ibas.strings.format("IG_LOG_A_{0}", ibas.strings.fill(id, 8, "0"));
                 }
             }
         }
