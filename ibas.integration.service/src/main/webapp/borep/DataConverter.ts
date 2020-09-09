@@ -135,7 +135,7 @@ namespace integration {
                 let token: string = ibas.config.get(ibas.CONFIG_ITEM_USER_TOKEN, "");
                 let rtVersion: string = undefined;
                 if (!ibas.config.get(ibas.CONFIG_ITEM_DEBUG_MODE, false)) {
-                    rtVersion = ibas.dates.now().getTime().toString();
+                    rtVersion = ibas.config.get(ibas.CONFIG_ITEM_RUNTIME_VERSION);
                 }
                 let actionRequire: Require = ibas.requires.create({
                     baseUrl: baseUrl,
