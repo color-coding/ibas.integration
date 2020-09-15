@@ -153,7 +153,25 @@ namespace integration {
                                                                         return "sap-icon://media-play";
                                                                     }
                                                                 },
-                                                                datetime: "+{job/frequency}s",
+                                                                datetime: {
+                                                                    parts: [
+                                                                        {
+                                                                            path: "job/frequency",
+                                                                            formatter(data: number): string {
+                                                                                return ibas.strings.format("+{0}s", data);
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            path: "job/atTime",
+                                                                            formatter(data: number): string {
+                                                                                if (data >= 0 && data < 2400) {
+                                                                                    return ibas.strings.format("@{0}", new sap.extension.data.Time().formatValue(data, "string"));
+                                                                                }
+                                                                                return undefined;
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
                                                                 authorName: {
                                                                     path: "lastRunTime",
                                                                     formatter(data: any): string {

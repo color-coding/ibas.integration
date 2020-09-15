@@ -15,6 +15,8 @@ import org.colorcoding.ibas.bobas.mapping.BusinessObjectUnit;
 import org.colorcoding.ibas.bobas.mapping.DbField;
 import org.colorcoding.ibas.bobas.mapping.DbFieldType;
 import org.colorcoding.ibas.bobas.ownership.IDataOwnership;
+import org.colorcoding.ibas.bobas.rule.IBusinessRule;
+import org.colorcoding.ibas.bobas.rule.common.BusinessRuleRequired;
 import org.colorcoding.ibas.integration.MyConfiguration;
 
 /**
@@ -77,8 +79,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-名称
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setName(String value) {
 		this.setProperty(PROPERTY_NAME, value);
@@ -109,8 +110,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-是否激活
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setActivated(emYesNo value) {
 		this.setProperty(PROPERTY_ACTIVATED, value);
@@ -141,11 +141,41 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-频率（秒）
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setFrequency(Integer value) {
 		this.setProperty(PROPERTY_FREQUENCY, value);
+	}
+
+	/**
+	 * 属性名称-运行时间点
+	 */
+	private static final String PROPERTY_ATTIME_NAME = "AtTime";
+
+	/**
+	 * 运行时间点 属性
+	 */
+	@DbField(name = "AtTime", type = DbFieldType.NUMERIC, table = DB_TABLE_NAME)
+	public static final IPropertyInfo<Short> PROPERTY_ATTIME = registerProperty(PROPERTY_ATTIME_NAME, Short.class,
+			MY_CLASS);
+
+	/**
+	 * 获取-运行时间点
+	 * 
+	 * @return 值
+	 */
+	@XmlElement(name = PROPERTY_ATTIME_NAME)
+	public final Short getAtTime() {
+		return this.getProperty(PROPERTY_ATTIME);
+	}
+
+	/**
+	 * 设置-运行时间点
+	 * 
+	 * @param value 值
+	 */
+	public final void setAtTime(Short value) {
+		this.setProperty(PROPERTY_ATTIME, value);
 	}
 
 	/**
@@ -173,8 +203,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-关联的业务对象
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setBOCode(String value) {
 		this.setProperty(PROPERTY_BOCODE, value);
@@ -205,8 +234,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-关联的应用
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setApplicationId(String value) {
 		this.setProperty(PROPERTY_APPLICATIONID, value);
@@ -237,8 +265,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-备注
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setRemarks(String value) {
 		this.setProperty(PROPERTY_REMARKS, value);
@@ -269,8 +296,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-对象编号
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setObjectKey(Integer value) {
 		this.setProperty(PROPERTY_OBJECTKEY, value);
@@ -301,8 +327,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-对象类型
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setObjectCode(String value) {
 		this.setProperty(PROPERTY_OBJECTCODE, value);
@@ -333,8 +358,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-实例号
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setLogInst(Integer value) {
 		this.setProperty(PROPERTY_LOGINST, value);
@@ -365,8 +389,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-服务系列
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setSeries(Integer value) {
 		this.setProperty(PROPERTY_SERIES, value);
@@ -397,8 +420,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-数据源
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setDataSource(String value) {
 		this.setProperty(PROPERTY_DATASOURCE, value);
@@ -429,8 +451,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-创建日期
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setCreateDate(DateTime value) {
 		this.setProperty(PROPERTY_CREATEDATE, value);
@@ -461,8 +482,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-创建时间
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setCreateTime(Short value) {
 		this.setProperty(PROPERTY_CREATETIME, value);
@@ -493,8 +513,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-更新日期
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setUpdateDate(DateTime value) {
 		this.setProperty(PROPERTY_UPDATEDATE, value);
@@ -525,8 +544,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-更新时间
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setUpdateTime(Short value) {
 		this.setProperty(PROPERTY_UPDATETIME, value);
@@ -557,8 +575,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-创建用户
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setCreateUserSign(Integer value) {
 		this.setProperty(PROPERTY_CREATEUSERSIGN, value);
@@ -589,8 +606,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-更新用户
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setUpdateUserSign(Integer value) {
 		this.setProperty(PROPERTY_UPDATEUSERSIGN, value);
@@ -621,8 +637,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-创建动作标识
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setCreateActionId(String value) {
 		this.setProperty(PROPERTY_CREATEACTIONID, value);
@@ -653,8 +668,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-更新动作标识
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setUpdateActionId(String value) {
 		this.setProperty(PROPERTY_UPDATEACTIONID, value);
@@ -685,8 +699,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-数据所有者
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setDataOwner(Integer value) {
 		this.setProperty(PROPERTY_DATAOWNER, value);
@@ -717,8 +730,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-团队成员
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setTeamMembers(String value) {
 		this.setProperty(PROPERTY_TEAMMEMBERS, value);
@@ -749,8 +761,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-数据所属组织
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setOrganization(String value) {
 		this.setProperty(PROPERTY_ORGANIZATION, value);
@@ -782,8 +793,7 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 	/**
 	 * 设置-集成任务-动作集合
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setIntegrationJobActions(IIntegrationJobActions value) {
 		this.setProperty(PROPERTY_INTEGRATIONJOBACTIONS, value);
@@ -798,6 +808,13 @@ public class IntegrationJob extends BusinessObject<IntegrationJob> implements II
 		this.setIntegrationJobActions(new IntegrationJobActions(this));
 		this.setObjectCode(MyConfiguration.applyVariables(BUSINESS_OBJECT_CODE));
 		this.setActivated(emYesNo.YES);
+		this.setAtTime((short) -1);
 	}
 
+	@Override
+	protected IBusinessRule[] registerRules() {
+		return new IBusinessRule[] { // 注册的业务规则
+				new BusinessRuleRequired(PROPERTY_NAME), // 要求有值
+		};
+	}
 }

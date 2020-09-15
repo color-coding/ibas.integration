@@ -18,6 +18,7 @@
         "bo_integrationjob_name": "服务的名称",
         "bo_integrationjob_activated": "是否激活",
         "bo_integrationjob_frequency": "频率（秒）",
+        "bo_integrationjob_attime": "运行时间点",
         "bo_integrationjob_bocode": "关联的业务对象",
         "bo_integrationjob_applicationid": "关联的应用",
         "bo_integrationjob_remarks": "备注",
