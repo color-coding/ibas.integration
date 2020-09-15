@@ -209,6 +209,26 @@ namespace integration {
                 if (ibas.dates.now().getTime() < (this.lastRunTime + this.job.frequency * 1000)) {
                     return;
                 }
+                // 时间点判断
+                if (this.job.atTime > 0) {
+                    let atTime: number = ibas.dates.today().getTime() + ((this.job.atTime - this.job.atTime % 100) / 100 * 60 + this.job.atTime % 100) * 60 * 1000;
+                    if (ibas.dates.now().getTime() < atTime) {
+                        // 当前时间未到时间点
+                        return;
+                    }
+                    // 上次运行时间
+                    let lastTime: number;
+                    if (this.lastRunTime > 0) {
+                        lastTime = this.lastRunTime;
+                    } else {
+                        // 未运行过，则未上次计划时间
+                        lastTime = ibas.dates.subtract(ibas.dates.emDifferenceType.DAY, new Date(atTime), 1).getTime();
+                    }
+                    // 与上次时间差需要超过12小时
+                    if (ibas.dates.difference(ibas.dates.emDifferenceType.HOUR, ibas.dates.now(), new Date(lastTime)) < 12) {
+                        return;
+                    }
+                }
                 // 检查任务是否更新
                 if (this.lastRunTime > 0) {
                     let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();

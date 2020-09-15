@@ -19,6 +19,9 @@ namespace integration {
             /** 频率（秒） */
             frequency: number;
 
+            /** 运行时间点 */
+            atTime: number;
+
             /** 关联的业务对象 */
             boCode: string;
 

@@ -74,6 +74,14 @@ namespace integration {
                                     type: new sap.extension.data.Numeric()
                                 }),
                             }),
+                            new sap.extension.table.DataColumn("", {
+                                label: ibas.i18n.prop("bo_integrationjob_attime"),
+                                template: new sap.extension.m.Text("", {
+                                }).bindProperty("bindingValue", {
+                                    path: "atTime",
+                                    type: new sap.extension.data.Time(),
+                                }),
+                            }),
                         ],
                         nextDataSet(event: sap.ui.base.Event): void {
                             // 查询下一个数据集

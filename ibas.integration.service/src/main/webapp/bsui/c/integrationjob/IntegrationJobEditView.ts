@@ -64,6 +64,12 @@ namespace integration {
                                 path: "frequency",
                                 type: new sap.extension.data.Numeric()
                             }),
+                            new sap.m.Label("", { text: ibas.i18n.prop("bo_integrationjob_attime") }),
+                            new sap.extension.m.TimePicker("", {
+                            }).bindProperty("bindingValue", {
+                                path: "atTime",
+                                type: new sap.extension.data.Time(),
+                            }),
                             new sap.ui.core.Title("", { text: ibas.i18n.prop("integration_title_others") }),
                             new sap.m.Label("", { text: ibas.i18n.prop("bo_integrationjob_bocode") }),
                             new sap.extension.m.RepositoryInput("", {

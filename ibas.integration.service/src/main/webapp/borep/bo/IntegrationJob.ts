@@ -50,6 +50,17 @@ namespace integration {
                 this.setProperty(IntegrationJob.PROPERTY_FREQUENCY_NAME, value);
             }
 
+            /** 映射的属性名称-运行时间点 */
+            static PROPERTY_ATTIME_NAME: string = "AtTime";
+            /** 获取-运行时间点 */
+            get atTime(): number {
+                return this.getProperty<number>(IntegrationJob.PROPERTY_ATTIME_NAME);
+            }
+            /** 设置-运行时间点 */
+            set atTime(value: number) {
+                this.setProperty(IntegrationJob.PROPERTY_ATTIME_NAME, value);
+            }
+
             /** 映射的属性名称-关联的业务对象 */
             static PROPERTY_BOCODE_NAME: string = "BOCode";
             /** 获取-关联的业务对象 */
@@ -278,6 +289,7 @@ namespace integration {
                 this.objectCode = ibas.config.applyVariables(IntegrationJob.BUSINESS_OBJECT_CODE);
                 this.activated = ibas.emYesNo.YES;
                 this.frequency = 0;
+                this.atTime = -1;
             }
         }
 

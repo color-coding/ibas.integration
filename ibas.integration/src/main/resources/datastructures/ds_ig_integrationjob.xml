@@ -5,6 +5,7 @@
     <Property Name="Name" Description="名称" DataType="Alphanumeric" DataSubType="Default" EditSize="30" Mapped="Name" UniqueKey="Yes"/>
     <Property Name="Activated" Description="是否激活" DataType="Alphanumeric" DataSubType="Default" EditSize="1" DeclaredType="emYesNo" Mapped="Activated"/>
     <Property Name="Frequency" Description="频率（秒）" DataType="Numeric" DataSubType="Default" EditSize="8" Mapped="Frequency"/>
+    <Property Name="AtTime" Description="运行时间点" DataType="Date" DataSubType="Time" EditSize="8" Mapped="AtTime"/>
     <Property Name="BOCode" Description="关联的业务对象" DataType="Alphanumeric" DataSubType="Default" EditSize="30" Mapped="BOCode"/>
     <Property Name="ApplicationId" Description="关联的应用" DataType="Alphanumeric" DataSubType="Default" EditSize="36" Mapped="AppId"/>
     <Property Name="Remarks" Description="备注" DataType="Memo" DataSubType="Default" EditSize="8" Mapped="Remarks"/>

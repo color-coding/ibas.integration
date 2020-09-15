@@ -132,12 +132,7 @@ namespace integration {
                                                                     parts: [
                                                                         {
                                                                             path: "id",
-                                                                            formatter(data: string): string {
-                                                                                if (typeof data === "string") {
-                                                                                    return ibas.strings.format("# {0}", data.substring(0, 8));
-                                                                                }
-                                                                                return data;
-                                                                            }
+                                                                            type: new sap.extension.data.Alphanumeric(),
                                                                         },
                                                                         {
                                                                             path: "dateTime",
