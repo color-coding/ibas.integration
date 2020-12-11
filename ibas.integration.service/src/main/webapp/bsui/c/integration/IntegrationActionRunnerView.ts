@@ -191,6 +191,18 @@ namespace integration {
                                             } else {
                                                 config.value = source.getPlaceholder();
                                             }
+                                        } else if (source instanceof sap.m.DatePicker) {
+                                            if (ibas.dates.isDate(source.getDateValue())) {
+                                                config.value = ibas.dates.toString(source.getDateValue(), "yyyy-MM-dd");
+                                            } else {
+                                                config.value = source.getPlaceholder();
+                                            }
+                                        } else if (source instanceof sap.m.TimePicker) {
+                                            if (ibas.dates.isDate(source.getDateValue())) {
+                                                config.value = ibas.dates.toString(source.getDateValue(), "HHmm");
+                                            } else {
+                                                config.value = source.getPlaceholder();
+                                            }
                                         }
                                     }
                                 )
