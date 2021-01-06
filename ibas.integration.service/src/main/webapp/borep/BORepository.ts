@@ -141,7 +141,11 @@ namespace integration {
                         }
                     }
                 };
-                boRepository.fetch(bo.Action.name, caller);
+                if (criteria && criteria.conditions.length > 0) {
+                    boRepository.fetch(bo.Action.name, caller);
+                } else {
+                    caller.onCompleted(new ibas.OperationResult<bo.Action>());
+                }
             }
             /**
              * 删除 集成动作
