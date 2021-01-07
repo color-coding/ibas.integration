@@ -413,7 +413,11 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 			out.push('<' + this.name);
 			//Namespaces
 			for (var name in this.ns) {
-				out.push(' xmlns:' + name + '="' + this.ns[name] + '"');
+				if (name && name.length > 0) {
+					out.push(' xmlns:' + name + '="' + this.ns[name] + '"');
+				} else {
+					out.push(' xmlns' + '="' + this.ns[name] + '"');
+				}
 			}
 			//Node Attributes
 			for (var attr in this.attributes) {
@@ -603,7 +607,12 @@ https://github.com/doedje/jquery.soap/blob/1.7.3/README.md
 				} else if (params.constructor.toString().indexOf("String") > -1) { // type is string
 					// handle String objects as string primitive value
 					soapObject = new SOAPObject(prefix + name);
-					soapObject.val(params);
+					soapObject.val(params.toString());
+					if (params["xmlns"]) {
+						soapObject.ns = {
+							"": params["xmlns"]
+						};
+					}
 				} else if (params.constructor.toString().indexOf("Date") > -1) { // type is Date
 					// handle Date objects as ISO8601 formated value
 					soapObject = new SOAPObject(prefix + name);

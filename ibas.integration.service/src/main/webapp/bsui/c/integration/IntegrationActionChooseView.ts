@@ -46,7 +46,7 @@ namespace integration {
                             template: new sap.m.ColumnListItem("", {
                                 cells: [
                                     new sap.extension.m.ObjectAttribute("", {
-                                        text: {
+                                        bindingValue: {
                                             path: "group",
                                             formatter(data: string): string {
                                                 if (typeof data === "string") {
@@ -58,13 +58,13 @@ namespace integration {
                                         }
                                     }),
                                     new sap.extension.m.ObjectAttribute("", {
-                                        text: {
+                                        bindingValue: {
                                             path: "name",
                                             type: new sap.extension.data.Alphanumeric(),
                                         }
                                     }),
                                     new sap.extension.m.ObjectAttribute("", {
-                                        text: {
+                                        bindingValue: {
                                             path: "remark",
                                             type: new sap.extension.data.Alphanumeric(),
                                         }
