@@ -73,7 +73,7 @@ namespace integration {
                             }),
                         },
                     });
-                    return new sap.extension.m.Dialog("", {
+                    return new sap.m.Dialog("", {
                         title: this.title,
                         type: sap.m.DialogType.Standard,
                         state: sap.ui.core.ValueState.None,
@@ -132,7 +132,7 @@ namespace integration {
                                 }
                             }),
                         ]
-                    });
+                    }).addStyleClass("sapUiNoContentPadding");
                 }
                 private table: sap.extension.m.Table;
                 private search: sap.m.SearchField;

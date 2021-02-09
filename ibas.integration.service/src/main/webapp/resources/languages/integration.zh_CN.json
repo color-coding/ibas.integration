@@ -21,7 +21,7 @@
   "integration_running_log": "运行日志",
   "integration_clear_log": "清理日志",
   "integration_save_log": "保存日志",
-  "integration_integrationjob_service": "数据集成服务",
+  "integration_integrationjob_service": "数据集成",
   "integration_not_found_action": "没有找到动作[{0}]，请尝试重新运行",
   "integration_not_found_job_actions": "没有找到任务[{0}]的动作",
   "integration_not_found_integrationjob": "没有找到有效的集成任务[{0}]",
