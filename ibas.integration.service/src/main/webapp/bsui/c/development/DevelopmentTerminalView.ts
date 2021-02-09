@@ -93,7 +93,7 @@ namespace integration {
                                     icon: "sap-icon://nav-back",
                                     press: function (): void {
                                         that.tableTitle.setText(ibas.i18n.prop("bo_action"));
-                                        that.splitContainer.backToTopDetail(null, null);
+                                        that.container.backToTop();
                                     }
                                 }),
                             ]
@@ -151,9 +151,9 @@ namespace integration {
                             ]
                         }),
                         content: [
-                            this.splitContainer = new sap.m.SplitContainer("", {
-                                mode: sap.m.SplitAppMode.HideMode,
-                                detailPages: [
+                            this.container = new sap.m.NavContainer("", {
+                                height: "22rem",
+                                pages: [
                                     this.table,
                                     this.tableConfig
                                 ]
@@ -163,17 +163,17 @@ namespace integration {
                 }
                 private table: sap.ui.table.Table;
                 private tableConfig: sap.ui.table.Table;
-                private splitContainer: sap.m.SplitContainer;
+                private container: sap.m.NavContainer;
                 private tableTitle: sap.m.Title;
                 /** 显示动作 */
                 showActions(datas: bo.Action[]): void {
-                    this.splitContainer.backToTopDetail(null, null);
+                    this.container.backToTop();
                     this.table.setModel(new sap.ui.model.json.JSONModel({ rows: datas }));
                 }
                 /** 显示动作 */
                 showAction(data: bo.Action): void {
                     this.tableTitle.setText(data.name);
-                    this.splitContainer.toDetail(this.tableConfig.getId(), null, null, null);
+                    this.container.to(this.tableConfig.getId());
                 }
                 /** 显示动作配置 */
                 showActionConfigs(datas: bo.ActionConfig[]): void {

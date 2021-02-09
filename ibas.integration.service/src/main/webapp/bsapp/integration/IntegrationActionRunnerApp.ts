@@ -110,6 +110,7 @@ namespace integration {
                         }
                     }
                 });
+                that.view.busy(true);
                 for (let item of this.actions) {
                     bo.actionFactory.create({
                         action: item,
@@ -129,6 +130,9 @@ namespace integration {
                             groupAction.addAction(action);
                             if (groupAction.length === that.actions.length) {
                                 that.groupAction = groupAction;
+                                groupAction.onDone = () => {
+                                    that.view.busy(false);
+                                };
                                 groupAction.do();
                             }
                         }
@@ -153,6 +157,8 @@ namespace integration {
             showActions(datas: bo.Action[]): void;
             /** 显示消息 */
             showMessages(type: ibas.emMessageType, message: string): void;
+            /** 忙状态 */
+            busy(value: boolean): void;
         }
         /** 集合动作 */
         class GroupAction extends ibas.Action {

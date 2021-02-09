@@ -22,7 +22,7 @@ namespace integration {
                 /** 绘制视图 */
                 draw(): any {
                     let that: this = this;
-                    return new sap.m.Page("", {
+                    return this.page = new sap.m.Page("", {
                         showHeader: false,
                         subHeader: new sap.m.Toolbar("", {
                             content: [
@@ -162,9 +162,19 @@ namespace integration {
                         ]
                     });
                 }
+                private page: sap.m.Page;
                 private maxCount: sap.m.StepInput;
                 private leftList: sap.ui.layout.VerticalLayout;
                 private rightList: sap.m.List;
+                /** 忙状态 */
+                busy(value: boolean): void {
+                    if (this.isDisplayed === true) {
+                        if (this.page!.getSubHeader() instanceof sap.m.Toolbar) {
+                            let button: sap.m.Button = (<any>this.page!.getSubHeader()).getContent()[0];
+                            button.setEnabled(!value);
+                        }
+                    }
+                }
                 /** 显示数据 */
                 showActions(datas: bo.Action[]): void {
                     this.leftList.destroyContent();
@@ -270,7 +280,11 @@ namespace integration {
                             }).setText(content)
                         ]
                     }), 0);
-                    storages.session.log(content, this.id.toUpperCase());
+                    try {
+                        storages.session.log(content, this.id.toUpperCase());
+                    } catch (error) {
+                        ibas.logger.log(ibas.emMessageLevel.DEBUG, content);
+                    }
                 }
             }
         }

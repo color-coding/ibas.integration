@@ -261,9 +261,9 @@ namespace integration {
                         editable: true,
                         content: [
                             this.tableTitle = new sap.ui.core.Title("", { text: ibas.i18n.prop("bo_integrationjobaction") }),
-                            this.splitContainer = new sap.m.SplitContainer("", {
-                                mode: sap.m.SplitAppMode.HideMode,
-                                detailPages: [
+                            this.container = new sap.m.NavContainer("", {
+                                height: "22rem",
+                                pages: [
                                     this.tableIntegrationJobAction,
                                     this.tableIntegrationJobActionCfg
                                 ]
@@ -327,7 +327,7 @@ namespace integration {
                 }
                 private page: sap.extension.m.Page;
                 private tableTitle: sap.ui.core.Title;
-                private splitContainer: sap.m.SplitContainer;
+                private container: sap.m.NavContainer;
                 private tableIntegrationJobAction: sap.extension.table.Table;
                 private tableIntegrationJobActionCfg: sap.extension.table.Table;
 
@@ -340,13 +340,13 @@ namespace integration {
                 /** 显示数据 */
                 showIntegrationJobActions(datas: bo.IntegrationJobAction[]): void {
                     this.tableTitle.setText(ibas.i18n.prop("bo_integrationjob_integrationjobactions"));
-                    this.splitContainer.backToTopDetail(null, null);
+                    this.container.backToTop();
                     this.tableIntegrationJobAction.setModel(new sap.extension.model.JSONModel({ rows: datas }));
                 }
                 /** 显示数据 */
                 showIntegrationJobActionCfgs(datas: bo.IntegrationJobActionCfg[]): void {
                     this.tableTitle.setText(ibas.i18n.prop("bo_integrationjobaction_integrationjobactioncfgs"));
-                    this.splitContainer.toDetail(this.tableIntegrationJobActionCfg.getId(), null, null, null);
+                    this.container.to(this.tableIntegrationJobActionCfg.getId());
                     this.tableIntegrationJobActionCfg.setModel(new sap.extension.model.JSONModel({ rows: datas }));
                 }
             }
