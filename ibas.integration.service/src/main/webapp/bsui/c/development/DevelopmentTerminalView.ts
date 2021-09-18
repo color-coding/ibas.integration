@@ -24,7 +24,7 @@ namespace integration {
                     let checkbox: sap.m.CheckBox, combobox: sap.m.ComboBox;
                     this.table = new sap.ui.table.Table("", {
                         selectionMode: sap.ui.table.SelectionMode.None,
-                        visibleRowCount: ibas.config.get(openui5.utils.CONFIG_ITEM_LIST_TABLE_VISIBLE_ROW_COUNT, 13),
+                        visibleRowCount: ibas.config.get(openui5.utils.CONFIG_ITEM_LIST_TABLE_VISIBLE_ROW_COUNT, 15),
                         visibleRowCountMode: sap.ui.table.VisibleRowCountMode.Interactive,
                         toolbar: new sap.m.Toolbar("", {
                             content: [
@@ -152,7 +152,6 @@ namespace integration {
                         }),
                         content: [
                             this.container = new sap.m.NavContainer("", {
-                                height: "22rem",
                                 pages: [
                                     this.table,
                                     this.tableConfig

@@ -111,33 +111,34 @@ namespace integration {
                     }
                 });
                 that.view.busy(true);
-                for (let item of this.actions) {
+                ibas.queues.execute(this.actions, (item, next) => {
                     bo.actionFactory.create({
                         action: item,
                         onError(error: Error): void {
                             if ((<any>error).requireType === "scripterror") {
-                                that.messages({
-                                    type: ibas.emMessageType.ERROR,
-                                    message: ibas.i18n.prop("integration_not_found_action", item.name),
-                                });
+                                next(new Error(ibas.i18n.prop("integration_not_found_action", item.name)));
                             } else {
-                                that.messages(error);
+                                next(error);
                             }
                         },
                         onCompleted(action: ibas.Action): void {
                             // 添加额外运行数据
                             action.extraData = that.extraData;
                             groupAction.addAction(action);
-                            if (groupAction.length === that.actions.length) {
-                                that.groupAction = groupAction;
-                                groupAction.onDone = () => {
-                                    that.view.busy(false);
-                                };
-                                groupAction.do();
-                            }
+                            next();
                         }
                     });
-                }
+                }, (error) => {
+                    if (error instanceof Error) {
+                        that.messages(error);
+                    } else {
+                        that.groupAction = groupAction;
+                        groupAction.onDone = () => {
+                            that.view.busy(false);
+                        };
+                        groupAction.do();
+                    }
+                });
             }
             private stopActions(): void {
                 if (ibas.objects.isNull(this.groupAction)) {
@@ -200,7 +201,7 @@ namespace integration {
                 }
                 return this.actions.length;
             }
-            addAction(action: ibas.Action): void {
+            addAction(action: ibas.Action, index?: number): void {
                 if (ibas.objects.isNull(this.actions)) {
                     this.actions = new ibas.ArrayList<ibas.Action>();
                 }
