@@ -56,6 +56,7 @@ namespace integration {
                                     path: "activated",
                                     type: new sap.extension.data.YesNo(true)
                                 }),
+                                width: "6rem",
                             }),
                             new sap.extension.table.DataColumn("", {
                                 label: ibas.i18n.prop("bo_integrationjob_bocode"),
@@ -80,6 +81,7 @@ namespace integration {
                                     path: "frequency",
                                     type: new sap.extension.data.Numeric()
                                 }),
+                                width: "6rem",
                             }),
                             new sap.extension.table.DataColumn("", {
                                 label: ibas.i18n.prop("bo_integrationjob_attime"),
@@ -88,6 +90,16 @@ namespace integration {
                                     path: "atTime",
                                     type: new sap.extension.data.Time(),
                                 }),
+                                width: "6rem",
+                            }),
+                            new sap.extension.table.DataColumn("", {
+                                label: ibas.i18n.prop("bo_integrationjob_remarks"),
+                                template: new sap.extension.m.Text("", {
+                                }).bindProperty("bindingValue", {
+                                    path: "remarks",
+                                    type: new sap.extension.data.Alphanumeric(),
+                                }),
+                                width: "20rem",
                             }),
                         ],
                         nextDataSet(event: sap.ui.base.Event): void {

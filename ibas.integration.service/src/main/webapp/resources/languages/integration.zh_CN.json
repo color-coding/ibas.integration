@@ -9,6 +9,7 @@
   "integration_title_general": "常规信息",
   "integration_title_others": "其他信息",
   "integration_title_configs": "配置信息",
+  "integration_title_relation": "关联信息",
   "integration_func_action": "集成动作管理",
   "integration_app_action_choose": "集成动作选择",
   "integration_app_action_list": "集成动作管理",

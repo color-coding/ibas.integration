@@ -70,7 +70,7 @@ namespace integration {
                                 path: "atTime",
                                 type: new sap.extension.data.Time(),
                             }),
-                            new sap.ui.core.Title("", { text: ibas.i18n.prop("integration_title_others") }),
+                            new sap.ui.core.Title("", { text: ibas.i18n.prop("integration_title_relation") }),
                             new sap.m.Label("", { text: ibas.i18n.prop("bo_integrationjob_bocode") }),
                             new sap.extension.m.RepositoryInput("", {
                                 showValueHelp: true,
@@ -89,12 +89,28 @@ namespace integration {
                                     maxLength: 30
                                 })
                             }),
-                            new sap.m.Label("", { text: ibas.i18n.prop("bo_integrationjob_dataowner") }),
-                            new sap.extension.m.UserInput("", {
+                            new sap.m.Label("", { text: ibas.i18n.prop("bo_integrationjob_applicationid") }),
+                            new sap.extension.m.SelectionInput("", {
                                 showValueHelp: true,
+                                valueHelpOnly: false,
+                                repository: initialfantasy.bo.BORepositoryInitialFantasy,
+                                dataInfo: {
+                                    type: initialfantasy.bo.BO_CODE_APPLICATIONELEMENT,
+                                    key: initialfantasy.bo.ApplicationElement.PROPERTY_ELEMENTID_NAME,
+                                    text: initialfantasy.bo.ApplicationElement.PROPERTY_ELEMENTNAME_NAME
+                                },
+                                criteria: [
+                                    new ibas.Condition(
+                                        initialfantasy.bo.ApplicationElement.PROPERTY_ELEMENTTYPE_NAME,
+                                        ibas.emConditionOperation.NOT_EQUAL,
+                                        initialfantasy.bo.emElementType.MODULE
+                                    )
+                                ]
                             }).bindProperty("bindingValue", {
-                                path: "dataOwner",
-                                type: new sap.extension.data.Numeric()
+                                path: "applicationId",
+                                type: new sap.extension.data.Alphanumeric({
+                                    maxLength: 36
+                                })
                             }),
                         ]
                     });
@@ -270,6 +286,47 @@ namespace integration {
                             })
                         ]
                     });
+                    let formBottom: sap.ui.layout.form.SimpleForm = new sap.ui.layout.form.SimpleForm("", {
+                        editable: true,
+                        content: [
+                            new sap.ui.core.Title("", { text: ibas.i18n.prop("materials_title_others") }),
+                            new sap.m.Label("", { text: ibas.i18n.prop("bo_integrationjob_dataowner") }),
+                            new sap.extension.m.UserInput("", {
+                                showValueHelp: true,
+                            }).bindProperty("bindingValue", {
+                                path: "dataOwner",
+                                type: new sap.extension.data.Numeric()
+                            }),
+                            new sap.m.Label("", { text: ibas.i18n.prop("bo_integrationjob_teammembers") }),
+                            new sap.extension.m.UserInput("", {
+                                showValueHelp: true,
+                                chooseType: ibas.emChooseType.MULTIPLE,
+                                criteria: [
+                                    new ibas.Condition(initialfantasy.bo.User.PROPERTY_ACTIVATED_NAME, ibas.emConditionOperation.EQUAL, ibas.emYesNo.YES)
+                                ]
+                            }).bindProperty("bindingValue", {
+                                path: "teamMembers",
+                                type: new sap.extension.data.Alphanumeric()
+                            }),
+                            new sap.m.Label("", { text: ibas.i18n.prop("bo_integrationjob_organization") }),
+                            new sap.extension.m.DataOrganizationInput("", {
+                                showValueHelp: true,
+                            }).bindProperty("bindingValue", {
+                                path: "organization",
+                                type: new sap.extension.data.Alphanumeric({
+                                    maxLength: 8
+                                })
+                            }),
+                            new sap.m.Label("", { text: ibas.i18n.prop("bo_integrationjob_remarks") }),
+                            new sap.extension.m.TextArea("", {
+                                rows: 3,
+                            }).bindProperty("bindingValue", {
+                                path: "remarks",
+                                type: new sap.extension.data.Alphanumeric()
+                            }),
+                            new sap.ui.core.Title("", {}),
+                        ]
+                    });
                     return this.page = new sap.extension.m.Page("", {
                         showHeader: false,
                         subHeader: new sap.m.Toolbar("", {
@@ -321,7 +378,8 @@ namespace integration {
                         }),
                         content: [
                             formTop,
-                            formMiddle
+                            formMiddle,
+                            formBottom,
                         ]
                     });
                 }
