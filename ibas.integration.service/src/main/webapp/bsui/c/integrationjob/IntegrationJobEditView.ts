@@ -95,7 +95,7 @@ namespace integration {
                                 valueHelpOnly: false,
                                 repository: initialfantasy.bo.BORepositoryInitialFantasy,
                                 dataInfo: {
-                                    type: initialfantasy.bo.BO_CODE_APPLICATIONELEMENT,
+                                    type: initialfantasy.bo.ApplicationElement,
                                     key: initialfantasy.bo.ApplicationElement.PROPERTY_ELEMENTID_NAME,
                                     text: initialfantasy.bo.ApplicationElement.PROPERTY_ELEMENTNAME_NAME
                                 },

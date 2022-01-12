@@ -73,6 +73,7 @@
     "activated": true,
     "path": "SyncSalesOrder.ts",
     "dependencies": [
+      "./3rdparty/jquery/index",
       "./3rdparty/jquerysoap/index",
       "./3rdparty/jqueryxml2json/index"
     ],

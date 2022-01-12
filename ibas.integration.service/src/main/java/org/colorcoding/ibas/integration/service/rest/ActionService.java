@@ -91,6 +91,14 @@ public class ActionService extends FileRepositoryAction {
 		}
 	}
 
+	@Override
+	protected String getContentType(String filePath) {
+		if (filePath.endsWith(".js")) {
+			return "application/javascript";
+		}
+		return super.getContentType(filePath);
+	}
+
 	@POST
 	@Path("uploadPackage")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)

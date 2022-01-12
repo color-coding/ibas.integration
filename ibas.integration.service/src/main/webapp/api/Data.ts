@@ -214,8 +214,17 @@ namespace integration {
                 }
                 return false;
             }
-            /** 调用后台服务 */
-            protected goAction(name: string, params: { key: string, value: any }[] | { key: string, value: any }, fnBack?: (opRslt: ibas.IOperationMessage) => void): void {
+            /**
+             * 调用后台服务
+             * @param name 服务名称
+             * @param params 参数
+             * @param fnBack 回调方法
+             * @param repositoryUrl 业务仓库地址
+             */
+            protected goAction(name: string,
+                params: { key: string, value: any }[] | { key: string, value: any },
+                fnBack?: (opRslt: ibas.IOperationMessage) => void,
+                repositoryUrl?: string): void {
                 let group: string = this.getConfig(CONFIG_ACTION_GROUP);
                 if (!ibas.strings.isEmpty(group)) {
                     if (group.endsWith("/")) {
@@ -227,6 +236,9 @@ namespace integration {
                     }
                 }
                 let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
+                if (!ibas.strings.isEmpty(repositoryUrl)) {
+                    boRepository.address = repositoryUrl;
+                }
                 boRepository.goAction({
                     group: group,
                     name: name,

@@ -12,3 +12,4 @@
 /// <reference path="./IntegrationJobRunnerApp.ts" />
 /// <reference path="./IntegrationJobApp.ts" />
 /// <reference path="./IntegrationJobSchedulerApp.ts" />
+/// <reference path="./IntegrationWorker.ts" />

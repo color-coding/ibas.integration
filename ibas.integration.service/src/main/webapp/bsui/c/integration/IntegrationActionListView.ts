@@ -41,6 +41,30 @@ namespace integration {
                                                 subHeader: new sap.m.Toolbar("", {
                                                     design: sap.m.ToolbarDesign.Transparent,
                                                     content: [
+                                                        new sap.m.Button("", {
+                                                            type: sap.m.ButtonType.Transparent,
+                                                            icon: "sap-icon://slim-arrow-right",
+                                                            press: function (event: sap.ui.base.Event): void {
+                                                                let source: any = event.getSource();
+                                                                if (source instanceof sap.m.Button) {
+                                                                    if (source.getIcon() === "sap-icon://slim-arrow-right") {
+                                                                        for (let item of that.leftList.getItems()) {
+                                                                            if (item instanceof sap.m.NotificationListGroup) {
+                                                                                item.setCollapsed(false);
+                                                                            }
+                                                                        }
+                                                                        source.setIcon("sap-icon://slim-arrow-down");
+                                                                    } else {
+                                                                        for (let item of that.leftList.getItems()) {
+                                                                            if (item instanceof sap.m.NotificationListGroup) {
+                                                                                item.setCollapsed(true);
+                                                                            }
+                                                                        }
+                                                                        source.setIcon("sap-icon://slim-arrow-right");
+                                                                    }
+                                                                }
+                                                            }
+                                                        }),
                                                         new sap.m.SearchField("", {
                                                             search(event: sap.ui.base.Event): void {
                                                                 let source: any = event.getSource();
@@ -91,31 +115,6 @@ namespace integration {
                                                                 that.fireViewEvents(that.fetchPackageEvent);
                                                             }
                                                         }),
-                                                        new sap.m.ToolbarSeparator(""),
-                                                        new sap.m.Button("", {
-                                                            type: sap.m.ButtonType.Transparent,
-                                                            icon: "sap-icon://slim-arrow-right",
-                                                            press: function (event: sap.ui.base.Event): void {
-                                                                let source: any = event.getSource();
-                                                                if (source instanceof sap.m.Button) {
-                                                                    if (source.getIcon() === "sap-icon://slim-arrow-right") {
-                                                                        for (let item of that.leftList.getItems()) {
-                                                                            if (item instanceof sap.m.NotificationListGroup) {
-                                                                                item.setCollapsed(false);
-                                                                            }
-                                                                        }
-                                                                        source.setIcon("sap-icon://slim-arrow-down");
-                                                                    } else {
-                                                                        for (let item of that.leftList.getItems()) {
-                                                                            if (item instanceof sap.m.NotificationListGroup) {
-                                                                                item.setCollapsed(true);
-                                                                            }
-                                                                        }
-                                                                        source.setIcon("sap-icon://slim-arrow-right");
-                                                                    }
-                                                                }
-                                                            }
-                                                        }),
                                                     ]
                                                 }),
                                                 content: [
@@ -131,17 +130,17 @@ namespace integration {
                                                                 title: {
                                                                     parts: [
                                                                         {
-                                                                            path: "id",
-                                                                            type: new sap.extension.data.Alphanumeric(),
-                                                                        },
-                                                                        {
                                                                             path: "dateTime",
                                                                             formatter(data: any): string {
                                                                                 if (data instanceof Date) {
-                                                                                    return ibas.dates.toString(data, "yyyy-MM-dd HH:mm");
+                                                                                    return ibas.dates.toString(data, "MM-dd_HH:mm");
                                                                                 }
                                                                                 return data;
                                                                             }
+                                                                        },
+                                                                        {
+                                                                            path: "id",
+                                                                            type: new sap.extension.data.Alphanumeric(),
                                                                         },
                                                                     ]
                                                                 },
@@ -181,7 +180,7 @@ namespace integration {
                                                                         },
                                                                         showCloseButton: false,
                                                                     })
-                                                                }
+                                                                },
                                                             }),
                                                         },
                                                     })

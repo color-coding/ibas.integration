@@ -65,87 +65,83 @@ namespace integration {
                 }
             }
             private actions: ibas.IList<bo.Action>;
-            private groupAction: GroupAction;
+            private myWorker: IntegrationWorker;
+            private logger: { log(message: string | Error, type?: ibas.emMessageType): void } = {
+                log: (message, type) => {
+                    if (ibas.objects.isNull(type)) {
+                        if (message instanceof Error) {
+                            type = ibas.emMessageType.ERROR;
+                            message = message.stack;
+                        } else {
+                            type = ibas.emMessageType.INFORMATION;
+                        }
+                    }
+                    // 控制台日志
+                    if (type === ibas.emMessageType.ERROR) {
+                        ibas.logger.log(ibas.emMessageLevel.ERROR, message.toString());
+                    }
+                    if (this.isViewShowed()) {
+                        try {
+                            this.view.showMessages(type, message.toString());
+                        } catch (error) {
+                            // 写日志出错
+                            this.proceeding(error);
+                        }
+                    } else {
+                        this.proceeding(type, message.toString());
+                    }
+                }
+            };
             private runActions(): void {
+                if (!ibas.objects.isNull(this.myWorker)) {
+                    this.messages(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_has_running_worker"));
+                    return;
+                }
                 if (ibas.objects.isNull(this.actions)) {
                     return;
                 }
-                let that: this = this;
-                let groupAction: GroupAction = new GroupAction();
-                groupAction.setLogger({
-                    level: ibas.config.get(ibas.CONFIG_ITEM_DEBUG_MODE) === true ? ibas.emMessageLevel.DEBUG : ibas.emMessageLevel.INFO,
-                    log(): void {
-                        let tmpArgs: Array<any> = new Array();
-                        for (let item of arguments) {
-                            tmpArgs.push(item);
-                        }
-                        // 控制台日志
-                        ibas.logger.log.apply(ibas.logger, tmpArgs);
-                        // 界面日志
-                        let level: number;
-                        if (typeof tmpArgs[0] === "number" && tmpArgs.length > 1) {
-                            level = tmpArgs[0];
-                            tmpArgs = tmpArgs.slice(1);
-                        } else if (tmpArgs[0] instanceof Error && tmpArgs.length === 1) {
-                            level = ibas.emMessageLevel.ERROR;
-                            tmpArgs[0] = tmpArgs[0].message;
+                try {
+                    this.busy(true);
+                    this.myWorker = ibas.workers.init(new IntegrationWorker());
+                    this.myWorker.addSetting("actions", this.actions);
+                    this.myWorker.onMessage = (message) => {
+                        if (message instanceof Error) {
+                            this.logger.log(message.stack ? message.stack : message, ibas.emMessageType.ERROR);
+                        } else if (typeof message === "string") {
+                            this.logger.log(message, ibas.emMessageType.INFORMATION);
                         } else {
-                            level = ibas.emMessageLevel.INFO;
+                            this.logger.log(message.message, message.type);
                         }
-                        if (level > this.level) {
-                            // 超过日志输出的级别
-                            return;
-                        }
-                        let type: ibas.emMessageType = bo.DataConverter.toMessageType(level);
-                        let message: string = ibas.strings.format(tmpArgs[0], tmpArgs.slice(1));
-                        if (that.isViewShowed()) {
-                            try {
-                                that.view.showMessages(type, message);
-                            } catch (error) {
-                                // 写日志出错
-                                that.proceeding(error);
-                            }
-                        } else {
-                            that.proceeding(type, message);
-                        }
-                    }
-                });
-                that.view.busy(true);
-                ibas.queues.execute(this.actions, (item, next) => {
-                    bo.actionFactory.create({
-                        action: item,
-                        onError(error: Error): void {
-                            if ((<any>error).requireType === "scripterror") {
-                                next(new Error(ibas.i18n.prop("integration_not_found_action", item.name)));
-                            } else {
-                                next(error);
-                            }
-                        },
-                        onCompleted(action: ibas.Action): void {
-                            // 添加额外运行数据
-                            action.extraData = that.extraData;
-                            groupAction.addAction(action);
-                            next();
-                        }
-                    });
-                }, (error) => {
-                    if (error instanceof Error) {
-                        that.messages(error);
-                    } else {
-                        that.groupAction = groupAction;
-                        groupAction.onDone = () => {
-                            that.view.busy(false);
-                        };
-                        groupAction.do();
-                    }
-                });
+                    };
+                    this.myWorker.onStop = () => {
+                        this.logger.log(ibas.i18n.prop("integration_worker_end",
+                            this.myWorker.name, ibas.dates.toString(this.myWorker.endTime, "HH:mm:ss"), ibas.dates.span(this.myWorker.startTime, this.myWorker.endTime)));
+                        this.myWorker = null;
+                        this.view.busy(false);
+                    };
+                    this.busy(false);
+                    this.view.busy(true);
+                    this.myWorker.do();
+                    this.logger.log(ibas.i18n.prop("integration_worker_starting", this.myWorker.name, ibas.dates.toString(this.myWorker.startTime, "HH:mm:ss")));
+                } catch (error) {
+                    this.messages(error);
+                    this.stopActions();
+                }
             }
             private stopActions(): void {
-                if (ibas.objects.isNull(this.groupAction)) {
+                if (ibas.objects.isNull(this.myWorker)) {
                     return;
                 }
-                this.groupAction.stop();
-                this.groupAction = null;
+                this.myWorker.stop();
+                this.myWorker = null;
+                this.view.busy(false);
+            }
+            close(): void {
+                if (!ibas.objects.isNull(this.myWorker)) {
+                    this.myWorker.stop();
+                    this.myWorker = null;
+                }
+                super.close();
             }
         }
         /** 视图-动作运行 */
@@ -160,62 +156,6 @@ namespace integration {
             showMessages(type: ibas.emMessageType, message: string): void;
             /** 忙状态 */
             busy(value: boolean): void;
-        }
-        /** 集合动作 */
-        class GroupAction extends ibas.Action {
-            /** 日志者 */
-            logger: ibas.ILogger;
-            /** 设置日志记录者 */
-            setLogger(logger: ibas.ILogger): void {
-                this.logger = logger;
-                super.setLogger(this.logger);
-            }
-            /** 运行 */
-            protected run(): boolean {
-                if (ibas.objects.isNull(this.actions)) {
-                    return true;
-                }
-                if (this.actions.length === 0) {
-                    return true;
-                }
-                let that: this = this;
-                ibas.queues.execute(this.actions, (action, next) => {
-                    action.onDone = function (): void {
-                        next();
-                    };
-                    action.do();
-                }, (error) => {
-                    if (error instanceof Error) {
-                        that.log(ibas.emMessageLevel.ERROR, error.message);
-                    }
-                    that.done();
-                });
-                return false;
-            }
-            /** 子任务 */
-            private actions: ibas.IList<ibas.Action>;
-            /** 任务个数 */
-            get length(): number {
-                if (ibas.objects.isNull(this.actions)) {
-                    return 0;
-                }
-                return this.actions.length;
-            }
-            addAction(action: ibas.Action, index?: number): void {
-                if (ibas.objects.isNull(this.actions)) {
-                    this.actions = new ibas.ArrayList<ibas.Action>();
-                }
-                action.setLogger(this.logger);
-                this.actions.add(action);
-            }
-            stop(): void {
-                if (ibas.objects.isNull(this.actions)) {
-                    return;
-                }
-                for (let item of this.actions) {
-                    item.stop();
-                }
-            }
         }
     }
 }

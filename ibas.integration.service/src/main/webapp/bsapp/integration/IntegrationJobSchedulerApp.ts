@@ -9,6 +9,19 @@ namespace integration {
     export namespace app {
         /** 配置项目-自动运行默认项 */
         const CONFIG_ITEM_JOB_SCHEDULER_DEFAULT_ACTION: string = "jobDefaultAction";
+        /** 配置项目-禁用落盘日志 */
+        const CONFIG_ITEM_DISABLE_PLACING_LOG: string = "disablePlacingLog";
+        /** 落盘日志 */
+        let placingLog: (message: {
+            name: string, level: string, content: string, date: Date
+        }) => void = (message) => {
+            if (typeof (<any>window).placingLog === "function") {
+                try {
+                    (<any>window).placingLog(message);
+                } catch (error) {
+                }
+            }
+        };
         /** 任务列表队列编号 */
         let jobHandler: number;
         /** 集成任务调度者 */
@@ -59,26 +72,36 @@ namespace integration {
                                 if (item.integrationJobActions.length === 0) {
                                     continue;
                                 }
+                                let unPlacing: boolean = ibas.config.get(CONFIG_ITEM_DISABLE_PLACING_LOG, false);
                                 let task: TaskAction = new TaskAction(item);
                                 task.setLogger({
                                     level: ibas.config.get(ibas.CONFIG_ITEM_DEBUG_MODE) === true ? ibas.emMessageLevel.DEBUG : ibas.emMessageLevel.INFO,
                                     log(): void {
+                                        let level: number;
                                         let tmpArgs: Array<any> = new Array();
                                         for (let item of arguments) {
                                             tmpArgs.push(item);
                                         }
-                                        // 界面日志
-                                        let level: number;
                                         if (typeof tmpArgs[0] === "number" && tmpArgs.length > 1) {
                                             level = tmpArgs[0];
                                             tmpArgs = tmpArgs.slice(1);
                                         } else {
                                             level = ibas.emMessageLevel.INFO;
                                         }
+                                        // 落盘日志，接口可能托管在docker或Windows服务中，自定义了日志记录方法
+                                        if (unPlacing !== true) {
+                                            placingLog({
+                                                name: task.name,
+                                                date: ibas.dates.now(),
+                                                level: ibas.enums.toString(ibas.emMessageLevel, level),
+                                                content: ibas.strings.format(tmpArgs[0], tmpArgs.slice(1))
+                                            });
+                                        }
+                                        // 超过日志输出的级别
                                         if (level > this.level) {
-                                            // 超过日志输出的级别
                                             return;
                                         }
+                                        // 界面日志
                                         try {
                                             that.view.showLogs(bo.DataConverter.toMessageType(level), ibas.strings.format(tmpArgs[0], tmpArgs.slice(1)));
                                         } catch (error) {
@@ -107,6 +130,11 @@ namespace integration {
                 if (jobHandler > 0) {
                     clearInterval(jobHandler);
                     this.proceeding(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_scheduler_job_list_stoped", jobHandler >= 0 ? jobHandler : -1));
+                    if (this.jobs instanceof Array) {
+                        for (let item of this.jobs) {
+                            item.stop();
+                        }
+                    }
                     jobHandler = undefined;
                 }
                 this.viewShowed();
@@ -122,21 +150,30 @@ namespace integration {
                         }, 10000);
                         this.proceeding(ibas.emMessageType.SUCCESS, ibas.i18n.prop("integration_scheduler_job_list_started", jobHandler >= 0 ? jobHandler : -1));
                     } else if (jobHandler > 0) {
-                        this.busy(true);
                         throw new Error(ibas.i18n.prop("integration_scheduler_job_list_in_running", jobHandler >= 0 ? jobHandler : -1));
                     }
                 } else {
                     if (jobHandler > 0) {
                         clearInterval(jobHandler);
                         this.proceeding(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_scheduler_job_list_stoped", jobHandler >= 0 ? jobHandler : -1));
+                        if (this.jobs instanceof Array) {
+                            for (let item of this.jobs) {
+                                item.stop();
+                            }
+                        }
                         jobHandler = undefined;
                     }
                 }
             }
-            public close(): void {
+            close(): void {
                 if (jobHandler > 0) {
                     clearInterval(jobHandler);
                     this.proceeding(ibas.emMessageType.WARNING, ibas.i18n.prop("integration_scheduler_job_list_stoped", jobHandler >= 0 ? jobHandler : -1));
+                    if (this.jobs instanceof Array) {
+                        for (let item of this.jobs) {
+                            item.stop();
+                        }
+                    }
                     jobHandler = undefined;
                 }
                 super.close();
@@ -188,13 +225,6 @@ namespace integration {
             lastRunTime: number;
             /** 激活的 */
             activated: boolean;
-            /** 日志者 */
-            logger: ibas.ILogger;
-            /** 设置日志记录者 */
-            setLogger(logger: ibas.ILogger): void {
-                this.logger = logger;
-                super.setLogger(this.logger);
-            }
             /** 进行 */
             do(): void {
                 // 未激活
@@ -229,111 +259,48 @@ namespace integration {
                         return;
                     }
                 }
-                // 检查任务是否更新
-                if (this.lastRunTime > 0) {
-                    let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
-                    let criteria: ibas.ICriteria = new ibas.Criteria();
-                    let condition: ibas.ICondition = criteria.conditions.create();
-                    condition.alias = bo.IntegrationJob.PROPERTY_OBJECTKEY_NAME;
-                    condition.operation = ibas.emConditionOperation.EQUAL;
-                    condition.value = this.job.objectKey.toString();
-                    boRepository.fetchIntegrationJob({
-                        criteria: criteria,
-                        onCompleted: (opRslt) => {
-                            let job: bo.IntegrationJob = opRslt.resultObjects.firstOrDefault();
-                            if (ibas.objects.isNull(job) || job.logInst !== this.job.logInst) {
-                                // 集成任务不存在，或已被修改
-                                this.log(ibas.emMessageLevel.FATAL, ibas.i18n.prop("integration_background_integrationjob_updated"));
-                                this.activated = false;
-                                this.done();
-                            } else {
-                                super.do();
-                            }
-                        }
-                    });
-                } else {
-                    super.do();
-                }
+                super.do();
             }
             protected done(): void {
                 super.done();
                 this.lastRunTime = this.endTime.getTime();
             }
-            /** 运行 */
+            private myWorker: IntegrationScheduleWorker;
             protected run(): boolean {
-                if (ibas.objects.isNull(this.actions)) {
-                    // 尚未初始化
-                    let that: this = this;
-                    let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
-                    boRepository.fetchAction({
-                        criteria: this.job,
-                        onCompleted(opRslt: ibas.IOperationResult<bo.Action>): void {
-                            try {
-                                if (opRslt.resultCode !== 0) {
-                                    throw new Error(opRslt.message);
-                                }
-                                if (opRslt.resultObjects.length === 0) {
-                                    throw new Error(ibas.i18n.prop("integration_not_found_job_actions", that.job.name));
-                                }
-                                for (let item of opRslt.resultObjects) {
-                                    bo.actionFactory.create({
-                                        action: item,
-                                        onError(error: Error): void {
-                                            that.activated = false;
-                                            that.log(ibas.emMessageLevel.ERROR, error.message);
-                                            that.done();
-                                        },
-                                        onCompleted(action: ibas.Action): void {
-                                            if (ibas.objects.isNull(that.actions)) {
-                                                that.actions = new ibas.ArrayList<ibas.Action>();
-                                            }
-                                            // 设置日志记录
-                                            action.setLogger(that.logger);
-                                            that.actions.add(action);
-                                            if (that.actions.length === opRslt.resultObjects.length) {
-                                                // 全部加载完成
-                                                that.runActions();
-                                            }
-                                        }
-                                    });
-                                }
-                            } catch (error) {
-                                // 出错，不在运行
-                                that.activated = false;
-                                that.log(ibas.emMessageLevel.ERROR, error.message);
-                                that.done();
-                            }
-                        }
-                    });
-                } else {
-                    // 已初始化，开始运行任务
-                    return this.runActions();
+                if (this.myWorker instanceof ibas.Worker) {
+                    this.myWorker.stop();
+                    this.myWorker = undefined;
                 }
-                return false;
-            }
-            /** 运行子任务 */
-            private runActions(): boolean {
-                if (ibas.objects.isNull(this.actions)) {
-                    return true;
-                }
-                if (this.actions.length === 0) {
-                    return true;
-                }
-                ibas.queues.execute(this.actions, (action, next) => {
-                    action.onDone = function (): void {
-                        next();
-                    };
-                    action.do();
-                }, (error) => {
-                    if (error instanceof Error) {
-                        this.log(ibas.emMessageLevel.ERROR, error.message);
+                this.myWorker = ibas.workers.init(new IntegrationScheduleWorker(this.name));
+                this.myWorker.addSetting("jobId", this.job.objectKey);
+                this.myWorker.onMessage = (message) => {
+                    if (message instanceof Error) {
+                        this.log(message.stack ? message.stack : message.message, ibas.emMessageType.ERROR);
+                    } else if (typeof message === "string") {
+                        this.log(message, ibas.emMessageType.INFORMATION);
+                    } else {
+                        this.log(message.message, message.type);
                     }
+                };
+                this.myWorker.onStop = () => {
+                    this.log(ibas.i18n.prop("integration_worker_end",
+                        this.myWorker.name, ibas.dates.toString(this.myWorker.endTime, "HH:mm:ss"), ibas.dates.span(this.myWorker.startTime, this.myWorker.endTime)));
+                    this.myWorker = null;
                     this.done();
-                });
+                };
+                this.myWorker.do();
+                this.log(ibas.i18n.prop("integration_worker_starting", this.myWorker.name, ibas.dates.toString(this.myWorker.startTime, "HH:mm:ss")));
                 return false;
             }
-            /** 子任务 */
-            private actions: ibas.IList<ibas.Action>;
+            stop(): void {
+                if (this.myWorker instanceof ibas.Worker) {
+                    this.myWorker.stop();
+                    this.myWorker = undefined;
+                }
+                if (this.isRunning() === true) {
+                    this.done();
+                }
+            }
         }
     }
 }
