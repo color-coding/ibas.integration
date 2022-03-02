@@ -27,7 +27,7 @@ namespace integration {
                             libraries.insert(0, "./3rdparty/jquery/index");
                         }
                     }
-                    if (globalThis.jQuery === undefined) {
+                    if (globalThis.jQuery === undefined && globalThis.hasOwnProperty("jQuery") !== true) {
                         Object.defineProperty(globalThis, "jQuery", {
                             get: function (): any {
                                 return globalThis.window.jQuery;
@@ -37,7 +37,7 @@ namespace integration {
                             }
                         });
                     }
-                    if (globalThis.$ === undefined) {
+                    if (globalThis.$ === undefined && globalThis.hasOwnProperty("$") !== true) {
                         Object.defineProperty(globalThis, "$", {
                             get: function (): any {
                                 return globalThis.window.$;
@@ -156,6 +156,9 @@ namespace integration {
                         return true;
                     }
                     if (src.indexOf("/anytouch.") > 0) {
+                        return true;
+                    }
+                    if (src.indexOf("/3rdparty/") > 0 && src.indexOf("/ibas/3rdparty/") < 0) {
                         return true;
                     }
                 }

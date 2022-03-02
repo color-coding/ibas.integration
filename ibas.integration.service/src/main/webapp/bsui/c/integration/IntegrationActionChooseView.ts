@@ -47,14 +47,20 @@ namespace integration {
                                 cells: [
                                     new sap.extension.m.ObjectAttribute("", {
                                         bindingValue: {
-                                            path: "group",
-                                            formatter(data: string): string {
-                                                if (typeof data === "string") {
-                                                    return data.substring(data.lastIndexOf("/") + 1);
-                                                }
-                                                return data;
-                                            },
-                                            type: new sap.extension.data.Alphanumeric(),
+                                            parts: [
+                                                {
+                                                    path: "id",
+                                                    type: new sap.extension.data.Alphanumeric(),
+                                                },
+                                                {
+                                                    path: "dateTime",
+                                                    type: new sap.extension.data.Time(),
+                                                },
+                                            ],
+                                            formatter(id: string, date: Date): string {
+                                                return ibas.strings.format("# {0}...  {1}",
+                                                    id?.substring(0, 8), ibas.dates.toString(date, "yyyy-MM-dd_HH:mm"));
+                                            }
                                         }
                                     }),
                                     new sap.extension.m.ObjectAttribute("", {
@@ -121,7 +127,11 @@ namespace integration {
                                 text: ibas.i18n.prop("shell_data_choose"),
                                 type: sap.m.ButtonType.Transparent,
                                 press: function (): void {
-                                    that.fireViewEvents(that.chooseDataEvent, that.table.getSelecteds());
+                                    let selecteds: ibas.ArrayList<bo.Action> = new ibas.ArrayList<bo.Action>();
+                                    for (let item of that.table.getSelecteds<LineData>()) {
+                                        selecteds.add(item.data);
+                                    }
+                                    that.fireViewEvents(that.chooseDataEvent, selecteds);
                                 }
                             }),
                             new sap.m.Button("", {
@@ -137,8 +147,20 @@ namespace integration {
                 private table: sap.extension.m.Table;
                 private search: sap.m.SearchField;
                 /** 显示数据 */
-                showData(datas: bo.Action[]): void {
-                    this.table.setModel(new sap.extension.model.JSONModel({ rows: datas }));
+                showData(datas: bo.ActionPackage[]): void {
+                    let lineData: ibas.ArrayList<LineData> = new ibas.ArrayList<LineData>();
+                    for (let item of datas) {
+                        for (let sItem of item.actions) {
+                            let data: LineData = new LineData();
+                            data.id = item.id;
+                            data.dateTime = item.dateTime;
+                            data.data = sItem;
+                            data.name = sItem.name;
+                            data.remark = sItem.remark;
+                            lineData.add(data);
+                        }
+                    }
+                    this.table.setModel(new sap.extension.model.JSONModel({ rows: lineData }));
                 }
 
                 /** 记录上次查询条件，表格滚动时自动触发 */
@@ -150,6 +172,13 @@ namespace integration {
                     }
                 }
             }
+        }
+        class LineData {
+            data: bo.Action;
+            id: string;
+            dateTime: Date;
+            name: string;
+            remark: string;
         }
     }
 }

@@ -54,6 +54,7 @@
         "bo_integrationjobaction_createactionid": "创建动作标识",
         "bo_integrationjobaction_updateactionid": "更新动作标识",
         "bo_integrationjobaction_relationship": "与上一个动作的关系",
+        "bo_integrationjobaction_actiongroup": "任务项组",
         "bo_integrationjobaction_actionid": "任务项标识",
         "bo_integrationjobaction_actionname": "任务项名称",
         "bo_integrationjobaction_actionremark": "任务项说明",

@@ -58,6 +58,7 @@ namespace integration {
                                     }
                                 }),
                                 new sap.m.ToolbarSpacer(""),
+                                /*
                                 new sap.m.Button("", {
                                     text: ibas.i18n.prop("integration_log_upload"),
                                     type: sap.m.ButtonType.Transparent,
@@ -80,6 +81,7 @@ namespace integration {
                                         });
                                     }
                                 }),
+                                */
                             ]
                         }),
                         content: [

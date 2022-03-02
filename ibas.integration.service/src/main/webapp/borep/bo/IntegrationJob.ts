@@ -465,6 +465,17 @@ namespace integration {
                 this.setProperty(IntegrationJobAction.PROPERTY_RELATIONSHIP_NAME, value);
             }
 
+            /** 映射的属性名称-任务项组 */
+            static PROPERTY_ACTIONGROUP_NAME: string = "ActionGroup";
+            /** 获取-任务项组 */
+            get actionGroup(): string {
+                return this.getProperty<string>(IntegrationJobAction.PROPERTY_ACTIONGROUP_NAME);
+            }
+            /** 设置-任务项组 */
+            set actionGroup(value: string) {
+                this.setProperty(IntegrationJobAction.PROPERTY_ACTIONGROUP_NAME, value);
+            }
+
             /** 映射的属性名称-任务项标识 */
             static PROPERTY_ACTIONID_NAME: string = "ActionId";
             /** 获取-任务项标识 */

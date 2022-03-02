@@ -130,19 +130,18 @@ namespace integration {
                                                                 title: {
                                                                     parts: [
                                                                         {
-                                                                            path: "dateTime",
-                                                                            formatter(data: any): string {
-                                                                                if (data instanceof Date) {
-                                                                                    return ibas.dates.toString(data, "MM-dd_HH:mm");
-                                                                                }
-                                                                                return data;
-                                                                            }
-                                                                        },
-                                                                        {
                                                                             path: "id",
                                                                             type: new sap.extension.data.Alphanumeric(),
                                                                         },
-                                                                    ]
+                                                                        {
+                                                                            path: "dateTime",
+                                                                            type: new sap.extension.data.Time(),
+                                                                        },
+                                                                    ],
+                                                                    formatter(id: string, date: Date): string {
+                                                                        return ibas.strings.format("# {0}...  {1}",
+                                                                            id?.substring(0, 8), ibas.dates.toString(date, "yyyy-MM-dd_HH:mm"));
+                                                                    }
                                                                 },
                                                                 close(event: sap.ui.base.Event): void {
                                                                     let source: any = event.getSource();

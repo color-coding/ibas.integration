@@ -187,7 +187,7 @@ namespace integration {
                             }),
                             new sap.extension.table.DataColumn("", {
                                 label: ibas.i18n.prop("bo_integrationjobaction_actionremark"),
-                                width: "30rem",
+                                width: "100%",
                                 template: new sap.extension.m.Input("", {
                                 }).bindProperty("bindingValue", {
                                     path: "actionRemark",
@@ -264,7 +264,7 @@ namespace integration {
                             }),
                             new sap.extension.table.DataColumn("", {
                                 label: ibas.i18n.prop("bo_integrationjobactioncfg_remark"),
-                                width: "30rem",
+                                width: "100%",
                                 template: new sap.extension.m.Input("", {
                                 }).bindProperty("bindingValue", {
                                     path: "remark",

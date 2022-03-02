@@ -72,8 +72,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-对象编号
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setObjectKey(Integer value) {
 		this.setProperty(PROPERTY_OBJECTKEY, value);
@@ -104,8 +103,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-对象行号
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setLineId(Integer value) {
 		this.setProperty(PROPERTY_LINEID, value);
@@ -136,8 +134,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-对象类型
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setObjectCode(String value) {
 		this.setProperty(PROPERTY_OBJECTCODE, value);
@@ -168,8 +165,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-实例号
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setLogInst(Integer value) {
 		this.setProperty(PROPERTY_LOGINST, value);
@@ -200,8 +196,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-数据源
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setDataSource(String value) {
 		this.setProperty(PROPERTY_DATASOURCE, value);
@@ -232,8 +227,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-创建日期
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setCreateDate(DateTime value) {
 		this.setProperty(PROPERTY_CREATEDATE, value);
@@ -264,8 +258,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-创建时间
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setCreateTime(Short value) {
 		this.setProperty(PROPERTY_CREATETIME, value);
@@ -296,8 +289,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-更新日期
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setUpdateDate(DateTime value) {
 		this.setProperty(PROPERTY_UPDATEDATE, value);
@@ -328,8 +320,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-更新时间
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setUpdateTime(Short value) {
 		this.setProperty(PROPERTY_UPDATETIME, value);
@@ -360,8 +351,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-创建用户
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setCreateUserSign(Integer value) {
 		this.setProperty(PROPERTY_CREATEUSERSIGN, value);
@@ -392,8 +382,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-更新用户
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setUpdateUserSign(Integer value) {
 		this.setProperty(PROPERTY_UPDATEUSERSIGN, value);
@@ -424,8 +413,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-创建动作标识
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setCreateActionId(String value) {
 		this.setProperty(PROPERTY_CREATEACTIONID, value);
@@ -456,8 +444,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-更新动作标识
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setUpdateActionId(String value) {
 		this.setProperty(PROPERTY_UPDATEACTIONID, value);
@@ -488,11 +475,41 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-与上一个动作的关系
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setRelationship(emActionRelationship value) {
 		this.setProperty(PROPERTY_RELATIONSHIP, value);
+	}
+
+	/**
+	 * 属性名称-任务项组
+	 */
+	private static final String PROPERTY_ACTIONGROUP_NAME = "ActionGroup";
+
+	/**
+	 * 任务项组 属性
+	 */
+	@DbField(name = "ActionGroup", type = DbFieldType.ALPHANUMERIC, table = DB_TABLE_NAME)
+	public static final IPropertyInfo<String> PROPERTY_ACTIONGROUP = registerProperty(PROPERTY_ACTIONGROUP_NAME,
+			String.class, MY_CLASS);
+
+	/**
+	 * 获取-任务项组
+	 * 
+	 * @return 值
+	 */
+	@XmlElement(name = PROPERTY_ACTIONGROUP_NAME)
+	public final String getActionGroup() {
+		return this.getProperty(PROPERTY_ACTIONGROUP);
+	}
+
+	/**
+	 * 设置-任务项组
+	 * 
+	 * @param value 值
+	 */
+	public final void setActionGroup(String value) {
+		this.setProperty(PROPERTY_ACTIONGROUP, value);
 	}
 
 	/**
@@ -520,8 +537,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-任务项标识
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setActionId(String value) {
 		this.setProperty(PROPERTY_ACTIONID, value);
@@ -552,8 +568,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-任务项名称
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setActionName(String value) {
 		this.setProperty(PROPERTY_ACTIONNAME, value);
@@ -584,8 +599,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-任务项说明
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setActionRemark(String value) {
 		this.setProperty(PROPERTY_ACTIONREMARK, value);
@@ -617,8 +631,7 @@ public class IntegrationJobAction extends BusinessObject<IntegrationJobAction> i
 	/**
 	 * 设置-集成任务-动作-配置集合
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	public final void setIntegrationJobActionCfgs(IIntegrationJobActionCfgs value) {
 		this.setProperty(PROPERTY_INTEGRATIONJOBACTIONCFGS, value);

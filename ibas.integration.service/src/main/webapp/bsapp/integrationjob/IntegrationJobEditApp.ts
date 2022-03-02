@@ -291,6 +291,7 @@ namespace integration {
                                 item = that.editData.integrationJobActions.create();
                                 created = true;
                             }
+                            item.actionGroup = selected.group;
                             item.actionId = selected.id;
                             item.actionName = selected.name;
                             item.actionRemark = selected.remark;

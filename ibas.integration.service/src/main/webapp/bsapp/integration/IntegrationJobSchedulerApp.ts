@@ -236,13 +236,14 @@ namespace integration {
                     return;
                 }
                 // 尚未到循环周期
-                if (ibas.dates.now().getTime() < (this.lastRunTime + this.job.frequency * 1000)) {
+                let nowTime: number = ibas.dates.now().getTime();
+                if (nowTime < (this.lastRunTime + this.job.frequency * 1000)) {
                     return;
                 }
                 // 时间点判断
                 if (this.job.atTime > 0) {
                     let atTime: number = ibas.dates.today().getTime() + ((this.job.atTime - this.job.atTime % 100) / 100 * 60 + this.job.atTime % 100) * 60 * 1000;
-                    if (ibas.dates.now().getTime() < atTime) {
+                    if (nowTime < atTime || (nowTime - atTime) / 1000 >= 2 * this.job.frequency) {
                         // 当前时间未到时间点
                         return;
                     }

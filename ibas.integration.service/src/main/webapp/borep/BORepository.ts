@@ -58,6 +58,7 @@ namespace integration {
             fetchAction(fetcher: IActionFetcher): void {
                 if (!this.address.endsWith("/")) { this.address += "/"; }
                 let criteria: ibas.ICriteria = null;
+                let condition: ibas.ICondition = null;
                 let jobActions: ibas.IList<bo.IIntegrationJobAction> = new ibas.ArrayList<bo.IIntegrationJobAction>();
                 if (fetcher.criteria instanceof ibas.Criteria) {
                     criteria = fetcher.criteria;
@@ -65,18 +66,32 @@ namespace integration {
                     // 集成任务，查询所有动作
                     criteria = new ibas.Criteria();
                     for (let item of fetcher.criteria.integrationJobActions) {
-                        let condition: ibas.ICondition = criteria.conditions.create();
+                        condition = criteria.conditions.create();
                         condition.alias = bo.CRITERIA_CONDITION_ALIAS_ACTION_ID;
                         condition.value = item.actionId;
                         condition.relationship = ibas.emConditionRelationship.OR;
+                        if (!ibas.strings.isEmpty(item.actionGroup)) {
+                            condition.bracketOpen = 1;
+                            condition = criteria.conditions.create();
+                            condition.alias = bo.CRITERIA_CONDITION_ALIAS_PACKAGE;
+                            condition.value = item.actionGroup;
+                            condition.bracketClose = 1;
+                        }
                         jobActions.add(item);
                     }
                 } else if (fetcher.criteria instanceof bo.IntegrationJobAction) {
                     // 集成动作
                     criteria = new ibas.Criteria();
-                    let condition: ibas.ICondition = criteria.conditions.create();
+                    condition = criteria.conditions.create();
                     condition.alias = bo.CRITERIA_CONDITION_ALIAS_ACTION_ID;
                     condition.value = fetcher.criteria.actionId;
+                    if (!ibas.strings.isEmpty(fetcher.criteria.actionGroup)) {
+                        condition.bracketOpen = 1;
+                        condition = criteria.conditions.create();
+                        condition.alias = bo.CRITERIA_CONDITION_ALIAS_PACKAGE;
+                        condition.value = fetcher.criteria.actionGroup;
+                        condition.bracketClose = 1;
+                    }
                     jobActions.add(fetcher.criteria);
                 } else if (fetcher.criteria instanceof Array) {
                     // 数组
@@ -84,10 +99,17 @@ namespace integration {
                     for (let item of fetcher.criteria) {
                         if (item instanceof bo.IntegrationJobAction) {
                             // 动作
-                            let condition: ibas.ICondition = criteria.conditions.create();
+                            condition = criteria.conditions.create();
                             condition.alias = bo.CRITERIA_CONDITION_ALIAS_ACTION_ID;
                             condition.value = item.actionId;
                             condition.relationship = ibas.emConditionRelationship.OR;
+                            if (!ibas.strings.isEmpty(item.actionGroup)) {
+                                condition.bracketOpen = 1;
+                                condition = criteria.conditions.create();
+                                condition.alias = bo.CRITERIA_CONDITION_ALIAS_PACKAGE;
+                                condition.value = item.actionGroup;
+                                condition.bracketClose = 1;
+                            }
                             jobActions.add(item);
                         } else if (item instanceof ibas.Condition) {
                             // 查寻条件
@@ -215,18 +237,6 @@ namespace integration {
                 return encodeURI(url + action.group);
             }
             /**
-             * 下载代码文件
-             * @param caller 调用者
-             */
-            downloadCode(caller: ICodeDownloader<Blob>): void {
-                if (!this.address.endsWith("/")) { this.address += "/"; }
-                let fileRepository: CodeRepositoryDownloadAjax = new CodeRepositoryDownloadAjax();
-                fileRepository.address = this.toUrl(caller.action);
-                fileRepository.token = this.token;
-                fileRepository.converter = this.createConverter();
-                fileRepository.download("", caller);
-            }
-            /**
              * 调用后台动作
              * @param caller 调用者
              */
@@ -260,38 +270,6 @@ namespace integration {
             /** 被删除 */
             beDeleted: string;
         }
-        /** 代码下载仓库 */
-        export class CodeRepositoryDownloadAjax extends ibas.RemoteRepositoryAjax {
-            constructor() {
-                super();
-                this.autoParsing = false;
-            }
-            /**
-             * 下载文件
-             * @param method 方法地址
-             * @param caller 调用者
-             */
-            download<T>(method: string, caller: ibas.IMethodCaller<any>): void {
-                this.callRemoteMethod(method, undefined, (data) => {
-                    let opRslt: ibas.IOperationResult<any> = null;
-                    if (data instanceof ibas.OperationResult) {
-                        opRslt = data;
-                    } else {
-                        opRslt = new ibas.OperationResult();
-                        opRslt.resultObjects.add(data);
-                    }
-                    caller.onCompleted.call(ibas.objects.isNull(caller.caller) ? caller : caller.caller, opRslt);
-                });
-            }
-            protected createHttpRequest(method: string): XMLHttpRequest {
-                let methodUrl: string = this.methodUrl(method);
-                let xhr: XMLHttpRequest = new XMLHttpRequest();
-                xhr.open("GET", methodUrl, true);
-                xhr.responseType = "blob";
-                return xhr;
-            }
-        }
-
         /** 业务对象仓库-集成开发 */
         export class BORepositoryIntegrationDevelopment extends ibas.BORepositoryApplication {
             constructor() {

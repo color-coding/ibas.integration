@@ -74,7 +74,9 @@ declare namespace initialfantasy {
             /** 用户 */
             USER = 0,
             /** 角色 */
-            ROLE = 1
+            ROLE = 1,
+            /** 全部 */
+            ALL = 2
         }
         /**
          * 筛选类型
@@ -2009,6 +2011,7 @@ declare namespace initialfantasy {
             get remarks(): string;
             /** 设置-备注 */
             set remarks(value: string);
+            protected onPropertyChanged(name: string): void;
             /** 初始化数据 */
             protected init(): void;
         }
@@ -4485,8 +4488,6 @@ declare namespace initialfantasy {
             protected deleteData(): void;
             /** 新建数据，参数1：是否克隆 */
             protected createData(clone: boolean): void;
-            /** 选择应用 */
-            private chooseApplication;
             /** 选择业务对象编码 */
             private chooseBusinessObject;
             /** 选择用户或角色 */
@@ -4502,8 +4503,6 @@ declare namespace initialfantasy {
             deleteDataEvent: Function;
             /** 新建数据事件，参数1：是否克隆 */
             createDataEvent: Function;
-            /** 选择应用 */
-            chooseApplicationEvent: Function;
             /** 选择查询目标 */
             chooseBusinessObjectEvent: Function;
             /** 选择用户或角色 */

@@ -41,6 +41,7 @@
     <Property Name="CreateActionId" Description="创建动作标识" DataType="Alphanumeric" DataSubType="Default" EditSize="36" Mapped="CreateActId"/>
     <Property Name="UpdateActionId" Description="更新动作标识" DataType="Alphanumeric" DataSubType="Default" EditSize="36" Mapped="UpdateActId"/>
     <Property Name="Relationship" Description="与上一个动作的关系" DataType="Alphanumeric" DataSubType="Default" EditSize="3" DeclaredType="emActionRelationship" Mapped="Relationship"/>
+    <Property Name="ActionGroup" Description="任务项组" DataType="Alphanumeric" DataSubType="Default" EditSize="36" Mapped="ActionGroup"/>
     <Property Name="ActionId" Description="任务项标识" DataType="Alphanumeric" DataSubType="Default" EditSize="36" Mapped="ActionId"/>
     <Property Name="ActionName" Description="任务项名称" DataType="Alphanumeric" DataSubType="Default" EditSize="60" Mapped="ActionName"/>
     <Property Name="ActionRemark" Description="任务项说明" DataType="Alphanumeric" DataSubType="Default" EditSize="100" Mapped="ActionRemark"/>

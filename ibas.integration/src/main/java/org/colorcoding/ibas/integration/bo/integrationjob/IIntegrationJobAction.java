@@ -20,8 +20,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-对象编号
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setObjectKey(Integer value);
 
@@ -35,8 +34,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-对象行号
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setLineId(Integer value);
 
@@ -50,8 +48,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-对象类型
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setObjectCode(String value);
 
@@ -65,8 +62,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-实例号
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setLogInst(Integer value);
 
@@ -80,8 +76,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-数据源
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setDataSource(String value);
 
@@ -95,8 +90,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-创建日期
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setCreateDate(DateTime value);
 
@@ -110,8 +104,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-创建时间
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setCreateTime(Short value);
 
@@ -125,8 +118,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-更新日期
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setUpdateDate(DateTime value);
 
@@ -140,8 +132,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-更新时间
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setUpdateTime(Short value);
 
@@ -155,8 +146,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-创建用户
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setCreateUserSign(Integer value);
 
@@ -170,8 +160,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-更新用户
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setUpdateUserSign(Integer value);
 
@@ -185,8 +174,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-创建动作标识
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setCreateActionId(String value);
 
@@ -200,8 +188,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-更新动作标识
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setUpdateActionId(String value);
 
@@ -215,10 +202,23 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-与上一个动作的关系
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setRelationship(emActionRelationship value);
+
+	/**
+	 * 获取-任务项组
+	 * 
+	 * @return 值
+	 */
+	String getActionGroup();
+
+	/**
+	 * 设置-任务项组
+	 * 
+	 * @param value 值
+	 */
+	void setActionGroup(String value);
 
 	/**
 	 * 获取-任务项标识
@@ -230,8 +230,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-任务项标识
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setActionId(String value);
 
@@ -245,8 +244,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-任务项名称
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setActionName(String value);
 
@@ -260,8 +258,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-任务项说明
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setActionRemark(String value);
 
@@ -275,8 +272,7 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	/**
 	 * 设置-集成任务-动作-配置集合
 	 * 
-	 * @param value
-	 *            值
+	 * @param value 值
 	 */
 	void setIntegrationJobActionCfgs(IIntegrationJobActionCfgs value);
 

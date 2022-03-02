@@ -48,18 +48,10 @@ namespace integration {
                             if (opRslt.resultCode !== 0) {
                                 throw new Error(opRslt.message);
                             }
-                            let actions: ibas.IList<bo.Action> = new ibas.ArrayList<bo.Action>();
-                            for (let pItem of opRslt.resultObjects) {
-                                let group: string = ibas.strings.format("# {0} {1}", pItem.id.substring(0, 8), ibas.dates.toString(pItem.dateTime, "yyyy-MM-dd HH:mm"));
-                                for (let aItem of pItem.actions) {
-                                    aItem.group = group;
-                                    actions.add(aItem);
-                                }
-                            }
-                            if (actions.length === 1
+                            if (opRslt.resultObjects.length === 1 && opRslt.resultObjects[0].actions.length === 1
                                 && ibas.config.get(ibas.CONFIG_ITEM_AUTO_CHOOSE_DATA, true) && !that.isViewShowed()) {
                                 // 仅一条数据，直接选择
-                                that.chooseData(actions);
+                                that.chooseData(opRslt.resultObjects[0].actions);
                             } else {
                                 if (!that.isViewShowed()) {
                                     // 没显示视图，先显示
@@ -68,7 +60,7 @@ namespace integration {
                                 if (opRslt.resultObjects.length === 0) {
                                     that.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_data_fetched_none"));
                                 }
-                                that.view.showData(actions);
+                                that.view.showData(opRslt.resultObjects);
                             }
                         } catch (error) {
                             that.messages(error);
@@ -92,7 +84,7 @@ namespace integration {
         /** 视图-集成任务 */
         export interface IIntegrationActionChooseView extends ibas.IBOChooseView {
             /** 显示数据 */
-            showData(datas: bo.Action[]): void;
+            showData(datas: bo.ActionPackage[]): void;
         }
         /** 集成任务选择服务映射 */
         export class IntegrationActionChooseServiceMapping extends ibas.BOChooseServiceMapping {

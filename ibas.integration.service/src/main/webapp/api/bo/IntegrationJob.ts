@@ -138,6 +138,9 @@ namespace integration {
             /** 与上一个动作的关系 */
             relationship: emActionRelationship;
 
+            /** 任务项组 */
+            actionGroup: string;
+
             /** 任务项标识 */
             actionId: string;
 
