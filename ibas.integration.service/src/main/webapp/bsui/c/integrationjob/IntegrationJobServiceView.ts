@@ -36,7 +36,8 @@ namespace integration {
                                 }).bindProperty("bindingValue", {
                                     path: "name",
                                     type: new sap.extension.data.Alphanumeric()
-                                })
+                                }),
+                                width: "100%",
                             }),
                         ]
                     });
@@ -46,6 +47,7 @@ namespace integration {
                         state: sap.ui.core.ValueState.None,
                         horizontalScrolling: true,
                         verticalScrolling: true,
+                        contentWidth: "40%",
                         content: [
                             this.table
                         ],

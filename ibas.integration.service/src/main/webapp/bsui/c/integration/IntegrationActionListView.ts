@@ -131,11 +131,9 @@ namespace integration {
                                                                     parts: [
                                                                         {
                                                                             path: "id",
-                                                                            type: new sap.extension.data.Alphanumeric(),
                                                                         },
                                                                         {
                                                                             path: "dateTime",
-                                                                            type: new sap.extension.data.Time(),
                                                                         },
                                                                     ],
                                                                     formatter(id: string, date: Date): string {

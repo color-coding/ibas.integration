@@ -132,8 +132,16 @@ namespace integration {
                             for (let action of opRslt.resultObjects) {
                                 // 补充地址
                                 action.group = that.toPackageUrl(action);
-                                let jobAction: bo.IIntegrationJobAction = jobActions.firstOrDefault(c => c.actionId === action.id);
-                                if (!ibas.objects.isNull(jobAction)) {
+                            }
+                            if (jobActions.length > 0) {
+                                // 排序，设置配置
+                                let newResult: ibas.IList<bo.Action> = new ibas.ArrayList<bo.Action>();
+                                for (let jobAction of jobActions) {
+                                    let action: bo.Action = opRslt.resultObjects.firstOrDefault(c => c.id === jobAction.actionId);
+                                    if (ibas.objects.isNull(action)) {
+                                        ibas.logger.log(ibas.emMessageLevel.WARN, "repository: not found action [{0} - {1}].", jobAction.actionId, jobAction.actionName);
+                                        continue;
+                                    }
                                     // 输入描述
                                     action.remark = jobAction.actionRemark;
                                     // 输入设置
@@ -157,7 +165,9 @@ namespace integration {
                                             config.remark = item.remark;
                                         }
                                     }
+                                    newResult.add(action);
                                 }
+                                opRslt.resultObjects = newResult;
                             }
                             fetcher.onCompleted(opRslt);
                         }

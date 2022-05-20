@@ -289,7 +289,7 @@ namespace integration {
                     let formBottom: sap.ui.layout.form.SimpleForm = new sap.ui.layout.form.SimpleForm("", {
                         editable: true,
                         content: [
-                            new sap.ui.core.Title("", { text: ibas.i18n.prop("materials_title_others") }),
+                            new sap.ui.core.Title("", { text: ibas.i18n.prop("integration_title_others") }),
                             new sap.m.Label("", { text: ibas.i18n.prop("bo_integrationjob_dataowner") }),
                             new sap.extension.m.UserInput("", {
                                 showValueHelp: true,

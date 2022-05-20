@@ -31,14 +31,16 @@ namespace integration {
                         columns: [
                             new sap.extension.m.Column("", {
                                 header: ibas.i18n.prop("bo_action_group"),
-                                width: "20rem",
+                                width: "16rem",
                                 mergeDuplicates: true,
                             }),
                             new sap.extension.m.Column("", {
                                 header: ibas.i18n.prop("bo_action_name"),
+                                width: "40%",
                             }),
                             new sap.extension.m.Column("", {
                                 header: ibas.i18n.prop("bo_action_remark"),
+                                width: "60%",
                             }),
                         ],
                         items: {
@@ -50,11 +52,9 @@ namespace integration {
                                             parts: [
                                                 {
                                                     path: "id",
-                                                    type: new sap.extension.data.Alphanumeric(),
                                                 },
                                                 {
                                                     path: "dateTime",
-                                                    type: new sap.extension.data.Time(),
                                                 },
                                             ],
                                             formatter(id: string, date: Date): string {
@@ -85,6 +85,7 @@ namespace integration {
                         state: sap.ui.core.ValueState.None,
                         horizontalScrolling: true,
                         verticalScrolling: true,
+                        contentWidth: "70%",
                         subHeader: new sap.m.Toolbar("", {
                             content: [
                                 this.search = new sap.m.SearchField("", {
