@@ -37,9 +37,8 @@ import org.colorcoding.ibas.integration.bo.integration.ActionPackage;
 
 /**
  * 动作文件管理仓库
- * 
- * @author Niuren.Zhu
  *
+ * @author Niuren.Zhu
  */
 public class FileRepositoryAction extends FileRepositoryService
 		implements IFileRepositoryActionApp, IFileRepositoryActionSvc {
@@ -140,50 +139,54 @@ public class FileRepositoryAction extends FileRepositoryService
 			if (criteria == null) {
 				criteria = new Criteria();
 			}
-			ICriteria aCriteria = new Criteria();
-			ICondition condition = criteria.getConditions()
-					.firstOrDefault(c -> c.getAlias().equals(FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER));
-			if (condition == null) {
-				condition = aCriteria.getConditions().create();
-				condition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER);
-				condition.setValue(emYesNo.YES);
-			} else {
-				aCriteria.getConditions().add(condition);
-			}
-			condition = criteria.getConditions()
-					.firstOrDefault(c -> c.getAlias().equals(FileRepository.CRITERIA_CONDITION_ALIAS_FILE_NAME));
-			if (condition == null) {
-				condition = aCriteria.getConditions().create();
-				condition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_FILE_NAME);
-				condition.setValue(PACKAGE_INTEGRATION_ACTIONS_FILE);
-			} else {
-				aCriteria.getConditions().add(condition);
-			}
-			IOperationResult<FileData> opRsltFile = this.fetch(aCriteria, token);
-			if (opRsltFile.getError() != null) {
-				throw opRsltFile.getError();
-			}
-			ArrayList<ICondition> aConditions = new ArrayList<>();
-			criteria.getConditions().forEach(c -> {
-				if (CRITERIA_CONDITION_ALIAS_ACTION_ID.equalsIgnoreCase(c.getAlias())
-						&& c.getOperation() == ConditionOperation.EQUAL) {
-					aConditions.add(c);
-				}
-			});
+
 			OperationResult<Action> operationResult = new OperationResult<>();
-			for (FileData item : opRsltFile.getResultObjects()) {
-				for (Action action : this.parsing(new File(item.getLocation()))) {
-					boolean filter = aConditions.isEmpty() ? false : true;
-					for (ICondition cItem : aConditions) {
-						if (action.getId().equals(cItem.getValue())) {
-							filter = false;
-							break;
+			for (ICondition condition : criteria.getConditions()) {
+				if (condition.getAlias().equals(FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER)) {
+					ICriteria aCriteria = new Criteria();
+					if (condition == null) {
+						condition = aCriteria.getConditions().create();
+						condition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER);
+						condition.setValue(emYesNo.YES);
+					} else {
+						aCriteria.getConditions().add(condition);
+					}
+					condition = criteria.getConditions().firstOrDefault(
+							c -> c.getAlias().equals(FileRepository.CRITERIA_CONDITION_ALIAS_FILE_NAME));
+					if (condition == null) {
+						condition = aCriteria.getConditions().create();
+						condition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_FILE_NAME);
+						condition.setValue(PACKAGE_INTEGRATION_ACTIONS_FILE);
+					} else {
+						aCriteria.getConditions().add(condition);
+					}
+					IOperationResult<FileData> opRsltFile = this.fetch(aCriteria, token);
+					if (opRsltFile.getError() != null) {
+						throw opRsltFile.getError();
+					}
+					ArrayList<ICondition> aConditions = new ArrayList<>();
+					criteria.getConditions().forEach(c -> {
+						if (CRITERIA_CONDITION_ALIAS_ACTION_ID.equalsIgnoreCase(c.getAlias())
+								&& c.getOperation() == ConditionOperation.EQUAL) {
+							aConditions.add(c);
+						}
+					});
+
+					for (FileData item : opRsltFile.getResultObjects()) {
+						for (Action action : this.parsing(new File(item.getLocation()))) {
+							boolean filter = aConditions.isEmpty() ? false : true;
+							for (ICondition cItem : aConditions) {
+								if (action.getId().equals(cItem.getValue())) {
+									filter = false;
+									break;
+								}
+							}
+							if (filter) {
+								continue;
+							}
+							operationResult.addResultObjects(action);
 						}
 					}
-					if (filter) {
-						continue;
-					}
-					operationResult.addResultObjects(action);
 				}
 			}
 			return operationResult;
