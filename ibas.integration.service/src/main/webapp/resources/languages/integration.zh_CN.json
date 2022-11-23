@@ -54,5 +54,11 @@
   "integrationdevelopment_please_actions_url": "请输入集成动作地址",
   "integrationdevelopment_run_action_faild": "运行动作[{0}]失败",
   "integrationdevelopment_display_console": "显示控制台",
+  "integration_integrationjoblist_batch_update": "批量更新",
+  "integration_integrationjoblist_batch_update_success": "更新完成",
+  "integration_integrationjoblist_batch_update_error": "更新失败",
+  "integration_integrationjoblist_batch_update_job_isnot": "该任务在更新包中不存在",
+  "integration_integrationjoblist_choose_package_title": "请选择更新包",
+  "integration_integrationjoblist_update_all": "如不在界面勾选需要更新的集成任务,则默认更新所有,是否继续?",
   "integrationdevelopment_closing_delimiter": "----结束----"
 }
