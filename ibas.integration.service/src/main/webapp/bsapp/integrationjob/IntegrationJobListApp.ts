@@ -32,6 +32,8 @@ namespace integration {
                 this.view.editDataEvent = this.editData;
                 this.view.deleteDataEvent = this.deleteData;
                 this.view.viewDataEvent = this.viewData;
+                this.view.chooseActionPackageEvent = this.chooseActionPackage;
+                this.view.batchUpdateActionEvent = this.batchUpdateAction;
             }
             /** 视图显示后 */
             protected viewShowed(): void {
@@ -161,6 +163,129 @@ namespace integration {
                     }
                 });
             }
+            /** 选择程序包 */
+            protected chooseActionPackage(): void {
+                this.busy(true);
+                let that: this = this;
+                let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
+                boRepository.fetchActionPackage({
+                    criteria: new ibas.Criteria(),
+                    onCompleted(opRslt: ibas.IOperationResult<bo.ActionPackage>): void {
+                        try {
+                            that.busy(false);
+                            if (opRslt.resultCode !== 0) {
+                                throw new Error(opRslt.message);
+                            }
+                            that.view.showActionPackage(opRslt.resultObjects);
+                        } catch (error) {
+                            that.messages(error);
+                        }
+                    }
+                });
+                this.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_fetching_data"));
+            }
+            /** 批量更新接口 */
+            protected async batchUpdateAction(datas: bo.IntegrationJob[], selectedPackage: bo.ActionPackage): Promise<void> {
+                let that: this = this;
+                if (datas.length === 0) {
+                    datas = await that.getAllIntegrations();
+                }
+                let updateLogs: ibas.ArrayList<IUpdateLog> = new ibas.ArrayList<IUpdateLog>();
+                try {
+                    // 遍历集成任务
+                    for (let job of datas) {
+                        let jobUpdateLogs: ibas.ArrayList<IUpdateLog> = new ibas.ArrayList<IUpdateLog>();
+                        // 遍历集成任务动作
+                        for (let jobAction of job.integrationJobActions) {
+                            let updateAction: bo.Action = selectedPackage.actions.find(c => c.name === jobAction.actionName);
+                            if (!ibas.objects.isNull(updateAction)) {
+                                jobAction.actionGroup = updateAction.group;
+                                jobAction.actionId = updateAction.id;
+                                jobAction.actionName = updateAction.name;
+                                jobAction.actionRemark = updateAction.remark;
+                                for (let cItem of updateAction.configs) {
+                                    // 添加默认配置
+                                    if (jobAction.integrationJobActionCfgs.firstOrDefault((c) => { return c.key === cItem.key; }) !== null) {
+                                        continue;
+                                    }
+                                    let jobConfig: bo.ActionConfig = jobAction.integrationJobActionCfgs.create();
+                                    jobConfig.key = cItem.key;
+                                    jobConfig.value = cItem.value;
+                                    jobConfig.remark = cItem.remark;
+                                }
+                                jobUpdateLogs.add({
+                                    jobName: job.name,
+                                    jobActionName: jobAction.actionName,
+                                    updateMessage: ""
+                                });
+                            } else {
+                                jobUpdateLogs.add({
+                                    jobName: job.name,
+                                    jobActionName: jobAction.actionName,
+                                    updateMessage: ibas.i18n.prop("integration_integrationjoblist_batch_update_job_isnot")
+                                });
+                            }
+                        }
+                        if (!ibas.objects.isNull(await that.saveJob(job))) {
+                            jobUpdateLogs.forEach(c => ibas.strings.isEmpty(c.updateMessage) ? c.updateMessage =
+                                ibas.i18n.prop("integration_integrationjoblist_batch_update_success") : c.updateMessage = c.updateMessage);
+                        } else {
+                            jobUpdateLogs.forEach(c => ibas.strings.isEmpty(c.updateMessage) ? c.updateMessage =
+                                ibas.i18n.prop("integration_integrationjoblist_batch_update_error") : c.updateMessage = c.updateMessage);
+                        }
+                        updateLogs.add(jobUpdateLogs);
+                    }
+                    let str: string = "";
+                    for (let item of updateLogs) {
+                        str += ibas.strings.format("{0}-{1}-{2}\n", item.jobName, item.jobActionName, item.updateMessage);
+                    }
+                    that.messages(ibas.emMessageType.INFORMATION, str);
+                } catch (error) {
+                    that.messages(ibas.emMessageType.ERROR, error.message);
+                }
+            }
+            /** 保存集成任务 */
+            private async saveJob(data: bo.IntegrationJob): Promise<bo.IntegrationJob> {
+                let promise: Promise<bo.IntegrationJob> = new Promise<bo.IntegrationJob>(resolve => {
+                    let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
+                    boRepository.saveIntegrationJob({
+                        beSaved: data,
+                        onCompleted(opRslt: ibas.IOperationResult<bo.IntegrationJob>): void {
+                            try {
+                                if (opRslt.resultCode !== 0) {
+                                    throw new Error(opRslt.message);
+                                }
+                                resolve(opRslt.resultObjects.firstOrDefault());
+                            } catch (error) {
+                                resolve(null);
+                            }
+                        }
+                    });
+                });
+                return promise;
+            }
+            /** 获取所有集成任务 */
+            private async getAllIntegrations(): Promise<bo.IntegrationJob[]> {
+                let promise: Promise<bo.IntegrationJob[]> = new Promise<bo.IntegrationJob[]>(resolve => {
+                    let criteria: ibas.Criteria = new ibas.Criteria();
+                    criteria.result = -1;
+                    let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
+                    boRepository.fetchIntegrationJob({
+                        criteria: criteria,
+                        onCompleted(opRslt: ibas.IOperationResult<bo.IntegrationJob>): void {
+                            try {
+                                if (opRslt.resultCode !== 0) {
+                                    throw new Error(opRslt.message);
+                                }
+                                resolve(opRslt.resultObjects);
+                            } catch (error) {
+                                resolve(null);
+                            }
+                        }
+                    });
+                });
+                return promise;
+            }
         }
         /** 视图-集成任务 */
         export interface IIntegrationJobListView extends ibas.IBOListView {
@@ -170,6 +295,17 @@ namespace integration {
             deleteDataEvent: Function;
             /** 显示数据 */
             showData(datas: bo.IntegrationJob[]): void;
+            /** 批量更新接口 */
+            batchUpdateActionEvent: Function;
+            /** 选择程序包 */
+            chooseActionPackageEvent: Function;
+            /** 显示程序包 */
+            showActionPackage(datas: bo.ActionPackage[]): void;
+        }
+        export interface IUpdateLog {
+            jobName: string;
+            jobActionName: string;
+            updateMessage: string;
         }
     }
 }

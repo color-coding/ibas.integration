@@ -22,6 +22,11 @@ namespace integration {
                 deleteDataEvent: Function;
                 /** 查看数据 */
                 viewDataEvent: Function;
+                /** 批量更新接口 */
+                batchUpdateActionEvent: Function;
+                /** 选择程序包 */
+                chooseActionPackageEvent: Function;
+
                 /** 绘制视图 */
                 draw(): any {
                     let that: this = this;
@@ -156,6 +161,29 @@ namespace integration {
                                         that.fireViewEvents(that.deleteDataEvent, that.table.getSelecteds());
                                     }
                                 }),
+                                new sap.m.ToolbarSeparator(""),
+                                new sap.m.Button("", {
+                                    text: ibas.i18n.prop("integration_integrationjoblist_batch_update"),
+                                    type: sap.m.ButtonType.Transparent,
+                                    icon: "sap-icon://request",
+                                    press: function (): void {
+                                        if (that.table.getSelecteds().length === 0) {
+                                            that.application.viewShower.messages({
+                                                type: ibas.emMessageType.QUESTION,
+                                                title: ibas.i18n.prop(that.application.name),
+                                                message: ibas.i18n.prop("integration_integrationjoblist_update_all"),
+                                                actions: [ibas.emMessageAction.YES, ibas.emMessageAction.NO],
+                                                onCompleted(action: ibas.emMessageAction): void {
+                                                    if (action === ibas.emMessageAction.YES) {
+                                                        that.fireViewEvents(that.chooseActionPackageEvent);
+                                                    }
+                                                }
+                                            });
+                                        } else {
+                                            that.fireViewEvents(that.chooseActionPackageEvent);
+                                        }
+                                    }
+                                }),
                                 new sap.m.ToolbarSpacer(""),
                                 new sap.m.Button("", {
                                     type: sap.m.ButtonType.Transparent,
@@ -224,6 +252,74 @@ namespace integration {
                         this.table.setModel(new sap.extension.model.JSONModel({ rows: datas }));
                     }
                     this.table.setBusy(false);
+                }
+                /** 显示程序包 */
+                showActionPackage(datas: bo.ActionPackage[]): void {
+                    let that: this = this;
+                    let table: sap.extension.m.Table = new sap.extension.m.Table("", {
+                        chooseType: ibas.emChooseType.SINGLE,
+                        includeItemInSelection: true,
+                        columns: [
+                            new sap.extension.m.Column("", {
+                                header: ibas.i18n.prop("bo_action_group"),
+                                width: "16rem",
+                                mergeDuplicates: true,
+                            }),
+                        ],
+                        items: {
+                            path: "/rows",
+                            template: new sap.m.ColumnListItem("", {
+                                cells: [
+                                    new sap.extension.m.ObjectAttribute("", {
+                                        bindingValue: {
+                                            parts: [
+                                                {
+                                                    path: "id",
+                                                },
+                                                {
+                                                    path: "dateTime",
+                                                },
+                                            ],
+                                            formatter(id: string, date: Date): string {
+                                                return ibas.strings.format("# {0}...  {1}",
+                                                    id?.substring(0, 8), ibas.dates.toString(date, "yyyy-MM-dd_HH:mm"));
+                                            }
+                                        }
+                                    }),
+                                ],
+                            }),
+                        },
+                    });
+                    table.setModel(new sap.extension.model.JSONModel({ rows: datas }));
+                    let dialog: sap.m.Dialog = new sap.m.Dialog("", {
+                        title: ibas.i18n.prop("integration_integrationjoblist_choose_package_title"),
+                        type: sap.m.DialogType.Standard,
+                        state: sap.ui.core.ValueState.None,
+                        horizontalScrolling: true,
+                        verticalScrolling: true,
+                        contentWidth: "50%",
+                        content: [
+                            table
+                        ],
+                        buttons: [
+                            new sap.m.Button("", {
+                                text: ibas.i18n.prop("shell_data_choose"),
+                                type: sap.m.ButtonType.Transparent,
+                                press: function (): void {
+                                    that.fireViewEvents(that.batchUpdateActionEvent, that.table.getSelecteds(), table.getSelecteds().firstOrDefault());
+                                    dialog.close();
+                                }
+                            }),
+                            new sap.m.Button("", {
+                                text: ibas.i18n.prop("shell_exit"),
+                                type: sap.m.ButtonType.Transparent,
+                                press: function (): void {
+                                    dialog.close();
+                                }
+                            }),
+                        ]
+                    }).addStyleClass("sapUiNoContentPadding");
+                    dialog.open();
                 }
                 /** 记录上次查询条件，表格滚动时自动触发 */
                 query(criteria: ibas.ICriteria): void {
