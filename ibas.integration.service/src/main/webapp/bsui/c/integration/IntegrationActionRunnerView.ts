@@ -32,6 +32,7 @@ namespace integration {
                                     icon: "sap-icon://begin",
                                     press: function (): void {
                                         that.rightList.destroyItems();
+                                        that.errrorMessages.clear();
                                         that.fireViewEvents(that.runActionsEvent);
                                     }
                                 }),
@@ -119,8 +120,8 @@ namespace integration {
                                                             level: sap.ui.core.TitleLevel.H6,
                                                             textAlign: sap.ui.core.TextAlign.Left,
                                                             text: ibas.i18n.prop("integration_running_log"),
-                                                            width: "6rem",
-                                                        }),
+                                                            //  width: "6rem",
+                                                        }).addStyleClass("sapUiTinyMarginEnd"),
                                                         this.maxCount = new sap.m.StepInput("", {
                                                             min: 100,
                                                             max: 5000,
@@ -128,9 +129,57 @@ namespace integration {
                                                             value: 500,
                                                             width: "7rem",
                                                             textAlign: sap.ui.core.TextAlign.Right,
-                                                        }),
+                                                        }).addStyleClass("sapUiTinyMarginEnd"),
+                                                        new sap.m.ToolbarSeparator(""),
                                                         new sap.m.Button("", {
-                                                            type: sap.m.ButtonType.Transparent,
+                                                            type: sap.m.ButtonType.Reject,
+                                                            icon: "sap-icon://filter",
+                                                            press: function (event: sap.ui.base.Event): void {
+                                                                let dialog: sap.m.Dialog = new sap.m.Dialog("", {
+                                                                    title: ibas.i18n.prop("integration_error_log", that.errrorMessages.length),
+                                                                    type: sap.m.DialogType.Standard,
+                                                                    state: sap.ui.core.ValueState.None,
+                                                                    horizontalScrolling: false,
+                                                                    verticalScrolling: true,
+                                                                    contentHeight: "40%",
+                                                                    contentWidth: "60%",
+                                                                    content: [
+                                                                        new sap.extension.m.List("", {
+                                                                            width: "auto",
+                                                                            items: {
+                                                                                path: "/",
+                                                                                template: new sap.m.CustomListItem("", {
+                                                                                    content: [
+                                                                                        new sap.m.MessageStrip("", {
+                                                                                            type: sap.ui.core.MessageType.Error,
+                                                                                            showIcon: true,
+                                                                                            showCloseButton: false,
+                                                                                            text: {
+                                                                                                path: "",
+                                                                                            },
+                                                                                        })
+                                                                                    ]
+                                                                                })
+                                                                            },
+                                                                        }).addStyleClass("sapUiTinyMarginBegin sapUiTinyMarginEnd"),
+                                                                    ],
+                                                                    buttons: [
+                                                                        new sap.m.Button("", {
+                                                                            text: ibas.i18n.prop("shell_exit"),
+                                                                            type: sap.m.ButtonType.Transparent,
+                                                                            press: function (): void {
+                                                                                dialog.close();
+                                                                            }
+                                                                        }),
+                                                                    ],
+                                                                }).addStyleClass("sapUiNoContentPadding");
+                                                                dialog.setModel(new sap.extension.model.JSONModel(that.errrorMessages));
+                                                                dialog.open();
+                                                            }
+                                                        }),
+                                                        new sap.m.ToolbarSeparator(""),
+                                                        new sap.m.Button("", {
+                                                            type: sap.m.ButtonType.Attention,
                                                             icon: "sap-icon://eraser",
                                                             press: function (event: sap.ui.base.Event): void {
                                                                 let source: any = event.getSource();
@@ -141,7 +190,7 @@ namespace integration {
                                                         }),
                                                         new sap.m.ToolbarSeparator(""),
                                                         new sap.m.Button("", {
-                                                            type: sap.m.ButtonType.Transparent,
+                                                            type: sap.m.ButtonType.Accept,
                                                             icon: "sap-icon://save",
                                                             press: function (event: sap.ui.base.Event): void {
                                                                 ibas.files.save(storages.session.file(false, that.id.toUpperCase()),
@@ -270,6 +319,9 @@ namespace integration {
                 }
                 /** 显示消息 */
                 showMessages(type: ibas.emMessageType, content: string): void {
+                    if (type === ibas.emMessageType.ERROR) {
+                        this.errrorMessages.add(content);
+                    }
                     if (this.rightList.getItems().length > this.maxCount.getValue()) {
                         this.rightList.destroyItems();
                     }
@@ -288,6 +340,7 @@ namespace integration {
                         ibas.logger.log(ibas.emMessageLevel.DEBUG, content);
                     }
                 }
+                private errrorMessages: ibas.IList<string> = new ibas.ArrayList<string>();
             }
         }
     }

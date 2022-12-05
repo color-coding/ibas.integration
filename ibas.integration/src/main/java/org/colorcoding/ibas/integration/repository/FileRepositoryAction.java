@@ -11,7 +11,7 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.colorcoding.ibas.bobas.common.ConditionOperation;
+import org.colorcoding.ibas.bobas.common.ConditionRelationship;
 import org.colorcoding.ibas.bobas.common.Criteria;
 import org.colorcoding.ibas.bobas.common.ICondition;
 import org.colorcoding.ibas.bobas.common.ICriteria;
@@ -22,7 +22,6 @@ import org.colorcoding.ibas.bobas.common.OperationResult;
 import org.colorcoding.ibas.bobas.data.ArrayList;
 import org.colorcoding.ibas.bobas.data.FileData;
 import org.colorcoding.ibas.bobas.data.List;
-import org.colorcoding.ibas.bobas.data.emYesNo;
 import org.colorcoding.ibas.bobas.message.Logger;
 import org.colorcoding.ibas.bobas.message.MessageLevel;
 import org.colorcoding.ibas.bobas.repository.FileRepository;
@@ -139,52 +138,83 @@ public class FileRepositoryAction extends FileRepositoryService
 			if (criteria == null) {
 				criteria = new Criteria();
 			}
-
+			int cBracket = -1;
+			ICriteria cCriteria = null;
+			ICondition cCondition = null;
+			List<ICriteria> criterias = new ArrayList<>();
+			// 按括号分组
+			for (ICondition iCondition : criteria.getConditions()) {
+				if (cCriteria == null) {
+					cCriteria = new Criteria();
+					criterias.add(cCriteria);
+					cBracket = iCondition.getBracketOpen();
+				} else if (iCondition.getBracketOpen() > 0) {
+					cBracket += iCondition.getBracketOpen();
+				}
+				cCriteria.getConditions().add(iCondition);
+				if (iCondition.getBracketClose() > 0) {
+					cBracket -= iCondition.getBracketClose();
+				}
+				if (cBracket <= 0) {
+					cCriteria = null;
+				}
+			}
+			IOperationResult<FileData> opRsltFile = null;
 			OperationResult<Action> operationResult = new OperationResult<>();
-			for (ICondition condition : criteria.getConditions()) {
-				if (condition.getAlias().equals(FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER)) {
-					ICriteria aCriteria = new Criteria();
-					if (condition == null) {
-						condition = aCriteria.getConditions().create();
-						condition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER);
-						condition.setValue(emYesNo.YES);
-					} else {
-						aCriteria.getConditions().add(condition);
-					}
-					condition = criteria.getConditions().firstOrDefault(
-							c -> c.getAlias().equals(FileRepository.CRITERIA_CONDITION_ALIAS_FILE_NAME));
-					if (condition == null) {
-						condition = aCriteria.getConditions().create();
-						condition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_FILE_NAME);
-						condition.setValue(PACKAGE_INTEGRATION_ACTIONS_FILE);
-					} else {
-						aCriteria.getConditions().add(condition);
-					}
-					IOperationResult<FileData> opRsltFile = this.fetch(aCriteria, token);
-					if (opRsltFile.getError() != null) {
-						throw opRsltFile.getError();
-					}
-					ArrayList<ICondition> aConditions = new ArrayList<>();
-					criteria.getConditions().forEach(c -> {
-						if (CRITERIA_CONDITION_ALIAS_ACTION_ID.equalsIgnoreCase(c.getAlias())
-								&& c.getOperation() == ConditionOperation.EQUAL) {
-							aConditions.add(c);
+			// 按文件夹查询
+			for (ICriteria iCriteria : criterias) {
+				// 获取文件夹里的配置文件
+				cCriteria = new Criteria();
+				for (ICondition iCondition : iCriteria.getConditions()) {
+					if (FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER.equalsIgnoreCase(iCondition.getAlias())) {
+						cCondition = cCriteria.getConditions().create();
+						cCondition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER);
+						cCondition.setValue(iCondition.getValue());
+						cCondition.setBracketOpen(1);
+						if (cCriteria.getConditions().size() > 2) {
+							cCondition.setRelationship(ConditionRelationship.OR);
 						}
-					});
-
-					for (FileData item : opRsltFile.getResultObjects()) {
-						for (Action action : this.parsing(new File(item.getLocation()))) {
-							boolean filter = aConditions.isEmpty() ? false : true;
-							for (ICondition cItem : aConditions) {
-								if (action.getId().equals(cItem.getValue())) {
+						cCondition = cCriteria.getConditions().create();
+						cCondition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_FILE_NAME);
+						cCondition.setValue(PACKAGE_INTEGRATION_ACTIONS_FILE);
+						cCondition.setBracketClose(1);
+					}
+				}
+				// 没有文件夹信息，处理下一条
+				if (cCriteria.getConditions().isEmpty()) {
+					continue;
+				}
+				opRsltFile = this.fetch(cCriteria, token);
+				if (opRsltFile.getError() != null) {
+					throw opRsltFile.getError();
+				}
+				// 带查询的动作ID
+				cCriteria.getConditions().clear();
+				for (ICondition iCondition : iCriteria.getConditions()) {
+					if (!CRITERIA_CONDITION_ALIAS_ACTION_ID.equalsIgnoreCase(iCondition.getAlias())) {
+						continue;
+					}
+					cCondition = cCriteria.getConditions().create();
+					cCondition.setAlias(iCondition.getAlias());
+					cCondition.setValue(iCondition.getValue());
+				}
+				// 解析配置文件
+				boolean filter = false;
+				for (FileData item : opRsltFile.getResultObjects()) {
+					for (Action action : this.parsing(new File(item.getLocation()))) {
+						if (cCriteria.getConditions().isEmpty()) {
+							operationResult.addResultObjects(action);
+						} else {
+							filter = true;
+							for (ICondition iCondition : cCriteria.getConditions()) {
+								if (action.getId().equalsIgnoreCase(iCondition.getValue())) {
 									filter = false;
 									break;
 								}
 							}
-							if (filter) {
-								continue;
+							if (!filter) {
+								operationResult.addResultObjects(action);
 							}
-							operationResult.addResultObjects(action);
 						}
 					}
 				}
