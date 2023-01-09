@@ -67,6 +67,8 @@ namespace integration {
             id: string;
             /** 时间 */
             dateTime: Date;
+            /** 说明 */
+            remarks: string;
             /** 动作 */
             actions: Action[];
         }

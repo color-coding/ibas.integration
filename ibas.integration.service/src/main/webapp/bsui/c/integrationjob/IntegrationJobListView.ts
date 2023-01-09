@@ -171,7 +171,7 @@ namespace integration {
                                             that.application.viewShower.messages({
                                                 type: ibas.emMessageType.QUESTION,
                                                 title: ibas.i18n.prop(that.application.name),
-                                                message: ibas.i18n.prop("integration_integrationjoblist_update_all"),
+                                                message: ibas.i18n.prop("integration_integrationjoblist_continue_update_all"),
                                                 actions: [ibas.emMessageAction.YES, ibas.emMessageAction.NO],
                                                 onCompleted(action: ibas.emMessageAction): void {
                                                     if (action === ibas.emMessageAction.YES) {
@@ -279,10 +279,22 @@ namespace integration {
                                                 {
                                                     path: "dateTime",
                                                 },
+                                                {
+                                                    path: "remarks",
+                                                },
                                             ],
-                                            formatter(id: string, date: Date): string {
-                                                return ibas.strings.format("# {0}...  {1}",
-                                                    id?.substring(0, 8), ibas.dates.toString(date, "yyyy-MM-dd_HH:mm"));
+                                            formatter(id: string, date: Date, remarks: string): string {
+                                                let builder: ibas.StringBuilder = new ibas.StringBuilder();
+                                                builder.map(undefined, "");
+                                                builder.map(null, "");
+                                                builder.append(ibas.strings.format("# {0}...  {1}",
+                                                    id?.substring(0, 8), ibas.dates.toString(date, "yyyy-MM-dd_HH:mm")));
+                                                if (!ibas.strings.isEmpty(remarks)) {
+                                                    builder.append("  (");
+                                                    builder.append(remarks);
+                                                    builder.append(")");
+                                                }
+                                                return builder.toString();
                                             }
                                         }
                                     }),

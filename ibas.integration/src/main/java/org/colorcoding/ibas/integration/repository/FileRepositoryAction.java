@@ -3,9 +3,13 @@ package org.colorcoding.ibas.integration.repository;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -21,7 +25,9 @@ import org.colorcoding.ibas.bobas.common.OperationMessage;
 import org.colorcoding.ibas.bobas.common.OperationResult;
 import org.colorcoding.ibas.bobas.data.ArrayList;
 import org.colorcoding.ibas.bobas.data.FileData;
+import org.colorcoding.ibas.bobas.data.KeyText;
 import org.colorcoding.ibas.bobas.data.List;
+import org.colorcoding.ibas.bobas.i18n.I18N;
 import org.colorcoding.ibas.bobas.message.Logger;
 import org.colorcoding.ibas.bobas.message.MessageLevel;
 import org.colorcoding.ibas.bobas.repository.FileRepository;
@@ -33,6 +39,7 @@ import org.colorcoding.ibas.bobas.util.EncryptMD5;
 import org.colorcoding.ibas.integration.MyConfiguration;
 import org.colorcoding.ibas.integration.bo.integration.Action;
 import org.colorcoding.ibas.integration.bo.integration.ActionPackage;
+import org.colorcoding.ibas.integration.data.DataConvert;
 
 /**
  * 动作文件管理仓库
@@ -44,6 +51,7 @@ public class FileRepositoryAction extends FileRepositoryService
 	public static final String TYPE_JSON_NO_ROOT = "json_no_root";
 	public static final String PACKAGE_INTEGRATION_ACTIONS_FOLDER = "integration/";
 	public static final String PACKAGE_INTEGRATION_ACTIONS_FILE = "actions.json";
+	public static final String PACKAGE_INTEGRATION_REMARKS_FILE = "remarks.json";
 	public static final String CRITERIA_CONDITION_ALIAS_ACTION_ID = "ActionId";
 	public static final String CRITERIA_CONDITION_ALIAS_PACKAGE = FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER;
 	public static final String CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER = FileRepository.CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER;
@@ -78,6 +86,11 @@ public class FileRepositoryAction extends FileRepositoryService
 	}
 
 	@Override
+	public IOperationMessage commentPackage(KeyText content) {
+		return this.commentPackage(content, this.getCurrentUser().getToken());
+	}
+
+	@Override
 	public OperationResult<ActionPackage> registerPackage(File file, String token) {
 		try (JarFile jarFile = new JarFile(file)) {
 			this.setCurrentUser(token);
@@ -98,8 +111,7 @@ public class FileRepositoryAction extends FileRepositoryService
 					jarEntryList.add(jarEntry);
 				}
 			}
-			File folder = new File(
-					this.getRepository().getRepositoryFolder() + File.separator + EncryptMD5.md5(file.getPath()));
+			File folder = new File(this.getRepository().getRepositoryFolder(), EncryptMD5.md5(file.getPath()));
 			// 读取内容
 			for (JarEntry jarEntry : jarEntryList) {
 				try (InputStream inputStream = jarFile.getInputStream(jarEntry)) {
@@ -240,17 +252,6 @@ public class FileRepositoryAction extends FileRepositoryService
 		}
 	}
 
-	@Override
-	public OperationResult<FileData> fetchFile(ICriteria criteria, String token) {
-		try {
-			this.setCurrentUser(token);
-			return (OperationResult<FileData>) this.fetch(criteria, token);
-		} catch (Exception e) {
-			Logger.log(e);
-			return new OperationResult<>(e);
-		}
-	}
-
 	private List<Action> parsing(File file) throws SerializationException, FileNotFoundException {
 		ArrayList<Action> actions = new ArrayList<>();
 		if (!file.exists() || !file.isFile()) {
@@ -359,6 +360,15 @@ public class FileRepositoryAction extends FileRepositoryService
 				aPackage.setId(folder.getName());
 				aPackage.setDateTime(folder.lastModified());
 				aPackage.setActions(this.parsing(aFile).toArray(new Action[] {}));
+				// 读取备注文件内容
+				aFile = new File(folder.getPath() + File.separator + PACKAGE_INTEGRATION_REMARKS_FILE);
+				if (aFile.exists() && aFile.isFile()) {
+					try {
+						aPackage.setRemarks(
+								new String(Files.readAllBytes(Paths.get(aFile.toURI())), StandardCharsets.UTF_8));
+					} catch (Exception e) {
+					}
+				}
 				opRsltPackage.addResultObjects(aPackage);
 			}
 			// 按日期排序
@@ -380,4 +390,36 @@ public class FileRepositoryAction extends FileRepositoryService
 	public IOperationResult<ActionPackage> fetchPackage(ICriteria criteria) {
 		return this.fetchPackage(criteria, this.getCurrentUser().getToken());
 	}
+
+	@Override
+	public OperationMessage commentPackage(KeyText content, String token) {
+		try {
+			this.setCurrentUser(token);
+			File folder = new File(this.getRepository().getRepositoryFolder() + File.separator + content.getKey());
+			if (!folder.exists() || !folder.isDirectory()) {
+				throw new Exception(I18N.prop("msg_ig_package_not_exists", content.getKey()));
+			}
+			if (DataConvert.isNullOrEmpty(content.getText())) {
+				// 空白，则删除原有注释
+				File file = new File(folder.getPath(), PACKAGE_INTEGRATION_REMARKS_FILE);
+				if (file.exists()) {
+					file.delete();
+				}
+			} else {
+				File file = new File(folder.getPath(), PACKAGE_INTEGRATION_REMARKS_FILE);
+				if (file.exists()) {
+					file.createNewFile();
+				}
+				try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+					fileOutputStream.write(content.getText().getBytes());
+					fileOutputStream.flush();
+				}
+			}
+			return new OperationMessage();
+		} catch (Exception e) {
+			Logger.log(e);
+			return new OperationMessage(e);
+		}
+	}
+
 }

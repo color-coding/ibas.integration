@@ -36,6 +36,7 @@ namespace integration {
                     let newData: bo.ActionPackage = new bo.ActionPackage();
                     newData.id = data.id;
                     newData.dateTime = ibas.dates.valueOf(data.dateTime);
+                    newData.remarks = data.remarks;
                     if (!ibas.objects.isNull(data.actions)) {
                         for (let item of data.actions) {
                             item.type = bo.Action.name;

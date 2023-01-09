@@ -56,8 +56,14 @@ namespace integration {
                                                 {
                                                     path: "dateTime",
                                                 },
+                                                {
+                                                    path: "notes",
+                                                },
                                             ],
-                                            formatter(id: string, date: Date): string {
+                                            formatter(id: string, date: Date, notes: string): string {
+                                                if (!ibas.strings.isEmpty(notes)) {
+                                                    return notes;
+                                                }
                                                 return ibas.strings.format("# {0}...  {1}",
                                                     id?.substring(0, 8), ibas.dates.toString(date, "yyyy-MM-dd_HH:mm"));
                                             }
@@ -155,6 +161,7 @@ namespace integration {
                             let data: LineData = new LineData();
                             data.id = item.id;
                             data.dateTime = item.dateTime;
+                            data.notes = item.remarks;
                             data.data = sItem;
                             data.name = sItem.name;
                             data.remark = sItem.remark;
@@ -178,6 +185,7 @@ namespace integration {
             data: bo.Action;
             id: string;
             dateTime: Date;
+            notes: string;
             name: string;
             remark: string;
         }

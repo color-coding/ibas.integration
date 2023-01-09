@@ -29,6 +29,7 @@ namespace integration {
                 this.view.fetchPackageEvent = this.fetchPackage;
                 this.view.deletePackageEvent = this.deletePackage;
                 this.view.uploadPackageEvent = this.uploadPackage;
+                this.view.commentPackageEvent = this.commentPackage;
                 this.view.viewActionEvent = this.viewAction;
             }
             /** 视图显示后 */
@@ -124,7 +125,7 @@ namespace integration {
                         ibas.queues.execute(beDeleteds, (data, next) => {
                             // 处理数据
                             boRepository.deleteActionPackage({
-                                beDeleted: data,
+                                package: data,
                                 onCompleted(opRslt: ibas.IOperationResult<bo.IntegrationJob>): void {
                                     if (opRslt.resultCode !== 0) {
                                         next(new Error(ibas.i18n.prop("shell_data_delete_error", data, opRslt.message)));
@@ -148,6 +149,29 @@ namespace integration {
                     }
                 });
             }
+            /** 查询数据 */
+            protected commentPackage(aPackage: bo.ActionPackage, remarks: string): void {
+                this.busy(true);
+                let that: this = this;
+                let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
+                boRepository.commentActionPackage({
+                    package: aPackage.id,
+                    remarks: remarks,
+                    onCompleted(opRslt: ibas.IOperationMessage): void {
+                        try {
+                            that.busy(false);
+                            if (opRslt.resultCode !== 0) {
+                                throw new Error(opRslt.message);
+                            }
+                            aPackage.remarks = remarks;
+                            that.view.showPackages(aPackage);
+                        } catch (error) {
+                            that.messages(error);
+                        }
+                    }
+                });
+                this.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_fetching_data"));
+            }
             protected viewAction(data: bo.Action): void {
                 if (ibas.objects.isNull(data)) {
                     this.messages(ibas.emMessageType.WARNING, ibas.i18n.prop("shell_please_chooose_data",
@@ -166,8 +190,10 @@ namespace integration {
             uploadPackageEvent: Function;
             /** 删除数据事件，参数：删除对象集合 */
             deletePackageEvent: Function;
+            /** 注释包 */
+            commentPackageEvent: Function;
             /** 显示包 */
-            showPackages(datas: bo.ActionPackage[]): void;
+            showPackages(datas: bo.ActionPackage[] | bo.ActionPackage): void;
             /** 查看动作 */
             viewActionEvent: Function;
             /** 显示动作 */

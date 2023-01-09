@@ -142,9 +142,10 @@ namespace integration {
                                         ibas.logger.log(ibas.emMessageLevel.WARN, "repository: not found action [{0} - {1}].", jobAction.actionId, jobAction.actionName);
                                         continue;
                                     }
-                                    // 输入描述
-                                    action.remark = jobAction.actionRemark;
+                                    // 复制对象，防止数据污染
+                                    action = ibas.objects.clone(action);
                                     // 输入设置
+                                    action.remark = jobAction.actionRemark;
                                     for (let item of jobAction.integrationJobActionCfgs) {
                                         if (ibas.objects.isNull(item.key)) {
                                             continue;
@@ -189,9 +190,26 @@ namespace integration {
                 boRepository.address = this.address.replace("/services/rest/data/", "/services/rest/action/");
                 boRepository.token = this.token;
                 boRepository.converter = this.createConverter();
-                let method: string = ibas.strings.format("deletePackage?group={0}&token={1}", deleter.beDeleted, this.token);
+                let method: string = ibas.strings.format("deletePackage?group={0}&token={1}", deleter.package, this.token);
                 boRepository.callRemoteMethod(method, undefined, (opRslt) => {
                     deleter.onCompleted.call(ibas.objects.isNull(deleter.caller) ? deleter : deleter.caller, opRslt);
+                });
+            }
+            /**
+             * 删除 集成动作
+             * @param fetcher 查询者
+             */
+            commentActionPackage(commenter: IPackageCommenter): void {
+                if (!this.address.endsWith("/")) { this.address += "/"; }
+                let boRepository: ibas.BORepositoryAjax = new ibas.BORepositoryAjax();
+                boRepository.address = this.address.replace("/services/rest/data/", "/services/rest/action/");
+                boRepository.token = this.token;
+                boRepository.converter = this.createConverter();
+                boRepository.callRemoteMethod(ibas.strings.format("commentPackage?token={0}", this.token), JSON.stringify({
+                    Key: commenter.package,
+                    Text: ibas.objects.isNull(commenter.remarks) ? "" : commenter.remarks
+                }), (opRslt) => {
+                    commenter.onCompleted.call(ibas.objects.isNull(commenter.caller) ? commenter : commenter.caller, opRslt);
                 });
             }
             /**
@@ -270,15 +288,16 @@ namespace integration {
                 });
             }
         }
-        /** 代码下载者 */
-        export interface ICodeDownloader<T> extends ibas.IMethodCaller<T> {
-            /** 标识 */
-            action: bo.Action;
-        }
         /** 包删除者 */
         export interface IPackageDeleter extends ibas.IMethodCaller<any> {
-            /** 被删除 */
-            beDeleted: string;
+            /** 包 */
+            package: string;
+        } /** 包删除者 */
+        export interface IPackageCommenter extends ibas.IMethodCaller<any> {
+            /** 包 */
+            package: string;
+            /** 注释 */
+            remarks: string;
         }
         /** 业务对象仓库-集成开发 */
         export class BORepositoryIntegrationDevelopment extends ibas.BORepositoryApplication {

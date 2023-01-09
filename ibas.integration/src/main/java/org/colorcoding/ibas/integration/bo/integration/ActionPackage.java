@@ -48,6 +48,17 @@ public class ActionPackage extends Serializable {
 		this.dateTime = dateTime;
 	}
 
+	private String remarks;
+
+	@XmlElement(name = "remarks")
+	public final String getRemarks() {
+		return remarks;
+	}
+
+	public final void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
 	private Action[] actions;
 
 	@XmlElementWrapper(name = "actions")

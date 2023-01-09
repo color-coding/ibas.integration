@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLDecoder;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -28,6 +29,7 @@ import org.colorcoding.ibas.bobas.common.IOperationResult;
 import org.colorcoding.ibas.bobas.common.OperationMessage;
 import org.colorcoding.ibas.bobas.common.OperationResult;
 import org.colorcoding.ibas.bobas.data.FileData;
+import org.colorcoding.ibas.bobas.data.KeyText;
 import org.colorcoding.ibas.bobas.data.emYesNo;
 import org.colorcoding.ibas.bobas.i18n.I18N;
 import org.colorcoding.ibas.bobas.message.Logger;
@@ -40,10 +42,9 @@ import org.colorcoding.ibas.integration.action.BOStatusAction;
 import org.colorcoding.ibas.integration.bo.integration.Action;
 import org.colorcoding.ibas.integration.bo.integration.ActionPackage;
 import org.colorcoding.ibas.integration.repository.FileRepositoryAction;
+import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 
 @Path("action")
 public class ActionService extends FileRepositoryAction {
@@ -69,7 +70,7 @@ public class ActionService extends FileRepositoryAction {
 			condition = criteria.getConditions().create();
 			condition.setAlias(FileRepositoryAction.CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER);
 			condition.setValue(emYesNo.YES);
-			IOperationResult<FileData> operationResult = this.fetchFile(criteria, token);
+			IOperationResult<FileData> operationResult = this.fetch(criteria, token);
 			for (FileData item : operationResult.getResultObjects()) {
 				String location = item.getLocation().substring(item.getLocation().indexOf(group))
 						.replace(File.separator, "/");
@@ -103,23 +104,35 @@ public class ActionService extends FileRepositoryAction {
 	@Path("uploadPackage")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public OperationResult<ActionPackage> uploadPackage(@FormDataParam("file") InputStream fileStream,
-			@FormDataParam("file") FormDataContentDisposition fileDisposition, @QueryParam("token") String token) {
+	public OperationResult<ActionPackage> uploadPackage(FormDataMultiPart formData, @QueryParam("token") String token) {
 		try {
+			FormDataBodyPart bodyPart;
 			FileData fileData = new FileData();
-			fileData.setOriginalName(fileDisposition.getFileName());
-			fileData.setStream(fileStream);
-			FileRepository fileRepository = new FileRepository();
-			fileRepository.setRepositoryFolder(MyConfiguration.getTempFolder());
-			IOperationResult<FileData> opRsltFile = fileRepository.save(fileData);
-			if (opRsltFile.getError() != null) {
-				throw opRsltFile.getError();
+			for (BodyPart bodyItem : formData.getBodyParts()) {
+				if (bodyItem instanceof FormDataBodyPart) {
+					bodyPart = (FormDataBodyPart) bodyItem;
+					if ("FILE".equalsIgnoreCase(bodyPart.getName())) {
+						fileData.setStream(bodyPart.getValueAs(InputStream.class));
+						fileData.setOriginalName(
+								URLDecoder.decode(bodyPart.getContentDisposition().getFileName(), "UTF-8"));
+					}
+				}
 			}
-			fileData = opRsltFile.getResultObjects().firstOrDefault();
-			if (fileData == null) {
-				throw new Exception(I18N.prop("msg_ig_package_parsing_failure"));
+			if (fileData.getStream() != null) {
+				FileRepository fileRepository = new FileRepository();
+				fileRepository.setRepositoryFolder(MyConfiguration.getTempFolder());
+				IOperationResult<FileData> opRsltFile = fileRepository.save(fileData);
+				if (opRsltFile.getError() != null) {
+					throw opRsltFile.getError();
+				}
+				fileData = opRsltFile.getResultObjects().firstOrDefault();
+				if (fileData == null) {
+					throw new Exception(I18N.prop("msg_ig_package_parsing_failure"));
+				}
+				return this.registerPackage(new File(fileData.getLocation()), token);
+			} else {
+				return new OperationResult<>();
 			}
-			return this.registerPackage(new File(fileData.getLocation()), token);
 		} catch (Exception e) {
 			return new OperationResult<>(e);
 		}
@@ -163,7 +176,17 @@ public class ActionService extends FileRepositoryAction {
 	public OperationResult<Action> fetchAction(Criteria criteria, @QueryParam("token") String token) {
 		return super.fetchAction(criteria, token);
 	}
+	// --------------------------------------------------------------------------------------------//
 
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("commentPackage")
+	public OperationMessage commentPackage(KeyText content, @QueryParam("token") String token) {
+		return super.commentPackage(content, token);
+	}
+
+	// --------------------------------------------------------------------------------------------//
 	/**
 	 * 执行后台服务
 	 * 
@@ -198,7 +221,7 @@ public class ActionService extends FileRepositoryAction {
 			ICondition condition = criteria.getConditions().create();
 			condition.setAlias(FileRepositoryAction.CRITERIA_CONDITION_ALIAS_FILE_NAME);
 			condition.setValue(stringBuilder.toString());
-			IOperationResult<FileData> operationResult = this.fetchFile(criteria, token);
+			IOperationResult<FileData> operationResult = this.fetch(criteria, token);
 			FileData fileData = operationResult.getResultObjects().firstOrDefault();
 			if (fileData == null) {
 				throw new FileNotFoundException(stringBuilder.toString());
