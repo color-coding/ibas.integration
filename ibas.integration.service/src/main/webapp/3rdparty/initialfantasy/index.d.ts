@@ -579,6 +579,8 @@ declare namespace initialfantasy {
             objectCode: string;
             /** 行号 */
             lineId: number;
+            /** 显示顺序 */
+            visOrder: number;
             /** 实例号（版本） */
             logInst: number;
             /** 数据源 */
@@ -2249,6 +2251,12 @@ declare namespace initialfantasy {
             get lineId(): number;
             /** 设置-行号 */
             set lineId(value: number);
+            /** 映射的属性名称-显示顺序 */
+            static PROPERTY_VISORDER_NAME: string;
+            /** 获取-显示顺序 */
+            get visOrder(): number;
+            /** 设置-显示顺序 */
+            set visOrder(value: number);
             /** 映射的属性名称-实例号（版本） */
             static PROPERTY_LOGINST_NAME: string;
             /** 获取-实例号（版本） */
@@ -6151,7 +6159,7 @@ declare namespace initialfantasy {
 declare namespace initialfantasy {
     namespace app {
         /** 应用-更改用户配置 */
-        class ChangeUserProfileApp extends ibas.Application<IChangeUserProfileView> implements ibas.IService<ibas.IServiceCaller<ibas.IServiceContract>> {
+        class ChangeUserProfileApp extends ibas.Application<IChangeUserProfileView> {
             /** 应用标识 */
             static APPLICATION_ID: string;
             /** 应用名称 */
@@ -6162,12 +6170,7 @@ declare namespace initialfantasy {
             /** 视图显示后 */
             protected viewShowed(): void;
             /** 运行 */
-            run(): void;
-            /**
-             * 运行
-             * @param caller 服务调用者
-             */
-            run(caller: ibas.IServiceCaller<ibas.IServiceContract>): void;
+            run(user?: bo.User | string | number): void;
             private user;
             private fetchUser;
             private saveUser;
@@ -6178,13 +6181,6 @@ declare namespace initialfantasy {
             showUser(user: bo.User): void;
             /** 保存用户事件 */
             saveUserEvent: Function;
-        }
-        /** 用户选择服务映射 */
-        class ChangeUserProfileMapping extends ibas.ServiceMapping {
-            /** 构造函数 */
-            constructor();
-            /** 创建服务实例 */
-            create(): ibas.IService<ibas.IServiceContract>;
         }
     }
 }
@@ -6369,11 +6365,14 @@ declare namespace initialfantasy {
             protected viewShowed(): void;
             private user;
             private fetchUser;
+            private editUser;
         }
         /** 视图-用户配置 */
         interface IUserProfileView extends ibas.IResidentView {
             /** 显示用户信息 */
             showUser(user: bo.User): void;
+            /** 编辑用户 */
+            editUserEvent: Function;
         }
         class UserProfileApplicationMapping extends ibas.ResidentApplicationMapping {
             /** 构造函数 */

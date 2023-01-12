@@ -108,6 +108,9 @@ namespace integration {
             /** 实例号 */
             logInst: number;
 
+            /** 显示顺序 */
+            visOrder: number;
+
             /** 数据源 */
             dataSource: string;
 

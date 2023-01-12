@@ -196,7 +196,8 @@ namespace integration {
                                     })
                                 }),
                             }),
-                        ]
+                        ],
+                        sortProperty: "visOrder",
                     });
                     this.tableIntegrationJobActionCfg = new sap.extension.table.DataTable("", {
                         enableSelectAll: false,
@@ -271,7 +272,7 @@ namespace integration {
                                     type: new sap.extension.data.Alphanumeric()
                                 })
                             }),
-                        ]
+                        ],
                     });
                     let formMiddle: sap.ui.layout.form.SimpleForm = new sap.ui.layout.form.SimpleForm("", {
                         editable: true,

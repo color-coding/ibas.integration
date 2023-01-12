@@ -67,6 +67,20 @@ public interface IIntegrationJobAction extends IBOSimpleLine {
 	void setLogInst(Integer value);
 
 	/**
+	 * 获取-显示顺序
+	 * 
+	 * @return 值
+	 */
+	Integer getVisOrder();
+
+	/**
+	 * 设置-显示顺序
+	 * 
+	 * @param value 值
+	 */
+	void setVisOrder(Integer value);
+
+	/**
 	 * 获取-数据源
 	 * 
 	 * @return 值

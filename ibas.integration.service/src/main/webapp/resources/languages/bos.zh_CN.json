@@ -44,6 +44,7 @@
         "bo_integrationjobaction_lineid": "对象行号",
         "bo_integrationjobaction_objectcode": "对象类型",
         "bo_integrationjobaction_loginst": "实例号",
+        "bo_integrationjobaction_visorder": "显示顺序",
         "bo_integrationjobaction_datasource": "数据源",
         "bo_integrationjobaction_createdate": "创建日期",
         "bo_integrationjobaction_createtime": "创建时间",

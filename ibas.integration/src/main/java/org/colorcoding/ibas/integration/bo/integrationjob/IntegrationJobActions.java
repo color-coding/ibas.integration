@@ -6,7 +6,11 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 import org.colorcoding.ibas.bobas.bo.BusinessObjects;
+import org.colorcoding.ibas.bobas.common.Criteria;
+import org.colorcoding.ibas.bobas.common.ICondition;
 import org.colorcoding.ibas.bobas.common.ICriteria;
+import org.colorcoding.ibas.bobas.common.ISort;
+import org.colorcoding.ibas.bobas.common.SortType;
 import org.colorcoding.ibas.integration.MyConfiguration;
 
 /**
@@ -37,8 +41,7 @@ public class IntegrationJobActions extends BusinessObjects<IIntegrationJobAction
 	/**
 	 * 构造方法
 	 * 
-	 * @param parent
-	 *            父项对象
+	 * @param parent 父项对象
 	 */
 	public IntegrationJobActions(IIntegrationJob parent) {
 		super(parent);
@@ -71,7 +74,19 @@ public class IntegrationJobActions extends BusinessObjects<IIntegrationJobAction
 
 	@Override
 	public ICriteria getElementCriteria() {
-		ICriteria criteria = super.getElementCriteria();
+		ICriteria criteria = new Criteria();
+		ICondition condition = criteria.getConditions().create();
+		condition.setAlias(IntegrationJobAction.PROPERTY_OBJECTKEY.getName());
+		condition.setValue(this.getParent().getObjectKey());
+		ISort sort = criteria.getSorts().create();
+		sort.setAlias(IntegrationJobAction.PROPERTY_OBJECTKEY.getName());
+		sort.setSortType(SortType.ASCENDING);
+		sort = criteria.getSorts().create();
+		sort.setAlias(IntegrationJobAction.PROPERTY_VISORDER.getName());
+		sort.setSortType(SortType.ASCENDING);
+		sort = criteria.getSorts().create();
+		sort.setAlias(IntegrationJobAction.PROPERTY_LINEID.getName());
+		sort.setSortType(SortType.ASCENDING);
 		return criteria;
 	}
 
