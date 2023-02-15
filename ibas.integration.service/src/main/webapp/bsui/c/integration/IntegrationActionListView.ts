@@ -49,20 +49,28 @@ namespace integration {
                                                             press: function (event: sap.ui.base.Event): void {
                                                                 let source: any = event.getSource();
                                                                 if (source instanceof sap.m.Button) {
-                                                                    if (source.getIcon() === "sap-icon://slim-arrow-right") {
+                                                                    if (source.getIcon() === "sap-icon://slim-arrow-down") {
                                                                         for (let item of that.leftList.getItems()) {
-                                                                            if (item instanceof sap.m.NotificationListGroup) {
-                                                                                item.setCollapsed(false);
-                                                                            }
-                                                                        }
-                                                                        source.setIcon("sap-icon://slim-arrow-down");
-                                                                    } else {
-                                                                        for (let item of that.leftList.getItems()) {
-                                                                            if (item instanceof sap.m.NotificationListGroup) {
-                                                                                item.setCollapsed(true);
+                                                                            if (item instanceof sap.m.CustomListItem) {
+                                                                                for (let sItem of item.getContent()) {
+                                                                                    if (sItem instanceof sap.m.Panel) {
+                                                                                        sItem.setExpanded(false);
+                                                                                    }
+                                                                                }
                                                                             }
                                                                         }
                                                                         source.setIcon("sap-icon://slim-arrow-right");
+                                                                    } else {
+                                                                        for (let item of that.leftList.getItems()) {
+                                                                            if (item instanceof sap.m.CustomListItem) {
+                                                                                for (let sItem of item.getContent()) {
+                                                                                    if (sItem instanceof sap.m.Panel) {
+                                                                                        sItem.setExpanded(true);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        source.setIcon("sap-icon://slim-arrow-down");
                                                                     }
                                                                 }
                                                             }
@@ -78,31 +86,36 @@ namespace integration {
                                                                         search = search.trim().toLowerCase();
                                                                     }
                                                                     for (let item of that.leftList.getItems()) {
-                                                                        if (item instanceof sap.m.NotificationListGroup) {
+                                                                        if (item instanceof sap.m.CustomListItem) {
                                                                             item.setVisible(true);
-                                                                            item.setCollapsed(true);
-                                                                            for (let gItem of item.getItems()) {
-                                                                                if (gItem instanceof sap.m.NotificationListItem) {
-                                                                                    gItem.setVisible(true);
-                                                                                    if (ibas.strings.isEmpty(search)) {
-                                                                                        continue;
+                                                                            for (let sItem of item.getContent()) {
+                                                                                if (sItem instanceof sap.m.Panel) {
+                                                                                    sItem.setExpanded(true);
+                                                                                    for (let tItem of sItem.getContent()) {
+                                                                                        if (tItem instanceof sap.extension.m.List) {
+                                                                                            let count: number = 0;
+                                                                                            for (let uItem of tItem.getItems()) {
+                                                                                                if (uItem instanceof sap.m.StandardListItem) {
+                                                                                                    uItem.setVisible(true);
+                                                                                                    if (ibas.strings.isEmpty(search)) {
+                                                                                                        continue;
+                                                                                                    }
+                                                                                                    content = uItem.getTitle(); if (content && content.toLowerCase().indexOf(search) >= 0) {
+                                                                                                        continue;
+                                                                                                    }
+                                                                                                    content = uItem.getDescription(); if (content && content.toLowerCase().indexOf(search) >= 0) {
+                                                                                                        continue;
+                                                                                                    }
+                                                                                                    uItem.setVisible(false);
+                                                                                                    count++;
+                                                                                                }
+                                                                                            }
+                                                                                            if (count >= tItem.getItems().length) {
+                                                                                                item.setVisible(false);
+                                                                                            }
+                                                                                        }
                                                                                     }
-                                                                                    content = gItem.getTitle(); if (content && content.toLowerCase().indexOf(search) >= 0) {
-                                                                                        item.setCollapsed(false);
-                                                                                        continue;
-                                                                                    }
-                                                                                    content = gItem.getDescription(); if (content && content.toLowerCase().indexOf(search) >= 0) {
-                                                                                        item.setCollapsed(false);
-                                                                                        continue;
-                                                                                    }
-                                                                                    gItem.setVisible(false);
                                                                                 }
-                                                                            }
-                                                                            if (ibas.strings.isEmpty(search)) {
-                                                                                continue;
-                                                                            }
-                                                                            if (item.getCollapsed() !== false) {
-                                                                                item.setVisible(false);
                                                                             }
                                                                         }
                                                                     }
@@ -122,128 +135,138 @@ namespace integration {
                                                 content: [
                                                     this.leftList = new sap.extension.m.List("", {
                                                         growing: false,
+                                                        growingThreshold: 99,
                                                         items: {
                                                             path: "/rows",
-                                                            templateShareable: false,
-                                                            template: new sap.m.NotificationListGroup("", {
-                                                                showCloseButton: true,
-                                                                unread: true,
-                                                                collapsed: true,
-                                                                title: {
-                                                                    parts: [
-                                                                        {
-                                                                            path: "id",
-                                                                        },
-                                                                        {
-                                                                            path: "dateTime",
-                                                                        },
-                                                                        {
-                                                                            path: "remarks",
-                                                                        },
-                                                                    ],
-                                                                    formatter(id: string, date: Date, remarks: string): string {
-                                                                        if (!ibas.strings.isEmpty(remarks)) {
-                                                                            return remarks;
-                                                                        }
-                                                                        return ibas.strings.format("# {0}...  {1}",
-                                                                            id?.substring(0, 8), ibas.dates.toString(date, "yyyy-MM-dd_HH:mm"));
-                                                                    }
-                                                                },
-                                                                close(event: sap.ui.base.Event): void {
-                                                                    let source: any = event.getSource();
-                                                                    if (source instanceof sap.m.NotificationListGroup) {
-                                                                        let data: any = source.getBindingContext().getObject();
-                                                                        if (data instanceof bo.ActionPackage) {
-                                                                            that.fireViewEvents(that.deletePackageEvent, data);
-                                                                        }
-                                                                    }
-                                                                },
-                                                                items: {
-                                                                    path: "actions",
-                                                                    templateShareable: false,
-                                                                    template: new sap.m.NotificationListItem("", {
-                                                                        title: "{name}",
-                                                                        description: "{remark}",
-                                                                        authorAvatarColor: {
-                                                                            path: "activated",
-                                                                            formatter(data: any): sap.m.AvatarColor {
-                                                                                if (data !== true) {
-                                                                                    return sap.m.AvatarColor.Accent2;
-                                                                                }
-                                                                                return sap.m.AvatarColor.Accent6;
-                                                                            }
-                                                                        },
-                                                                        authorPicture: "sap-icon://Netweaver-business-client",
-                                                                        press(event: sap.ui.base.Event): void {
-                                                                            let source: any = event.getSource();
-                                                                            if (source instanceof sap.m.NotificationListItem) {
-                                                                                let data: any = source.getBindingContext().getObject();
-                                                                                if (data instanceof bo.Action) {
-                                                                                    that.fireViewEvents(that.viewActionEvent, data);
-                                                                                }
-                                                                            }
-                                                                        },
-                                                                        showCloseButton: false,
-                                                                    })
-                                                                },
-                                                                buttons: [
-                                                                    new sap.m.Button("", {
-                                                                        type: sap.m.ButtonType.Transparent,
-                                                                        icon: "sap-icon://notes",
-                                                                        press(event: sap.ui.base.Event): void {
-                                                                            let source: any = event.getSource();
-                                                                            if (source instanceof sap.m.Button) {
-                                                                                let data: any = source.getParent().getBindingContext().getObject();
-                                                                                if (data instanceof bo.ActionPackage) {
-                                                                                    let popover: sap.m.Popover = new sap.m.Popover("", {
-                                                                                        showHeader: false,
-                                                                                        placement: sap.m.PlacementType.Bottom,
-                                                                                        content: [
-                                                                                            new sap.m.TextArea("", {
-                                                                                                rows: 3,
-                                                                                                value: data.remarks,
-                                                                                            })
+                                                            templateShareable: true,
+                                                            template: new sap.m.CustomListItem("", {
+                                                                content: [
+                                                                    new sap.m.Panel("", {
+                                                                        expandable: true,
+                                                                        expanded: false,
+                                                                        backgroundDesign: sap.m.BackgroundDesign.Translucent,
+                                                                        accessibleRole: sap.m.PanelAccessibleRole.Form,
+                                                                        headerToolbar: new sap.m.Toolbar("", {
+                                                                            content: [
+                                                                                new sap.m.Title("", {
+                                                                                    text: {
+                                                                                        parts: [
+                                                                                            {
+                                                                                                path: "id",
+                                                                                            },
+                                                                                            {
+                                                                                                path: "dateTime",
+                                                                                            },
+                                                                                            {
+                                                                                                path: "remarks",
+                                                                                            },
                                                                                         ],
-                                                                                        footer: new sap.m.Toolbar("", {
-                                                                                            content: [
-                                                                                                new sap.m.ToolbarSpacer(),
-                                                                                                new sap.m.Button("", {
-                                                                                                    text: ibas.i18n.prop("shell_confirm"),
-                                                                                                    type: sap.m.ButtonType.Transparent,
-                                                                                                    press(): void {
-                                                                                                        that.fireViewEvents(that.commentPackageEvent, data, (<sap.m.Input>popover.getContent()[0]).getValue());
-                                                                                                        popover.close();
-                                                                                                    }
-                                                                                                }),
-                                                                                                new sap.m.Button("", {
-                                                                                                    text: ibas.i18n.prop("shell_exit"),
-                                                                                                    type: sap.m.ButtonType.Transparent,
-                                                                                                    press(): void {
-                                                                                                        popover.close();
-                                                                                                    }
-                                                                                                })
-                                                                                            ]
-                                                                                        })
-                                                                                    }).addStyleClass("");
-                                                                                    popover.openBy(event.getSource(), true);
-                                                                                }
-                                                                            }
-                                                                        },
-                                                                        tooltip: {
-                                                                            parts: [
-                                                                                {
-                                                                                    path: "id",
+                                                                                        formatter(id: string, date: Date, remarks: string): string {
+                                                                                            if (!ibas.strings.isEmpty(remarks)) {
+                                                                                                return remarks;
+                                                                                            }
+                                                                                            return ibas.strings.format("# {0}...  {1}",
+                                                                                                id?.substring(0, 8), ibas.dates.toString(date, "yyyy-MM-dd_HH:mm"));
+                                                                                        }
+                                                                                    },
+                                                                                    tooltip: {
+                                                                                        parts: [
+                                                                                            {
+                                                                                                path: "id",
+                                                                                            },
+                                                                                            {
+                                                                                                path: "dateTime",
+                                                                                            },
+                                                                                        ],
+                                                                                        formatter(id: string, date: Date): string {
+                                                                                            return ibas.strings.format("# {0} {1}", id, ibas.dates.toString(date, "yyyy-MM-dd_HH:mm"));
+                                                                                        }
+                                                                                    },
+                                                                                }),
+                                                                                new sap.m.Button("", {
+                                                                                    type: sap.m.ButtonType.Transparent,
+                                                                                    icon: "sap-icon://notes",
+                                                                                    press(event: sap.ui.base.Event): void {
+                                                                                        let source: any = event.getSource();
+                                                                                        if (source instanceof sap.m.Button) {
+                                                                                            let data: any = source.getParent().getBindingContext().getObject();
+                                                                                            if (data instanceof bo.ActionPackage) {
+                                                                                                let popover: sap.m.Popover = new sap.m.Popover("", {
+                                                                                                    showHeader: false,
+                                                                                                    placement: sap.m.PlacementType.Bottom,
+                                                                                                    content: [
+                                                                                                        new sap.m.TextArea("", {
+                                                                                                            rows: 3,
+                                                                                                            value: data.remarks,
+                                                                                                        })
+                                                                                                    ],
+                                                                                                    footer: new sap.m.Toolbar("", {
+                                                                                                        content: [
+                                                                                                            new sap.m.ToolbarSpacer(),
+                                                                                                            new sap.m.Button("", {
+                                                                                                                text: ibas.i18n.prop("shell_confirm"),
+                                                                                                                type: sap.m.ButtonType.Transparent,
+                                                                                                                press(): void {
+                                                                                                                    that.fireViewEvents(that.commentPackageEvent, data, (<sap.m.Input>popover.getContent()[0]).getValue());
+                                                                                                                    popover.close();
+                                                                                                                }
+                                                                                                            }),
+                                                                                                            new sap.m.Button("", {
+                                                                                                                text: ibas.i18n.prop("shell_exit"),
+                                                                                                                type: sap.m.ButtonType.Transparent,
+                                                                                                                press(): void {
+                                                                                                                    popover.close();
+                                                                                                                }
+                                                                                                            })
+                                                                                                        ]
+                                                                                                    })
+                                                                                                }).addStyleClass("");
+                                                                                                popover.openBy(event.getSource(), true);
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                }),
+                                                                                new sap.m.ToolbarSpacer(""),
+                                                                                new sap.m.Button("", {
+                                                                                    type: sap.m.ButtonType.Transparent,
+                                                                                    icon: "sap-icon://decline",
+                                                                                    press(this: sap.m.Button, event: sap.ui.base.Event): void {
+                                                                                        let data: any = this?.getBindingContext()?.getObject();
+                                                                                        if (data instanceof bo.ActionPackage) {
+                                                                                            that.fireViewEvents(that.deletePackageEvent, data);
+                                                                                        }
+                                                                                    }
+                                                                                }),
+                                                                            ]
+                                                                        }),
+                                                                        content: [
+                                                                            new sap.extension.m.List("", {
+                                                                                growing: false,
+                                                                                growingThreshold: 99,
+                                                                                items: {
+                                                                                    path: "actions",
+                                                                                    templateShareable: true,
+                                                                                    template: new sap.m.StandardListItem("", {
+                                                                                        title: "{name}",
+                                                                                        description: "{remark}",
+                                                                                        icon: "sap-icon://Netweaver-business-client",
+                                                                                        type: sap.m.ListType.Active,
+                                                                                        iconDensityAware: false,
+                                                                                        iconInset: false,
+                                                                                        infoState: sap.ui.core.ValueState.Success,
+                                                                                        press(this: sap.m.StandardListItem, event: sap.ui.base.Event): void {
+                                                                                            let data: any = this?.getBindingContext()?.getObject();
+                                                                                            if (data instanceof bo.Action) {
+                                                                                                that.fireViewEvents(that.viewActionEvent, data);
+                                                                                            }
+                                                                                        },
+                                                                                    })
                                                                                 },
-                                                                                {
-                                                                                    path: "dateTime",
-                                                                                },
-                                                                            ],
-                                                                            formatter(id: string, date: Date): string {
-                                                                                return ibas.strings.format("# {0} {1}", id, ibas.dates.toString(date, "yyyy-MM-dd_HH:mm"));
-                                                                            }
-                                                                        },
+                                                                            })
+                                                                        ],
                                                                     })
-                                                                ]
+                                                                ],
+                                                                type: sap.m.ListType.Inactive
                                                             }),
                                                         },
                                                     })
@@ -318,7 +341,7 @@ namespace integration {
                         ]
                     });
                 }
-                private leftList: sap.m.List;
+                private leftList: sap.m.NotificationList;
                 private rightList: sap.m.ScrollContainer;
                 /** 显示包 */
                 showPackages(datas: bo.ActionPackage[] | bo.ActionPackage): void {
@@ -366,7 +389,7 @@ namespace integration {
                             }));
                             form.addContent(new sap.extension.m.Input("", {
                                 editable: false,
-                                value: item.value,
+                                value: ibas.strings.isWith(item.value, "{", "}") ? "" : item.value,
                             }));
                         }
                         this.rightList.addContent(form);
