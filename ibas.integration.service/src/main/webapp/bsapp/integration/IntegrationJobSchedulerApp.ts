@@ -276,11 +276,11 @@ namespace integration {
                 this.myWorker.addSetting("jobId", this.job.objectKey);
                 this.myWorker.onMessage = (message) => {
                     if (message instanceof Error) {
-                        this.log(message.stack ? message.stack : message.message, ibas.emMessageType.ERROR);
+                        this.log(ibas.emMessageLevel.ERROR, message.stack ? message.stack : message.message);
                     } else if (typeof message === "string") {
-                        this.log(message, ibas.emMessageType.INFORMATION);
+                        this.log(ibas.emMessageLevel.INFO, message);
                     } else {
-                        this.log(message.message, message.type);
+                        this.log(message.type === ibas.emMessageType.ERROR ? ibas.emMessageLevel.ERROR : ibas.emMessageLevel.INFO, message.message);
                     }
                 };
                 this.myWorker.onStop = () => {
