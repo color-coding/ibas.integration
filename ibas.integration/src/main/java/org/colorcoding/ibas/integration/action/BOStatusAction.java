@@ -38,7 +38,18 @@ import org.colorcoding.ibas.integration.MyConfiguration;
 @XmlRootElement(name = "StatusAction", namespace = MyConfiguration.NAMESPACE_ACTION)
 public class BOStatusAction extends Action {
 
+	/**
+	 * 配置项目-口令
+	 */
 	public static final String CONFIG_ITEM_USER_TOKEN = "userToken";
+	/**
+	 * 配置项目-关闭业务逻辑的动作（必须“;”号结尾， 如：XXX01;XXX02;）
+	 */
+	public final static String CONFIG_ITEM_ACTIONS_DISABLED_BUSINESS_LOGICS = "DisabledBusinessLogicsActions";
+	/**
+	 * 配置项目-关闭业务规则的动作（必须“;”号结尾， 如：XXX01;XXX02;）
+	 */
+	public final static String CONFIG_ITEM_ACTIONS_DISABLED_BUSINESS_RULES = "DisabledBusinessRulesActions";
 
 	private static final long serialVersionUID = 6097200644090177916L;
 
@@ -102,8 +113,22 @@ public class BOStatusAction extends Action {
 	@Override
 	protected void run() throws Exception {
 		BORepository4Action boRepository = new BORepository4Action();
-		String token = this.getConfig(CONFIG_ITEM_USER_TOKEN, "");
-		boRepository.setUserToken(token);
+		boRepository.setUserToken(this.getConfig(CONFIG_ITEM_USER_TOKEN, ""));
+		if (!DataConvert.isNullOrEmpty(this.getName())) {
+			// 从配置文件中判断，是否禁用了业务规则及逻辑
+			String values = this.getConfig(CONFIG_ITEM_ACTIONS_DISABLED_BUSINESS_LOGICS, "");
+			if (!DataConvert.isNullOrEmpty(values)) {
+				if (values.indexOf(this.getName() + ";") >= 0) {
+					boRepository.noCheckLogics();
+				}
+			}
+			values = this.getConfig(CONFIG_ITEM_ACTIONS_DISABLED_BUSINESS_RULES, "");
+			if (!DataConvert.isNullOrEmpty(values)) {
+				if (values.indexOf(this.getName() + ";") >= 0) {
+					boRepository.noCheckRules();
+				}
+			}
+		}
 		// 设置参数
 		this.applyConfigs(this.getConditions());
 		ICriteria criteria = new Criteria();

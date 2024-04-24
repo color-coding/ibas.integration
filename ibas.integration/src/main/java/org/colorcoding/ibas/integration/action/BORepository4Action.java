@@ -30,6 +30,14 @@ class BORepository4Action extends BORepositoryLogicService {
 		super.setRepository(repository);
 	}
 
+	public final void noCheckRules() {
+		this.setCheckRules(false);
+	}
+
+	public final void noCheckLogics() {
+		this.setCheckLogics(false);
+	}
+
 	public boolean openRepository() throws RepositoryException {
 		return super.openRepository();
 	}
