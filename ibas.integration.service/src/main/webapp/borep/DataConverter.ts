@@ -147,7 +147,7 @@ namespace integration {
                             return "";
                         }
                         // 允许多次调用
-                        return (url.indexOf("?") === -1 ? "?" : "&") + "token=" + token
+                        return (url.indexOf("?") === -1 ? "?" : "&") + "token=" + ibas.tokens.content(token)
                             + (rtVersion ? ("&_=" + rtVersion) : "");
                     }
                 });

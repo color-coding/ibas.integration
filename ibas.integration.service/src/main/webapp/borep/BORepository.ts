@@ -190,7 +190,7 @@ namespace integration {
                 boRepository.address = this.address.replace("/services/rest/data/", "/services/rest/action/");
                 boRepository.token = this.token;
                 boRepository.converter = this.createConverter();
-                let method: string = ibas.strings.format("deletePackage?group={0}&token={1}", deleter.package, this.token);
+                let method: string = ibas.strings.format("deletePackage?group={0}&token={1}", deleter.package, ibas.tokens.content(this.token));
                 boRepository.callRemoteMethod(method, undefined, (opRslt) => {
                     deleter.onCompleted.call(ibas.objects.isNull(deleter.caller) ? deleter : deleter.caller, opRslt);
                 });
@@ -205,7 +205,7 @@ namespace integration {
                 boRepository.address = this.address.replace("/services/rest/data/", "/services/rest/action/");
                 boRepository.token = this.token;
                 boRepository.converter = this.createConverter();
-                boRepository.callRemoteMethod(ibas.strings.format("commentPackage?token={0}", this.token), JSON.stringify({
+                boRepository.callRemoteMethod(ibas.strings.format("commentPackage?token={0}", ibas.tokens.content(this.token)), JSON.stringify({
                     Key: commenter.package,
                     Text: ibas.objects.isNull(commenter.remarks) ? "" : commenter.remarks
                 }), (opRslt) => {
@@ -234,7 +234,7 @@ namespace integration {
                 boRepository.address = this.address.replace("/services/rest/data/", "/services/rest/action/");
                 boRepository.token = this.token;
                 boRepository.converter = this.createConverter();
-                let method: string = ibas.strings.format("fetchPackage?token={0}", this.token);
+                let method: string = ibas.strings.format("fetchPackage?token={0}", ibas.tokens.content(this.token));
                 if (ibas.objects.isNull(fetcher.criteria)) {
                     fetcher.criteria = new ibas.Criteria();
                 }
@@ -248,7 +248,7 @@ namespace integration {
             toUrl(action: bo.Action): string {
                 if (!this.address.endsWith("/")) { this.address += "/"; }
                 let url: string = this.address.replace("/services/rest/data/", "/services/rest/action/");
-                url += ibas.strings.format("{0}?token={1}", action.fullPath(), this.token);
+                url += ibas.strings.format("{0}?token={1}", action.fullPath(), ibas.tokens.content(this.token));
                 return encodeURI(url);
             }
             /**
@@ -283,7 +283,7 @@ namespace integration {
                         formData.append(item.key, item.value);
                     }
                 }
-                boRepository.callRemoteMethod(ibas.strings.format("goAction?token={0}", this.token), formData, (opRslt) => {
+                boRepository.callRemoteMethod(ibas.strings.format("goAction?token={0}", ibas.tokens.content(this.token)), formData, (opRslt) => {
                     caller.onCompleted.call(ibas.objects.isNull(caller.caller) ? caller : caller.caller, opRslt);
                 });
             }

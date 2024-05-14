@@ -11,6 +11,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -104,7 +105,8 @@ public class ActionService extends FileRepositoryAction {
 	@Path("uploadPackage")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public OperationResult<ActionPackage> uploadPackage(FormDataMultiPart formData, @QueryParam("token") String token) {
+	public OperationResult<ActionPackage> uploadPackage(FormDataMultiPart formData,
+			@HeaderParam("authorization") String authorization, @QueryParam("token") String token) {
 		try {
 			FormDataBodyPart bodyPart;
 			FileData fileData = new FileData();
@@ -129,7 +131,8 @@ public class ActionService extends FileRepositoryAction {
 				if (fileData == null) {
 					throw new Exception(I18N.prop("msg_ig_package_parsing_failure"));
 				}
-				return this.registerPackage(new File(fileData.getLocation()), token);
+				return this.registerPackage(new File(fileData.getLocation()),
+						MyConfiguration.optToken(authorization, token));
 			} else {
 				return new OperationResult<>();
 			}
@@ -149,16 +152,18 @@ public class ActionService extends FileRepositoryAction {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("deletePackage")
-	public OperationMessage deletePackage(@QueryParam("group") String group, @QueryParam("token") String token) {
-		return super.deletePackage(group, token);
+	public OperationMessage deletePackage(@QueryParam("group") String group,
+			@HeaderParam("authorization") String authorization, @QueryParam("token") String token) {
+		return super.deletePackage(group, MyConfiguration.optToken(authorization, token));
 	}
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("fetchPackage")
-	public OperationResult<ActionPackage> fetchPackage(Criteria criteria, @QueryParam("token") String token) {
-		return super.fetchPackage(criteria, token);
+	public OperationResult<ActionPackage> fetchPackage(Criteria criteria,
+			@HeaderParam("authorization") String authorization, @QueryParam("token") String token) {
+		return super.fetchPackage(criteria, MyConfiguration.optToken(authorization, token));
 	}
 
 	// --------------------------------------------------------------------------------------------//
@@ -173,8 +178,9 @@ public class ActionService extends FileRepositoryAction {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("fetchAction")
-	public OperationResult<Action> fetchAction(Criteria criteria, @QueryParam("token") String token) {
-		return super.fetchAction(criteria, token);
+	public OperationResult<Action> fetchAction(Criteria criteria, @HeaderParam("authorization") String authorization,
+			@QueryParam("token") String token) {
+		return super.fetchAction(criteria, MyConfiguration.optToken(authorization, token));
 	}
 	// --------------------------------------------------------------------------------------------//
 
@@ -182,8 +188,9 @@ public class ActionService extends FileRepositoryAction {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("commentPackage")
-	public OperationMessage commentPackage(KeyText content, @QueryParam("token") String token) {
-		return super.commentPackage(content, token);
+	public OperationMessage commentPackage(KeyText content, @HeaderParam("authorization") String authorization,
+			@QueryParam("token") String token) {
+		return super.commentPackage(content, MyConfiguration.optToken(authorization, token));
 	}
 
 	// --------------------------------------------------------------------------------------------//
@@ -198,7 +205,8 @@ public class ActionService extends FileRepositoryAction {
 	@Path("goAction")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public OperationMessage goAction(FormDataMultiPart formData, @QueryParam("token") String token) {
+	public OperationMessage goAction(FormDataMultiPart formData, @HeaderParam("authorization") String authorization,
+			@QueryParam("token") String token) {
 		try {
 			FormDataBodyPart fieldGroup = formData.getField("ACTION_GROUP");
 			if (fieldGroup == null) {
@@ -221,7 +229,8 @@ public class ActionService extends FileRepositoryAction {
 			ICondition condition = criteria.getConditions().create();
 			condition.setAlias(FileRepositoryAction.CRITERIA_CONDITION_ALIAS_FILE_NAME);
 			condition.setValue(stringBuilder.toString());
-			IOperationResult<FileData> operationResult = this.fetch(criteria, token);
+			IOperationResult<FileData> operationResult = this.fetch(criteria,
+					MyConfiguration.optToken(authorization, token));
 			FileData fileData = operationResult.getResultObjects().firstOrDefault();
 			if (fileData == null) {
 				throw new FileNotFoundException(stringBuilder.toString());
@@ -236,7 +245,7 @@ public class ActionService extends FileRepositoryAction {
 			}
 			BOStatusAction action = (BOStatusAction) data;
 			// 设置参数
-			action.addConfig(BOStatusAction.CONFIG_ITEM_USER_TOKEN, token);
+			action.addConfig(BOStatusAction.CONFIG_ITEM_USER_TOKEN, MyConfiguration.optToken(authorization, token));
 			for (List<FormDataBodyPart> items : formData.getFields().values()) {
 				if (items == null) {
 					continue;

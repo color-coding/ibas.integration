@@ -203,7 +203,7 @@ namespace integration {
                         }
                         url.append("token");
                         url.append("=");
-                        url.append(token);
+                        url.append(ibas.tokens.content(token));
                     }
                     ibas.i18n.load(url.toString());
                 }
