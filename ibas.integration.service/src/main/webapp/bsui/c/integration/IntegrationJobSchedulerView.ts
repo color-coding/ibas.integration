@@ -337,23 +337,6 @@ namespace integration {
                             }).setText(content)
                         ]
                     }), 0);
-                    try {
-                        storages.local.log(content);
-                    } catch (error) {
-                        storages.local.upload((result) => {
-                            if (result instanceof Error) {
-                                this.application.viewShower.messages({
-                                    title: this.title,
-                                    type: ibas.emMessageType.ERROR,
-                                    message: result.message,
-                                });
-                            } else {
-                                this.application.viewShower.proceeding(this, ibas.emMessageType.SUCCESS,
-                                    ibas.i18n.prop("integration_log_uploaded", result.fileName));
-                            }
-                        });
-                        storages.local.log(content);
-                    }
                 }
             }
         }
