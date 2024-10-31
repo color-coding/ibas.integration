@@ -7,8 +7,6 @@
  */
 namespace integration {
     export namespace app {
-        /** 配置项目-自动运行默认项 */
-        const CONFIG_ITEM_JOB_SCHEDULER_DEFAULT_ACTION: string = "jobDefaultAction";
         /** 配置项目-禁用落盘日志 */
         const CONFIG_ITEM_DISABLE_PLACING_LOG: string = "disablePlacingLog";
         /** 落盘日志 */

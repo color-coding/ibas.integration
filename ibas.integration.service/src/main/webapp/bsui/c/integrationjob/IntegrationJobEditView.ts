@@ -279,7 +279,7 @@ namespace integration {
                         content: [
                             this.tableTitle = new sap.ui.core.Title("", { text: ibas.i18n.prop("bo_integrationjobaction") }),
                             this.container = new sap.m.NavContainer("", {
-                                height: "22rem",
+                                height: ibas.strings.format("{0}rem", sap.extension.table.visibleRowCount(8) * 3),
                                 pages: [
                                     this.tableIntegrationJobAction,
                                     this.tableIntegrationJobActionCfg
