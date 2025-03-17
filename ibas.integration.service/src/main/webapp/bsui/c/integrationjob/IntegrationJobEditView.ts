@@ -123,13 +123,26 @@ namespace integration {
                         },
                         toolbar: new sap.m.Toolbar("", {
                             content: [
-                                new sap.m.Button("", {
-                                    text: ibas.i18n.prop("shell_data_add"),
+                                new sap.m.MenuButton("", {
                                     type: sap.m.ButtonType.Transparent,
                                     icon: "sap-icon://add",
-                                    press: function (): void {
-                                        that.fireViewEvents(that.addIntegrationJobActionEvent);
-                                    }
+                                    text: ibas.i18n.prop("shell_data_add"),
+                                    menu: new sap.m.Menu("", {
+                                        items: [
+                                            new sap.m.MenuItem("", {
+                                                text: ibas.i18n.prop("bo_action"),
+                                                press: function (): void {
+                                                    that.fireViewEvents(that.addIntegrationJobActionEvent);
+                                                }
+                                            }),
+                                            new sap.m.MenuItem("", {
+                                                text: ibas.i18n.prop("bo_integrationjob"),
+                                                press: function (): void {
+                                                    that.fireViewEvents(that.addIntegrationJobActionEvent, bo.IntegrationJob.name);
+                                                }
+                                            }),
+                                        ]
+                                    }),
                                 }),
                                 new sap.m.Button("", {
                                     text: ibas.i18n.prop("shell_data_remove"),
