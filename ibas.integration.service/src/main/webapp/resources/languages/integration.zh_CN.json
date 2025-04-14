@@ -19,6 +19,7 @@
   "integration_upload_package": "上传程序包",
   "integration_delete_package": "删除程序包",
   "integration_continue_upload_package": "上传包[{0}]是否继续？",
+  "integration_sql_code_pretty": "美化",
   "integration_view_code": "查看代码",
   "integration_running_log": "运行日志",
   "integration_clear_log": "清理日志",

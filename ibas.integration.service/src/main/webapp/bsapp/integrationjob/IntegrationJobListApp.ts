@@ -202,7 +202,7 @@ namespace integration {
                                 jobAction.actionGroup = updateAction.group;
                                 jobAction.actionId = updateAction.id;
                                 jobAction.actionName = updateAction.name;
-                                jobAction.actionRemark = updateAction.remark;
+                                jobAction.actionRemark = !ibas.strings.isEmpty(jobAction.actionRemark) ? jobAction.actionRemark : updateAction.remark;
                                 for (let cItem of updateAction.configs) {
                                     // 添加默认配置
                                     if (jobAction.integrationJobActionCfgs.firstOrDefault((c) => { return c.key === cItem.key; }) !== null) {

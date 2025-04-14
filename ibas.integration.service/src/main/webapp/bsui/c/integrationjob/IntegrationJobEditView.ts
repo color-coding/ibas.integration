@@ -123,13 +123,26 @@ namespace integration {
                         },
                         toolbar: new sap.m.Toolbar("", {
                             content: [
-                                new sap.m.Button("", {
-                                    text: ibas.i18n.prop("shell_data_add"),
+                                new sap.m.MenuButton("", {
                                     type: sap.m.ButtonType.Transparent,
                                     icon: "sap-icon://add",
-                                    press: function (): void {
-                                        that.fireViewEvents(that.addIntegrationJobActionEvent);
-                                    }
+                                    text: ibas.i18n.prop("shell_data_add"),
+                                    menu: new sap.m.Menu("", {
+                                        items: [
+                                            new sap.m.MenuItem("", {
+                                                text: ibas.i18n.prop("bo_action"),
+                                                press: function (): void {
+                                                    that.fireViewEvents(that.addIntegrationJobActionEvent);
+                                                }
+                                            }),
+                                            new sap.m.MenuItem("", {
+                                                text: ibas.i18n.prop("bo_integrationjob"),
+                                                press: function (): void {
+                                                    that.fireViewEvents(that.addIntegrationJobActionEvent, bo.IntegrationJob.name);
+                                                }
+                                            }),
+                                        ]
+                                    }),
                                 }),
                                 new sap.m.Button("", {
                                     text: ibas.i18n.prop("shell_data_remove"),
@@ -258,6 +271,58 @@ namespace integration {
                                 label: ibas.i18n.prop("bo_integrationjobactioncfg_value"),
                                 width: "20rem",
                                 template: new sap.extension.m.Input("", {
+                                    showValueHelp: true,
+                                    valueHelpOnly: false,
+                                    valueHelpRequest(this: sap.m.Input): void {
+                                        let data: bo.IntegrationJobActionCfg = this.getBindingContext().getObject();
+                                        if (ibas.objects.isNull(data)) {
+                                            return;
+                                        }
+                                        if (data.value !== this.getValue()) {
+                                            data.value = this.getValue();
+                                        }
+                                        jQuery.sap.require("sap.ui.codeeditor.CodeEditor");
+                                        let dialog: sap.m.Dialog = new sap.m.Dialog("", {
+                                            title: ibas.i18n.prop("reportanalysis_sql_code_edit"),
+                                            type: sap.m.DialogType.Standard,
+                                            state: sap.ui.core.ValueState.None,
+                                            content: [
+                                                new sap.ui.codeeditor.CodeEditor("", {
+                                                    height: ibas.strings.format("{0}px", window.innerHeight * 0.6),
+                                                    width: ibas.strings.format("{0}px", window.innerWidth * 0.6),
+                                                    type: "sql",
+                                                    colorTheme: "eclipse",
+                                                    value: {
+                                                        path: "/value"
+                                                    }
+                                                })
+                                            ],
+                                            buttons: [
+                                                new sap.m.Button("", {
+                                                    text: ibas.i18n.prop("integration_sql_code_pretty"),
+                                                    type: sap.m.ButtonType.Transparent,
+                                                    icon: "sap-icon://text-formatting",
+                                                    press: function (): void {
+                                                        let content: any = dialog.getContent()[0];
+                                                        if (content instanceof sap.ui.codeeditor.CodeEditor) {
+                                                            content.prettyPrint();
+                                                        }
+                                                    }
+                                                }),
+                                                new sap.m.Button("", {
+                                                    text: ibas.i18n.prop("shell_exit"),
+                                                    type: sap.m.ButtonType.Transparent,
+                                                    icon: "sap-icon://inspect-down",
+                                                    press: function (): void {
+                                                        dialog.close();
+                                                        dialog = null;
+                                                    }
+                                                }),
+                                            ]
+                                        }).addStyleClass("sapUiNoContentPadding");
+                                        dialog.setModel(new sap.extension.model.JSONModel(data));
+                                        dialog.open();
+                                    }
                                 }).bindProperty("bindingValue", {
                                     path: "value",
                                     type: new sap.extension.data.Alphanumeric()
@@ -279,7 +344,7 @@ namespace integration {
                         content: [
                             this.tableTitle = new sap.ui.core.Title("", { text: ibas.i18n.prop("bo_integrationjobaction") }),
                             this.container = new sap.m.NavContainer("", {
-                                height: "22rem",
+                                height: ibas.strings.format("{0}rem", sap.extension.table.visibleRowCount(8) * 3),
                                 pages: [
                                     this.tableIntegrationJobAction,
                                     this.tableIntegrationJobActionCfg

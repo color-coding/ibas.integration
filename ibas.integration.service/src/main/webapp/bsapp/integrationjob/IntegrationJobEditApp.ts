@@ -184,8 +184,31 @@ namespace integration {
                 }
             }
             /** 添加集成任务-动作事件 */
-            private addIntegrationJobAction(): void {
-                this.chooseJobAction(undefined);
+            private addIntegrationJobAction(type?: string): void {
+                if (ibas.strings.equals(bo.IntegrationJob.name, type)) {
+                    let that: this = this;
+                    let criteria: ibas.ICriteria = new ibas.Criteria();
+                    let condition: ibas.ICondition = criteria.conditions.create();
+                    condition.alias = bo.IntegrationJob.PROPERTY_NAME_NAME;
+                    condition.operation = ibas.emConditionOperation.NOT_EQUAL;
+                    condition.value = that.editData.name ? that.editData.name : "";
+
+                    ibas.servicesManager.runChooseService<bo.IntegrationJob>({
+                        chooseType: ibas.emChooseType.MULTIPLE,
+                        boCode: bo.IntegrationJob.BUSINESS_OBJECT_CODE,
+                        criteria: criteria,
+                        onCompleted(selecteds: ibas.IList<bo.IntegrationJob>): void {
+                            for (let selected of selecteds) {
+                                for (let item of selected.integrationJobActions) {
+                                    that.editData.integrationJobActions.add(item.clone());
+                                }
+                            }
+                            that.view.showIntegrationJobActions(that.editData.integrationJobActions.filterDeleted());
+                        }
+                    });
+                } else {
+                    this.chooseJobAction(undefined);
+                }
             }
             /** 删除集成任务-动作事件 */
             private removeIntegrationJobAction(items: bo.IntegrationJobAction[]): void {
@@ -294,7 +317,7 @@ namespace integration {
                             item.actionGroup = selected.group;
                             item.actionId = selected.id;
                             item.actionName = selected.name;
-                            item.actionRemark = selected.remark;
+                            item.actionRemark = !ibas.strings.isEmpty(item.actionRemark) ? item.actionRemark : selected.remark;
                             for (let cItem of selected.configs) {
                                 // 添加默认配置
                                 if (item.integrationJobActionCfgs.firstOrDefault((c) => { return c.key === cItem.key; }) !== null) {
