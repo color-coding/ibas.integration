@@ -17,14 +17,17 @@ import java.util.jar.JarFile;
 
 import org.colorcoding.ibas.bobas.common.ConditionRelationship;
 import org.colorcoding.ibas.bobas.common.Criteria;
+import org.colorcoding.ibas.bobas.common.EncryptMD5;
 import org.colorcoding.ibas.bobas.common.ICondition;
 import org.colorcoding.ibas.bobas.common.ICriteria;
 import org.colorcoding.ibas.bobas.common.IOperationMessage;
 import org.colorcoding.ibas.bobas.common.IOperationResult;
 import org.colorcoding.ibas.bobas.common.OperationMessage;
 import org.colorcoding.ibas.bobas.common.OperationResult;
+import org.colorcoding.ibas.bobas.common.Strings;
 import org.colorcoding.ibas.bobas.data.ArrayList;
 import org.colorcoding.ibas.bobas.data.FileData;
+import org.colorcoding.ibas.bobas.data.FileItem;
 import org.colorcoding.ibas.bobas.data.KeyText;
 import org.colorcoding.ibas.bobas.data.List;
 import org.colorcoding.ibas.bobas.i18n.I18N;
@@ -34,12 +37,10 @@ import org.colorcoding.ibas.bobas.repository.FileRepository;
 import org.colorcoding.ibas.bobas.repository.jersey.FileRepositoryService;
 import org.colorcoding.ibas.bobas.serialization.ISerializer;
 import org.colorcoding.ibas.bobas.serialization.SerializationException;
-import org.colorcoding.ibas.bobas.serialization.SerializerFactory;
-import org.colorcoding.ibas.bobas.util.EncryptMD5;
+import org.colorcoding.ibas.bobas.serialization.SerializationFactory;
 import org.colorcoding.ibas.integration.MyConfiguration;
 import org.colorcoding.ibas.integration.bo.integration.Action;
 import org.colorcoding.ibas.integration.bo.integration.ActionPackage;
-import org.colorcoding.ibas.integration.data.DataConvert;
 
 /**
  * 动作文件管理仓库
@@ -53,10 +54,10 @@ public class FileRepositoryAction extends FileRepositoryService
 	public static final String PACKAGE_INTEGRATION_ACTIONS_FILE = "actions.json";
 	public static final String PACKAGE_INTEGRATION_REMARKS_FILE = "remarks.json";
 	public static final String CRITERIA_CONDITION_ALIAS_ACTION_ID = "ActionId";
-	public static final String CRITERIA_CONDITION_ALIAS_PACKAGE = FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER;
-	public static final String CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER = FileRepository.CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER;
-	public static final String CRITERIA_CONDITION_ALIAS_FOLDER = FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER;
-	public static final String CRITERIA_CONDITION_ALIAS_FILE_NAME = FileRepository.CRITERIA_CONDITION_ALIAS_FILE_NAME;
+	public static final String CRITERIA_CONDITION_ALIAS_PACKAGE = FileRepository.CONDITION_ALIAS_FOLDER;
+	public static final String CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER = FileRepository.CONDITION_ALIAS_INCLUDE_SUBFOLDER;
+	public static final String CRITERIA_CONDITION_ALIAS_FOLDER = FileRepository.CONDITION_ALIAS_FOLDER;
+	public static final String CRITERIA_CONDITION_ALIAS_FILE_NAME = FileRepository.CONDITION_ALIAS_FILE_NAME;
 
 	public FileRepositoryAction() {
 		String workFolder = MyConfiguration.getConfigValue(MyConfiguration.CONFIG_ITEM_ACTION_FOLDER);
@@ -67,7 +68,7 @@ public class FileRepositoryAction extends FileRepositoryService
 		if (!file.exists()) {
 			file.mkdirs();
 		}
-		this.getRepository().setRepositoryFolder(workFolder);
+		this.setRepositoryFolder(workFolder);
 	}
 
 	@Override
@@ -93,7 +94,7 @@ public class FileRepositoryAction extends FileRepositoryService
 	@Override
 	public OperationResult<ActionPackage> registerPackage(File file, String token) {
 		try (JarFile jarFile = new JarFile(file)) {
-			this.setCurrentUser(token);
+			this.setUserToken(token);
 			Logger.log(MessageLevel.DEBUG, "the package [%s] begins to be registered.", file.getName());
 			ArrayList<JarEntry> jarEntryList = new ArrayList<>();
 			Enumeration<JarEntry> jarEntries = jarFile.entries();
@@ -111,7 +112,7 @@ public class FileRepositoryAction extends FileRepositoryService
 					jarEntryList.add(jarEntry);
 				}
 			}
-			File folder = new File(this.getRepository().getRepositoryFolder(), EncryptMD5.md5(file.getPath()));
+			File folder = new File(this.getRepositoryFolder(), EncryptMD5.md5(file.getPath()));
 			// 读取内容
 			for (JarEntry jarEntry : jarEntryList) {
 				try (InputStream inputStream = jarFile.getInputStream(jarEntry)) {
@@ -122,7 +123,7 @@ public class FileRepositoryAction extends FileRepositoryService
 							+ jarEntry.getName().substring(
 									jarEntry.getName().toLowerCase().indexOf(PACKAGE_INTEGRATION_ACTIONS_FOLDER)
 											+ PACKAGE_INTEGRATION_ACTIONS_FOLDER.length()));
-					IOperationResult<FileData> opRsltFile = this.getRepository().save(fileData);
+					IOperationResult<FileItem> opRsltFile = this.save(fileData);
 					if (opRsltFile.getError() != null) {
 						// 发生错误，清理已释放文件
 						this.deleteFiles(folder);
@@ -134,7 +135,7 @@ public class FileRepositoryAction extends FileRepositoryService
 			// 获取注册的动作
 			ICriteria criteria = new Criteria();
 			ICondition condition = criteria.getConditions().create();
-			condition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER);
+			condition.setAlias(FileRepository.CONDITION_ALIAS_FOLDER);
 			condition.setValue(folder.getName());
 			return this.fetchPackage(criteria, this.getCurrentUser().getToken());
 		} catch (Exception e) {
@@ -146,7 +147,7 @@ public class FileRepositoryAction extends FileRepositoryService
 	@Override
 	public OperationResult<Action> fetchAction(ICriteria criteria, String token) {
 		try {
-			this.setCurrentUser(token);
+			this.setUserToken(token);
 			if (criteria == null) {
 				criteria = new Criteria();
 			}
@@ -171,23 +172,23 @@ public class FileRepositoryAction extends FileRepositoryService
 					cCriteria = null;
 				}
 			}
-			IOperationResult<FileData> opRsltFile = null;
+			IOperationResult<FileItem> opRsltFile = null;
 			OperationResult<Action> operationResult = new OperationResult<>();
 			// 按文件夹查询
 			for (ICriteria iCriteria : criterias) {
 				// 获取文件夹里的配置文件
 				cCriteria = new Criteria();
 				for (ICondition iCondition : iCriteria.getConditions()) {
-					if (FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER.equalsIgnoreCase(iCondition.getAlias())) {
+					if (FileRepository.CONDITION_ALIAS_FOLDER.equalsIgnoreCase(iCondition.getAlias())) {
 						cCondition = cCriteria.getConditions().create();
-						cCondition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_FOLDER);
+						cCondition.setAlias(FileRepository.CONDITION_ALIAS_FOLDER);
 						cCondition.setValue(iCondition.getValue());
 						cCondition.setBracketOpen(1);
 						if (cCriteria.getConditions().size() > 2) {
 							cCondition.setRelationship(ConditionRelationship.OR);
 						}
 						cCondition = cCriteria.getConditions().create();
-						cCondition.setAlias(FileRepository.CRITERIA_CONDITION_ALIAS_FILE_NAME);
+						cCondition.setAlias(FileRepository.CONDITION_ALIAS_FILE_NAME);
 						cCondition.setValue(PACKAGE_INTEGRATION_ACTIONS_FILE);
 						cCondition.setBracketClose(1);
 					}
@@ -212,8 +213,8 @@ public class FileRepositoryAction extends FileRepositoryService
 				}
 				// 解析配置文件
 				boolean filter = false;
-				for (FileData item : opRsltFile.getResultObjects()) {
-					for (Action action : this.parsing(new File(item.getLocation()))) {
+				for (FileItem item : opRsltFile.getResultObjects()) {
+					for (Action action : this.parsing(new File(item.getPath()))) {
 						if (cCriteria.getConditions().isEmpty()) {
 							operationResult.addResultObjects(action);
 						} else {
@@ -241,8 +242,8 @@ public class FileRepositoryAction extends FileRepositoryService
 	@Override
 	public OperationMessage deletePackage(String name, String token) {
 		try {
-			this.setCurrentUser(token);
-			File folder = new File(this.getRepository().getRepositoryFolder() + File.separator + name);
+			this.setUserToken(token);
+			File folder = new File(this.getRepositoryFolder() + File.separator + name);
 			this.deleteFiles(folder);
 			Logger.log(MessageLevel.DEBUG, "the action group [%s] was deleted.", name);
 			return new OperationMessage();
@@ -258,7 +259,7 @@ public class FileRepositoryAction extends FileRepositoryService
 			return actions;
 		}
 		try (InputStream stream = new FileInputStream(file)) {
-			ISerializer<?> serializer = SerializerFactory.create().createManager().create(TYPE_JSON_NO_ROOT);
+			ISerializer serializer = SerializationFactory.createManager().create(TYPE_JSON_NO_ROOT);
 			Object values = serializer.deserialize(stream, Action.class);
 			if (values != null) {
 				if (values instanceof Action) {
@@ -336,12 +337,12 @@ public class FileRepositoryAction extends FileRepositoryService
 	@Override
 	public OperationResult<ActionPackage> fetchPackage(ICriteria criteria, String token) {
 		try {
-			this.setCurrentUser(token);
+			this.setUserToken(token);
 			if (criteria == null) {
 				criteria = new Criteria();
 			}
 			OperationResult<ActionPackage> opRsltPackage = new OperationResult<ActionPackage>();
-			for (File folder : new File(this.getRepository().getRepositoryFolder()).listFiles()) {
+			for (File folder : new File(this.getRepositoryFolder()).listFiles()) {
 				if (!folder.isDirectory()) {
 					continue;
 				}
@@ -394,12 +395,12 @@ public class FileRepositoryAction extends FileRepositoryService
 	@Override
 	public OperationMessage commentPackage(KeyText content, String token) {
 		try {
-			this.setCurrentUser(token);
-			File folder = new File(this.getRepository().getRepositoryFolder() + File.separator + content.getKey());
+			this.setUserToken(token);
+			File folder = new File(this.getRepositoryFolder() + File.separator + content.getKey());
 			if (!folder.exists() || !folder.isDirectory()) {
 				throw new Exception(I18N.prop("msg_ig_package_not_exists", content.getKey()));
 			}
-			if (DataConvert.isNullOrEmpty(content.getText())) {
+			if (Strings.isNullOrEmpty(content.getText())) {
 				// 空白，则删除原有注释
 				File file = new File(folder.getPath(), PACKAGE_INTEGRATION_REMARKS_FILE);
 				if (file.exists()) {

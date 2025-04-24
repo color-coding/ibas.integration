@@ -11,7 +11,7 @@ import org.colorcoding.ibas.bobas.common.IOperationResult;
 import org.colorcoding.ibas.bobas.data.emYesNo;
 import org.colorcoding.ibas.bobas.organization.OrganizationFactory;
 import org.colorcoding.ibas.bobas.serialization.ISerializer;
-import org.colorcoding.ibas.bobas.serialization.SerializerFactory;
+import org.colorcoding.ibas.bobas.serialization.SerializationFactory;
 import org.colorcoding.ibas.integration.MyConfiguration;
 import org.colorcoding.ibas.integration.action.ActionException;
 import org.colorcoding.ibas.integration.action.BOPropertyValue;
@@ -43,32 +43,33 @@ public class TestIntegrationAction extends TestCase {
 		// 测试对象的保存和查询
 		IOperationResult<?> operationResult = null;
 		ICriteria criteria = null;
-		FileRepositoryAction boRepository = new FileRepositoryAction();
-		File resFolder = new File(MyConfiguration.getWorkFolder());
-		resFolder = resFolder.getParentFile().getParentFile().getParentFile();
-		File packageFile = new File(
-				resFolder.getPath() + File.separator + "release" + File.separator + "ibas.integration.test-0.1.0.war");
-		operationResult = boRepository.registerPackage(packageFile, this.getToken());
-		if (operationResult.getError() != null) {
-			throw operationResult.getError();
-		}
-		for (Object item : operationResult.getResultObjects()) {
-			System.out.println(item.toString());
-		}
-		System.out.println("-----test-fetch-----");
-		criteria = new Criteria();
-		operationResult = boRepository.fetchAction(criteria);
-		if (operationResult.getError() != null) {
-			throw operationResult.getError();
-		}
-		for (Object item : operationResult.getResultObjects()) {
-			System.out.println(item.toString());
+		try (FileRepositoryAction boRepository = new FileRepositoryAction()) {
+			File resFolder = new File(MyConfiguration.getWorkFolder());
+			resFolder = resFolder.getParentFile().getParentFile().getParentFile();
+			File packageFile = new File(resFolder.getPath() + File.separator + "release" + File.separator
+					+ "ibas.integration.test-0.1.0.war");
+			operationResult = boRepository.registerPackage(packageFile, this.getToken());
+			if (operationResult.getError() != null) {
+				throw operationResult.getError();
+			}
+			for (Object item : operationResult.getResultObjects()) {
+				System.out.println(item.toString());
+			}
+			System.out.println("-----test-fetch-----");
+			criteria = new Criteria();
+			operationResult = boRepository.fetchAction(criteria);
+			if (operationResult.getError() != null) {
+				throw operationResult.getError();
+			}
+			for (Object item : operationResult.getResultObjects()) {
+				System.out.println(item.toString());
+			}
 		}
 	}
 
 	public void testBOStatusAction() throws ActionException {
 		MyConfiguration.addConfigValue(MyConfiguration.CONFIG_ITEM_FORMATTED_OUTPUT, true);
-		ISerializer<?> serializer = SerializerFactory.create().createManager().create("xml");
+		ISerializer serializer = SerializationFactory.createManager().create("xml");
 		BOStatusAction action = new BOStatusAction();
 		action.setBusinessObject(IntegrationJob.class.getName());
 		ICondition condition = action.getConditions().create();

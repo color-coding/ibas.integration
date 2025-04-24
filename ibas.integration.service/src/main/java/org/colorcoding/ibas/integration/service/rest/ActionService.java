@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.util.List;
 
@@ -30,13 +29,14 @@ import org.colorcoding.ibas.bobas.common.IOperationResult;
 import org.colorcoding.ibas.bobas.common.OperationMessage;
 import org.colorcoding.ibas.bobas.common.OperationResult;
 import org.colorcoding.ibas.bobas.data.FileData;
+import org.colorcoding.ibas.bobas.data.FileItem;
 import org.colorcoding.ibas.bobas.data.KeyText;
 import org.colorcoding.ibas.bobas.data.emYesNo;
 import org.colorcoding.ibas.bobas.i18n.I18N;
 import org.colorcoding.ibas.bobas.message.Logger;
 import org.colorcoding.ibas.bobas.repository.FileRepository;
 import org.colorcoding.ibas.bobas.serialization.ISerializer;
-import org.colorcoding.ibas.bobas.serialization.SerializerFactory;
+import org.colorcoding.ibas.bobas.serialization.SerializationFactory;
 import org.colorcoding.ibas.integration.MyConfiguration;
 import org.colorcoding.ibas.integration.action.BOPropertyValue;
 import org.colorcoding.ibas.integration.action.BOStatusAction;
@@ -71,17 +71,16 @@ public class ActionService extends FileRepositoryAction {
 			condition = criteria.getConditions().create();
 			condition.setAlias(FileRepositoryAction.CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER);
 			condition.setValue(emYesNo.YES);
-			IOperationResult<FileData> operationResult = this.fetch(criteria, token);
-			for (FileData item : operationResult.getResultObjects()) {
-				String location = item.getLocation().substring(item.getLocation().indexOf(group))
-						.replace(File.separator, "/");
+			IOperationResult<FileItem> operationResult = this.fetch(criteria, token);
+			for (FileItem item : operationResult.getResultObjects()) {
+				String location = item.getPath().substring(item.getPath().indexOf(group)).replace(File.separator, "/");
 				if (location.equalsIgnoreCase(path)) {
 					// 设置内容类型
 					response.setContentType(this.getContentType(item));
 					// 写入响应输出流
-					OutputStream os = response.getOutputStream();
-					os.write(item.getFileBytes());
-					os.flush();
+					item.writeTo(response.getOutputStream());
+					// 提交
+					response.getOutputStream().flush();
 					return;
 				}
 			}
@@ -121,18 +120,19 @@ public class ActionService extends FileRepositoryAction {
 				}
 			}
 			if (fileData.getStream() != null) {
-				FileRepository fileRepository = new FileRepository();
-				fileRepository.setRepositoryFolder(MyConfiguration.getTempFolder());
-				IOperationResult<FileData> opRsltFile = fileRepository.save(fileData);
-				if (opRsltFile.getError() != null) {
-					throw opRsltFile.getError();
+				try (FileRepository fileRepository = new FileRepository()) {
+					fileRepository.setRepositoryFolder(MyConfiguration.getTempFolder());
+					IOperationResult<FileItem> opRsltFile = fileRepository.save(fileData);
+					if (opRsltFile.getError() != null) {
+						throw opRsltFile.getError();
+					}
+					FileItem fileItem = opRsltFile.getResultObjects().firstOrDefault();
+					if (fileItem == null) {
+						throw new Exception(I18N.prop("msg_ig_package_parsing_failure"));
+					}
+					return this.registerPackage(new File(fileItem.getPath()),
+							MyConfiguration.optToken(authorization, token));
 				}
-				fileData = opRsltFile.getResultObjects().firstOrDefault();
-				if (fileData == null) {
-					throw new Exception(I18N.prop("msg_ig_package_parsing_failure"));
-				}
-				return this.registerPackage(new File(fileData.getLocation()),
-						MyConfiguration.optToken(authorization, token));
 			} else {
 				return new OperationResult<>();
 			}
@@ -227,19 +227,18 @@ public class ActionService extends FileRepositoryAction {
 			}
 			ICriteria criteria = new Criteria();
 			ICondition condition = criteria.getConditions().create();
-			condition.setAlias(FileRepositoryAction.CRITERIA_CONDITION_ALIAS_FILE_NAME);
+			condition.setAlias(FileRepositoryAction.CONDITION_ALIAS_FILE_NAME);
 			condition.setValue(stringBuilder.toString());
-			IOperationResult<FileData> operationResult = this.fetch(criteria,
+			IOperationResult<FileItem> operationResult = this.fetch(criteria,
 					MyConfiguration.optToken(authorization, token));
-			FileData fileData = operationResult.getResultObjects().firstOrDefault();
-			if (fileData == null) {
+			FileItem fileItem = operationResult.getResultObjects().firstOrDefault();
+			if (fileItem == null) {
 				throw new FileNotFoundException(stringBuilder.toString());
 			}
-			fileData.setStream(new FileInputStream(fileData.getLocation()));
 			// 序列化内容
-			ISerializer<?> serializer = SerializerFactory.create().createManager().create("xml");
-			Object data = serializer.deserialize(fileData.getStream(), BOStatusAction.class, BOPropertyValue.class,
-					Condition.class);
+			ISerializer serializer = SerializationFactory.createManager().create("xml");
+			Object data = serializer.deserialize(new FileInputStream(fileItem.getPath()), BOStatusAction.class,
+					BOPropertyValue.class, Condition.class);
 			if (!(data instanceof BOStatusAction)) {
 				throw new Exception(I18N.prop("msg_bobas_invalid_data"));
 			}

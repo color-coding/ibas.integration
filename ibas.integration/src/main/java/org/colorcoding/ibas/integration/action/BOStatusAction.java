@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.colorcoding.ibas.bobas.bo.BusinessObject;
 import org.colorcoding.ibas.bobas.bo.IBusinessObject;
 import org.colorcoding.ibas.bobas.bo.IBusinessObjects;
 import org.colorcoding.ibas.bobas.common.Condition;
@@ -17,7 +18,6 @@ import org.colorcoding.ibas.bobas.common.ICondition;
 import org.colorcoding.ibas.bobas.common.IConditions;
 import org.colorcoding.ibas.bobas.common.ICriteria;
 import org.colorcoding.ibas.bobas.common.IOperationResult;
-import org.colorcoding.ibas.bobas.core.ITrackStatusOperator;
 import org.colorcoding.ibas.bobas.core.fields.IFieldData;
 import org.colorcoding.ibas.bobas.core.fields.IManagedFields;
 import org.colorcoding.ibas.bobas.data.DataConvert;
@@ -42,14 +42,6 @@ public class BOStatusAction extends Action {
 	 * 配置项目-口令
 	 */
 	public static final String CONFIG_ITEM_USER_TOKEN = "userToken";
-	/**
-	 * 配置项目-关闭业务逻辑的动作（必须“;”号结尾， 如：XXX01;XXX02;）
-	 */
-	public final static String CONFIG_ITEM_ACTIONS_DISABLED_BUSINESS_LOGICS = "DisabledBusinessLogicsActions";
-	/**
-	 * 配置项目-关闭业务规则的动作（必须“;”号结尾， 如：XXX01;XXX02;）
-	 */
-	public final static String CONFIG_ITEM_ACTIONS_DISABLED_BUSINESS_RULES = "DisabledBusinessRulesActions";
 
 	private static final long serialVersionUID = 6097200644090177916L;
 
@@ -112,78 +104,63 @@ public class BOStatusAction extends Action {
 
 	@Override
 	protected void run() throws Exception {
-		BORepository4Action boRepository = new BORepository4Action();
-		boRepository.setUserToken(this.getConfig(CONFIG_ITEM_USER_TOKEN, ""));
-		if (!DataConvert.isNullOrEmpty(this.getName())) {
-			// 从配置文件中判断，是否禁用了业务规则及逻辑
-			String values = this.getConfig(CONFIG_ITEM_ACTIONS_DISABLED_BUSINESS_LOGICS, "");
-			if (!DataConvert.isNullOrEmpty(values)) {
-				if (values.indexOf(this.getName() + ";") >= 0) {
-					boRepository.noCheckLogics();
-				}
+		try (BORepository4Action boRepository = new BORepository4Action()) {
+			boRepository.setUserToken(this.getConfig(CONFIG_ITEM_USER_TOKEN, ""));
+			// 设置参数
+			this.applyConfigs(this.getConditions());
+			ICriteria criteria = new Criteria();
+			criteria.setBusinessObject(this.getBusinessObject());
+			for (ICondition item : this.getConditions()) {
+				criteria.getConditions().add(item);
 			}
-			values = this.getConfig(CONFIG_ITEM_ACTIONS_DISABLED_BUSINESS_RULES, "");
-			if (!DataConvert.isNullOrEmpty(values)) {
-				if (values.indexOf(this.getName() + ";") >= 0) {
-					boRepository.noCheckRules();
-				}
+			IOperationResult<?> opRsltFetch = boRepository.fetchData(criteria);
+			if (opRsltFetch.getError() != null) {
+				throw opRsltFetch.getError();
 			}
-		}
-		// 设置参数
-		this.applyConfigs(this.getConditions());
-		ICriteria criteria = new Criteria();
-		criteria.setBusinessObject(this.getBusinessObject());
-		for (ICondition item : this.getConditions()) {
-			criteria.getConditions().add(item);
-		}
-		IOperationResult<?> opRsltFetch = boRepository.fetchData(criteria);
-		if (opRsltFetch.getError() != null) {
-			throw opRsltFetch.getError();
-		}
-		boolean trans = boRepository.beginTransaction();
-		try {
-			for (Object data : opRsltFetch.getResultObjects()) {
-				if (!(data instanceof IBusinessObject)) {
-					continue;
-				}
-				IBusinessObject bo = (IBusinessObject) data;
-				for (BOPropertyValue property : this.getPropertyValues()) {
-					if (property.getProperty() == null || property.getProperty().isEmpty()) {
+			boolean trans = boRepository.beginTransaction();
+			try {
+				for (Object data : opRsltFetch.getResultObjects()) {
+					if (!(data instanceof IBusinessObject)) {
 						continue;
 					}
-					// 设置参数
-					this.applyConfigs(property.getConditions());
-					// 设置值
-					if (property.getValue() != null && property.getValue().startsWith("${")
-							&& property.getValue().endsWith("}")) {
-						Object value = this
-								.getConfig(property.getValue().substring(2, property.getValue().length() - 1));
-						if (value == null) {
-							property.setValue(null);
-						} else {
-							property.setValue(String.valueOf(value));
+					IBusinessObject bo = (IBusinessObject) data;
+					for (BOPropertyValue property : this.getPropertyValues()) {
+						if (property.getProperty() == null || property.getProperty().isEmpty()) {
+							continue;
 						}
+						// 设置参数
+						this.applyConfigs(property.getConditions());
+						// 设置值
+						if (property.getValue() != null && property.getValue().startsWith("${")
+								&& property.getValue().endsWith("}")) {
+							Object value = this
+									.getConfig(property.getValue().substring(2, property.getValue().length() - 1));
+							if (value == null) {
+								property.setValue(null);
+							} else {
+								property.setValue(String.valueOf(value));
+							}
+						}
+						this.setPropertyValue(bo, property.getProperty(), property.getValue(),
+								property.getConditions());
 					}
-					this.setPropertyValue(bo, property.getProperty(), property.getValue(), property.getConditions());
+					if (!bo.isDirty()) {
+						continue;
+					}
+					IOperationResult<?> opRsltSave = boRepository.saveData(bo);
+					if (opRsltSave.getError() != null) {
+						throw opRsltSave.getError();
+					}
 				}
-				if (!bo.isDirty()) {
-					continue;
+				if (trans) {
+					boRepository.commitTransaction();
 				}
-				IOperationResult<?> opRsltSave = boRepository.saveData(bo);
-				if (opRsltSave.getError() != null) {
-					throw opRsltSave.getError();
+			} catch (Exception e) {
+				if (trans) {
+					boRepository.rollbackTransaction();
 				}
+				throw e;
 			}
-			if (trans) {
-				boRepository.commitTransaction();
-			}
-		} catch (
-
-		Exception e) {
-			if (trans) {
-				boRepository.rollbackTransaction();
-			}
-			throw e;
 		}
 	}
 
@@ -227,8 +204,8 @@ public class BOStatusAction extends Action {
 			// 条件符合且属性存在
 			boolean fixed = field.setValue(DataConvert.convert(field.getValueType(), value));
 			if (fixed) {
-				if (bo instanceof ITrackStatusOperator) {
-					((ITrackStatusOperator) bo).markDirty();
+				if (bo instanceof BusinessObject) {
+					((BusinessObject<?>) bo).markDirty();
 				}
 				Logger.log(MessageLevel.INFO, "Action: %s's %s change to %s.", bo.toString(), field.getName(), value);
 			}
