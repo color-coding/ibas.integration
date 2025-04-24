@@ -7,8 +7,9 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.colorcoding.ibas.bobas.common.DateTimes;
+import org.colorcoding.ibas.bobas.core.Serializable;
 import org.colorcoding.ibas.bobas.data.DateTime;
-import org.colorcoding.ibas.bobas.serialization.Serializable;
 import org.colorcoding.ibas.integration.MyConfiguration;
 
 /**
@@ -74,7 +75,7 @@ public class ActionPackage extends Serializable {
 	@Override
 	public String toString() {
 		return String.format("{actions: %s %s}", this.getId(),
-				this.getDateTime() != null ? DateTime.valueOf(this.getDateTime()).toString(DateTime.FORMAT_DATETIME)
+				this.getDateTime() != null ? DateTimes.valueOf(this.getDateTime()).toString(DateTime.FORMAT_DATETIME)
 						: "unknown");
 	}
 }

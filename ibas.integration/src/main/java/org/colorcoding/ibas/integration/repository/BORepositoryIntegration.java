@@ -24,7 +24,7 @@ public class BORepositoryIntegration extends BORepositoryServiceApplication
 	 * @return 操作结果
 	 */
 	public OperationResult<IntegrationJob> fetchIntegrationJob(ICriteria criteria, String token) {
-		return super.fetch(criteria, token, IntegrationJob.class);
+		return super.fetch(IntegrationJob.class, criteria, token);
 	}
 
 	/**
