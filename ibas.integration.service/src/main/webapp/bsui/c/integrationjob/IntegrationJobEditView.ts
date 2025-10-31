@@ -211,6 +211,7 @@ namespace integration {
                             }),
                         ],
                         sortProperty: "visOrder",
+                        sortIntervalStep: 1,
                     });
                     this.tableIntegrationJobActionCfg = new sap.extension.table.DataTable("", {
                         enableSelectAll: false,
