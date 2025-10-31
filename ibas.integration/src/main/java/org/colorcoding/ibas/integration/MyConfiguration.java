@@ -60,9 +60,5 @@ public class MyConfiguration extends org.colorcoding.ibas.initialfantasy.MyConfi
 	 * 动作命名空间
 	 */
 	public static final String NAMESPACE_ACTION = NAMESPACE_ROOT + "action";
-	/**
-	 * 配置项目-动作文件文件夹
-	 */
-	public final static String CONFIG_ITEM_ACTION_FOLDER = "ActionFolder";
 
 }

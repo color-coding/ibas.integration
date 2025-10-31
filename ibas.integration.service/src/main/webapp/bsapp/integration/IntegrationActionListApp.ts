@@ -54,6 +54,7 @@ namespace integration {
                                 that.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_data_fetched_none"));
                             }
                             that.view.showPackages(opRslt.resultObjects);
+                            that.view.showAction(undefined);
                         } catch (error) {
                             that.messages(error);
                         }
@@ -140,6 +141,7 @@ namespace integration {
                             if (error instanceof Error) {
                                 that.messages(ibas.emMessageType.ERROR, error.message);
                             } else {
+                                that.view.showAction(undefined);
                                 that.messages(ibas.emMessageType.SUCCESS,
                                     ibas.i18n.prop("shell_data_delete") + ibas.i18n.prop("shell_sucessful"));
                             }

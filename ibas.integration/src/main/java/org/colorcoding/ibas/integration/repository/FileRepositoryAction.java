@@ -1,17 +1,15 @@
 package org.colorcoding.ibas.integration.repository;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -26,19 +24,17 @@ import org.colorcoding.ibas.bobas.common.OperationMessage;
 import org.colorcoding.ibas.bobas.common.OperationResult;
 import org.colorcoding.ibas.bobas.common.Strings;
 import org.colorcoding.ibas.bobas.data.ArrayList;
-import org.colorcoding.ibas.bobas.data.FileData;
-import org.colorcoding.ibas.bobas.data.FileItem;
 import org.colorcoding.ibas.bobas.data.KeyText;
 import org.colorcoding.ibas.bobas.data.List;
-import org.colorcoding.ibas.bobas.i18n.I18N;
+import org.colorcoding.ibas.bobas.data.emYesNo;
+import org.colorcoding.ibas.bobas.file.FileData;
+import org.colorcoding.ibas.bobas.file.FileItem;
 import org.colorcoding.ibas.bobas.message.Logger;
 import org.colorcoding.ibas.bobas.message.MessageLevel;
-import org.colorcoding.ibas.bobas.repository.FileRepository;
 import org.colorcoding.ibas.bobas.repository.jersey.FileRepositoryService;
 import org.colorcoding.ibas.bobas.serialization.ISerializer;
 import org.colorcoding.ibas.bobas.serialization.SerializationException;
 import org.colorcoding.ibas.bobas.serialization.SerializationFactory;
-import org.colorcoding.ibas.integration.MyConfiguration;
 import org.colorcoding.ibas.integration.bo.integration.Action;
 import org.colorcoding.ibas.integration.bo.integration.ActionPackage;
 
@@ -54,21 +50,10 @@ public class FileRepositoryAction extends FileRepositoryService
 	public static final String PACKAGE_INTEGRATION_ACTIONS_FILE = "actions.json";
 	public static final String PACKAGE_INTEGRATION_REMARKS_FILE = "remarks.json";
 	public static final String CRITERIA_CONDITION_ALIAS_ACTION_ID = "ActionId";
-	public static final String CRITERIA_CONDITION_ALIAS_PACKAGE = FileRepository.CONDITION_ALIAS_FOLDER;
-	public static final String CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER = FileRepository.CONDITION_ALIAS_INCLUDE_SUBFOLDER;
-	public static final String CRITERIA_CONDITION_ALIAS_FOLDER = FileRepository.CONDITION_ALIAS_FOLDER;
-	public static final String CRITERIA_CONDITION_ALIAS_FILE_NAME = FileRepository.CONDITION_ALIAS_FILE_NAME;
 
 	public FileRepositoryAction() {
-		String workFolder = MyConfiguration.getConfigValue(MyConfiguration.CONFIG_ITEM_ACTION_FOLDER);
-		if (workFolder == null || workFolder.isEmpty()) {
-			workFolder = MyConfiguration.getDataFolder() + File.separator + "integration_actions";
-		}
-		File file = new File(workFolder);
-		if (!file.exists()) {
-			file.mkdirs();
-		}
-		this.setRepositoryFolder(workFolder);
+		this.setGroupingFiles(false);
+		this.setRepositoryFolder("integration_actions");
 	}
 
 	@Override
@@ -112,22 +97,20 @@ public class FileRepositoryAction extends FileRepositoryService
 					jarEntryList.add(jarEntry);
 				}
 			}
-			File folder = new File(this.getRepositoryFolder(), EncryptMD5.md5(file.getPath()));
+			String folder = EncryptMD5.md5(file.getPath());
 			// 读取内容
 			for (JarEntry jarEntry : jarEntryList) {
 				try (InputStream inputStream = jarFile.getInputStream(jarEntry)) {
-					FileData fileData = new FileData();
-					fileData.setOriginalName(jarEntry.getName());
-					fileData.setStream(inputStream);
-					fileData.setFileName(folder.getName() + File.separator
-							+ jarEntry.getName().substring(
-									jarEntry.getName().toLowerCase().indexOf(PACKAGE_INTEGRATION_ACTIONS_FOLDER)
-											+ PACKAGE_INTEGRATION_ACTIONS_FOLDER.length()));
-					IOperationResult<FileItem> opRsltFile = this.save(fileData);
-					if (opRsltFile.getError() != null) {
-						// 发生错误，清理已释放文件
-						this.deleteFiles(folder);
-						throw opRsltFile.getError();
+					try (FileData fileData = new FileData(inputStream)) {
+						fileData.setOriginalName(jarEntry.getName());
+						fileData.setName(folder + File.separator
+								+ jarEntry.getName().substring(
+										jarEntry.getName().toLowerCase().indexOf(PACKAGE_INTEGRATION_ACTIONS_FOLDER)
+												+ PACKAGE_INTEGRATION_ACTIONS_FOLDER.length()));
+						IOperationResult<FileItem> opRsltFile = this.save(fileData);
+						if (opRsltFile.getError() != null) {
+							throw opRsltFile.getError();
+						}
 					}
 				}
 			}
@@ -135,8 +118,8 @@ public class FileRepositoryAction extends FileRepositoryService
 			// 获取注册的动作
 			ICriteria criteria = new Criteria();
 			ICondition condition = criteria.getConditions().create();
-			condition.setAlias(FileRepository.CONDITION_ALIAS_FOLDER);
-			condition.setValue(folder.getName());
+			condition.setAlias(CONDITION_ALIAS_FILE_FOLDER);
+			condition.setValue(folder);
 			return this.fetchPackage(criteria, this.getCurrentUser().getToken());
 		} catch (Exception e) {
 			Logger.log(e);
@@ -179,16 +162,16 @@ public class FileRepositoryAction extends FileRepositoryService
 				// 获取文件夹里的配置文件
 				cCriteria = new Criteria();
 				for (ICondition iCondition : iCriteria.getConditions()) {
-					if (FileRepository.CONDITION_ALIAS_FOLDER.equalsIgnoreCase(iCondition.getAlias())) {
+					if (CONDITION_ALIAS_FILE_FOLDER.equalsIgnoreCase(iCondition.getAlias())) {
 						cCondition = cCriteria.getConditions().create();
-						cCondition.setAlias(FileRepository.CONDITION_ALIAS_FOLDER);
+						cCondition.setAlias(CONDITION_ALIAS_FILE_FOLDER);
 						cCondition.setValue(iCondition.getValue());
 						cCondition.setBracketOpen(1);
 						if (cCriteria.getConditions().size() > 2) {
 							cCondition.setRelationship(ConditionRelationship.OR);
 						}
 						cCondition = cCriteria.getConditions().create();
-						cCondition.setAlias(FileRepository.CONDITION_ALIAS_FILE_NAME);
+						cCondition.setAlias(CONDITION_ALIAS_FILE_NAME);
 						cCondition.setValue(PACKAGE_INTEGRATION_ACTIONS_FILE);
 						cCondition.setBracketClose(1);
 					}
@@ -214,7 +197,7 @@ public class FileRepositoryAction extends FileRepositoryService
 				// 解析配置文件
 				boolean filter = false;
 				for (FileItem item : opRsltFile.getResultObjects()) {
-					for (Action action : this.parsing(new File(item.getPath()))) {
+					for (Action action : this.parsing(item)) {
 						if (cCriteria.getConditions().isEmpty()) {
 							operationResult.addResultObjects(action);
 						} else {
@@ -243,9 +226,17 @@ public class FileRepositoryAction extends FileRepositoryService
 	public OperationMessage deletePackage(String name, String token) {
 		try {
 			this.setUserToken(token);
-			File folder = new File(this.getRepositoryFolder() + File.separator + name);
-			this.deleteFiles(folder);
-			Logger.log(MessageLevel.DEBUG, "the action group [%s] was deleted.", name);
+			Criteria criteria = new Criteria();
+			ICondition condition = criteria.getConditions().create();
+			condition.setAlias(CONDITION_ALIAS_INCLUDE_SUBFOLDER);
+			condition.setValue(emYesNo.YES);
+			condition = criteria.getConditions().create();
+			condition.setAlias(CONDITION_ALIAS_FILE_FOLDER);
+			condition.setValue(name);
+			IOperationResult<FileItem> operationResult = this.delete(criteria);
+			if (operationResult.getError() != null) {
+				throw operationResult.getError();
+			}
 			return new OperationMessage();
 		} catch (Exception e) {
 			Logger.log(e);
@@ -253,15 +244,13 @@ public class FileRepositoryAction extends FileRepositoryService
 		}
 	}
 
-	private List<Action> parsing(File file) throws SerializationException, FileNotFoundException {
+	private List<Action> parsing(FileItem fileItem) throws SerializationException, IOException {
 		ArrayList<Action> actions = new ArrayList<>();
-		if (!file.exists() || !file.isFile()) {
-			return actions;
-		}
-		try (InputStream stream = new FileInputStream(file)) {
-			ISerializer serializer = SerializationFactory.createManager().create(TYPE_JSON_NO_ROOT);
-			Object values = serializer.deserialize(stream, Action.class);
-			if (values != null) {
+		ISerializer serializer = SerializationFactory.createManager().create(TYPE_JSON_NO_ROOT);
+		try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+			fileItem.writeTo(outputStream);
+			try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
+				Object values = serializer.deserialize(inputStream, Action.class);
 				if (values instanceof Action) {
 					actions.add((Action) values);
 				} else if (values instanceof Iterable) {
@@ -279,59 +268,20 @@ public class FileRepositoryAction extends FileRepositoryService
 					}
 				}
 			}
-		} catch (IOException e) {
-			throw new SerializationException(e);
 		}
-		// 检查动作
-		String group = file.getParentFile().getName();
 		for (Action action : actions) {
-			if (!action.isActivated()) {
-				continue;
-			}
-			// 设置包名
-			action.setGroup(group);
-			// 检查id
-			if (action.getId() == null || action.getId().isEmpty()) {
-				action.setId(EncryptMD5.md5(group, action.getName()));
-			}
-			// 检查路径
-			String path = action.getPath();
-			if (path == null || path.isEmpty()) {
-				Logger.log(MessageLevel.DEBUG, "action [%s] no path.", action.getName());
-				action.setActivated(false);
-			}
-			path = path.replace(".ts", ".js");
-			if (path.startsWith("./")) {
-				path = path.substring(2);
-			}
-			path = path.replace("/", File.separator);
-			File pathFile = new File(file.getParentFile().getPath() + File.separator + path);
-			if (!pathFile.isFile() || !pathFile.exists()) {
-				Logger.log(MessageLevel.DEBUG, "action [%s] path file not exists.", action.getName());
-				action.setActivated(false);
-			} else {
-				// 设置绝对路径
-				action.setLocation(pathFile.getAbsolutePath());
+			action.setGroup(this.groupOf(fileItem.getPath()));
+			if (Strings.isNullOrEmpty(action.getId())) {
+				action.setId(EncryptMD5.md5(action.getGroup(), action.getName()));
 			}
 		}
-		// 删除无效的
-		actions.removeIf(c -> !c.isActivated());
-		Logger.log(MessageLevel.DEBUG, "the file [%s] has [%s] actions.", file.getName(), actions.size());
+		Logger.log(MessageLevel.DEBUG, "the file [%s] has [%s] actions.", fileItem.getName(), actions.size());
 		return actions;
 	}
 
-	private void deleteFiles(File file) {
-		if (!file.exists()) {
-			return;
-		}
-		if (file.isFile()) {
-			file.delete();
-		} else if (file.isDirectory()) {
-			for (File item : file.listFiles()) {
-				this.deleteFiles(item);
-			}
-			file.delete();
-		}
+	private String groupOf(String filePath) {
+		String tmpValue = filePath.substring(filePath.indexOf(FileRepositoryAction.this.getRepositoryFolder()));
+		return tmpValue.replace("\\", "/").split("/")[1];
 	}
 
 	@Override
@@ -341,33 +291,70 @@ public class FileRepositoryAction extends FileRepositoryService
 			if (criteria == null) {
 				criteria = new Criteria();
 			}
-			OperationResult<ActionPackage> opRsltPackage = new OperationResult<ActionPackage>();
-			for (File folder : new File(this.getRepositoryFolder()).listFiles()) {
-				if (!folder.isDirectory()) {
-					continue;
-				}
-				ICondition condition = criteria.getConditions()
-						.firstOrDefault(c -> CRITERIA_CONDITION_ALIAS_FOLDER.equalsIgnoreCase(c.getAlias()));
+			if (!criteria.getConditions()
+					.contains(c -> Strings.equalsIgnoreCase(c.getAlias(), CONDITION_ALIAS_INCLUDE_SUBFOLDER))) {
+				ICondition condition = criteria.getConditions().create();
+				condition.setAlias(CONDITION_ALIAS_INCLUDE_SUBFOLDER);
+				condition.setValue(emYesNo.YES);
+			}
+			OperationResult<FileItem> opRsltFiles = this.fetch(criteria);
+			if (opRsltFiles.getError() != null) {
+				throw opRsltFiles.getError();
+			}
+			List<FileItem> actionFiles = new ArrayList<>();
+			ICondition condition = criteria.getConditions()
+					.firstOrDefault(c -> CONDITION_ALIAS_FILE_FOLDER.equalsIgnoreCase(c.getAlias())
+							&& !Strings.isNullOrEmpty(c.getValue()));
+			for (FileItem fileItem : opRsltFiles.getResultObjects()) {
 				if (condition != null) {
-					if (!folder.getName().equalsIgnoreCase(condition.getValue())) {
+					if (fileItem.getPath().indexOf(condition.getValue()) < 0) {
 						continue;
 					}
 				}
-				File aFile = new File(folder.getPath() + File.separator + PACKAGE_INTEGRATION_ACTIONS_FILE);
-				if (!aFile.exists() || !aFile.isFile()) {
-					continue;
+				actionFiles.add(fileItem);
+			}
+			Function<Action, Boolean> fileExists = new Function<Action, Boolean>() {
+
+				@Override
+				public Boolean apply(Action action) {
+					String filePath;
+					String actionPath = action.getPath();
+					if (Strings.indexOf(actionPath, Strings.VALUE_DOT) > 0) {
+						actionPath = Strings.concat(action.getGroup(), Strings.VALUE_SLASH,
+								actionPath.substring(0, actionPath.lastIndexOf(Strings.VALUE_DOT)));
+					}
+					for (FileItem fileItem : actionFiles) {
+						filePath = fileItem.relativePath();
+						if (fileItem.getName().indexOf(Strings.VALUE_DOT) > 0) {
+							filePath = filePath.substring(0, filePath.lastIndexOf(Strings.VALUE_DOT));
+						}
+						if (Strings.equalsIgnoreCase(actionPath, filePath)) {
+							return true;
+						}
+					}
+					return false;
 				}
+			};
+			OperationResult<ActionPackage> opRsltPackage = new OperationResult<ActionPackage>();
+			for (FileItem actionFile : actionFiles
+					.where(c -> Strings.equalsIgnoreCase(c.getName(), PACKAGE_INTEGRATION_ACTIONS_FILE))) {
 				ActionPackage aPackage = new ActionPackage();
-				aPackage.setId(folder.getName());
-				aPackage.setDateTime(folder.lastModified());
-				aPackage.setActions(this.parsing(aFile).toArray(new Action[] {}));
+				aPackage.setId(this.groupOf(actionFile.getPath()));
+				aPackage.setDateTime(actionFile.getModifyTime().getTime());
+				// 读取动作文件内容
+				for (Action action : this.parsing(actionFile)) {
+					if (!fileExists.apply(action)) {
+						continue;
+					}
+					aPackage.getActions().add(action);
+				}
 				// 读取备注文件内容
-				aFile = new File(folder.getPath() + File.separator + PACKAGE_INTEGRATION_REMARKS_FILE);
-				if (aFile.exists() && aFile.isFile()) {
-					try {
-						aPackage.setRemarks(
-								new String(Files.readAllBytes(Paths.get(aFile.toURI())), StandardCharsets.UTF_8));
-					} catch (Exception e) {
+				actionFile = actionFiles.firstOrDefault(c -> c.getPath().indexOf(aPackage.getId()) >= 0
+						&& Strings.equalsIgnoreCase(c.getName(), PACKAGE_INTEGRATION_REMARKS_FILE));
+				if (actionFile != null) {
+					try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+						actionFile.writeTo(outputStream);
+						aPackage.setRemarks(new String(outputStream.toByteArray(), StandardCharsets.UTF_8));
 					}
 				}
 				opRsltPackage.addResultObjects(aPackage);
@@ -396,24 +383,15 @@ public class FileRepositoryAction extends FileRepositoryService
 	public OperationMessage commentPackage(KeyText content, String token) {
 		try {
 			this.setUserToken(token);
-			File folder = new File(this.getRepositoryFolder() + File.separator + content.getKey());
-			if (!folder.exists() || !folder.isDirectory()) {
-				throw new Exception(I18N.prop("msg_ig_package_not_exists", content.getKey()));
-			}
-			if (Strings.isNullOrEmpty(content.getText())) {
-				// 空白，则删除原有注释
-				File file = new File(folder.getPath(), PACKAGE_INTEGRATION_REMARKS_FILE);
-				if (file.exists()) {
-					file.delete();
-				}
-			} else {
-				File file = new File(folder.getPath(), PACKAGE_INTEGRATION_REMARKS_FILE);
-				if (file.exists()) {
-					file.createNewFile();
-				}
-				try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-					fileOutputStream.write(content.getText().getBytes());
-					fileOutputStream.flush();
+			try (ByteArrayInputStream inputStream = new ByteArrayInputStream(
+					Strings.isNullOrEmpty(content.getText()) ? Strings.VALUE_EMPTY.getBytes()
+							: content.getText().getBytes())) {
+				try (FileData fileData = new FileData(inputStream)) {
+					fileData.setName(content.getKey() + File.separator + PACKAGE_INTEGRATION_REMARKS_FILE);
+					IOperationResult<FileItem> opRslt = this.save(fileData);
+					if (opRslt.getError() != null) {
+						throw opRslt.getError();
+					}
 				}
 			}
 			return new OperationMessage();

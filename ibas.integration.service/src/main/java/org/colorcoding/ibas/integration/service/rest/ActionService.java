@@ -1,10 +1,10 @@
 package org.colorcoding.ibas.integration.service.rest;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URLDecoder;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -28,10 +28,10 @@ import org.colorcoding.ibas.bobas.common.ICriteria;
 import org.colorcoding.ibas.bobas.common.IOperationResult;
 import org.colorcoding.ibas.bobas.common.OperationMessage;
 import org.colorcoding.ibas.bobas.common.OperationResult;
-import org.colorcoding.ibas.bobas.data.FileData;
-import org.colorcoding.ibas.bobas.data.FileItem;
 import org.colorcoding.ibas.bobas.data.KeyText;
 import org.colorcoding.ibas.bobas.data.emYesNo;
+import org.colorcoding.ibas.bobas.file.FileData;
+import org.colorcoding.ibas.bobas.file.FileItem;
 import org.colorcoding.ibas.bobas.i18n.I18N;
 import org.colorcoding.ibas.bobas.message.Logger;
 import org.colorcoding.ibas.bobas.repository.FileRepository;
@@ -66,10 +66,10 @@ public class ActionService extends FileRepositoryAction {
 			}
 			ICriteria criteria = new Criteria();
 			ICondition condition = criteria.getConditions().create();
-			condition.setAlias(FileRepositoryAction.CRITERIA_CONDITION_ALIAS_FOLDER);
+			condition.setAlias(CONDITION_ALIAS_FILE_FOLDER);
 			condition.setValue(group);
 			condition = criteria.getConditions().create();
-			condition.setAlias(FileRepositoryAction.CRITERIA_CONDITION_ALIAS_INCLUDE_SUBFOLDER);
+			condition.setAlias(CONDITION_ALIAS_INCLUDE_SUBFOLDER);
 			condition.setValue(emYesNo.YES);
 			IOperationResult<FileItem> operationResult = this.fetch(criteria, token);
 			for (FileItem item : operationResult.getResultObjects()) {
@@ -106,35 +106,35 @@ public class ActionService extends FileRepositoryAction {
 	@Produces(MediaType.APPLICATION_JSON)
 	public OperationResult<ActionPackage> uploadPackage(FormDataMultiPart formData,
 			@HeaderParam("authorization") String authorization, @QueryParam("token") String token) {
-		try {
-			FormDataBodyPart bodyPart;
-			FileData fileData = new FileData();
-			for (BodyPart bodyItem : formData.getBodyParts()) {
-				if (bodyItem instanceof FormDataBodyPart) {
-					bodyPart = (FormDataBodyPart) bodyItem;
-					if ("FILE".equalsIgnoreCase(bodyPart.getName())) {
-						fileData.setStream(bodyPart.getValueAs(InputStream.class));
-						fileData.setOriginalName(
-								URLDecoder.decode(bodyPart.getContentDisposition().getFileName(), "UTF-8"));
-					}
+		FormDataBodyPart bodyPart = null;
+		for (BodyPart bodyItem : formData.getBodyParts()) {
+			if (bodyItem instanceof FormDataBodyPart) {
+				bodyPart = (FormDataBodyPart) bodyItem;
+				if ("FILE".equalsIgnoreCase(bodyPart.getName())) {
+					break;
 				}
 			}
-			if (fileData.getStream() != null) {
-				try (FileRepository fileRepository = new FileRepository()) {
-					fileRepository.setRepositoryFolder(MyConfiguration.getTempFolder());
-					IOperationResult<FileItem> opRsltFile = fileRepository.save(fileData);
-					if (opRsltFile.getError() != null) {
-						throw opRsltFile.getError();
-					}
-					FileItem fileItem = opRsltFile.getResultObjects().firstOrDefault();
-					if (fileItem == null) {
-						throw new Exception(I18N.prop("msg_ig_package_parsing_failure"));
-					}
-					return this.registerPackage(new File(fileItem.getPath()),
-							MyConfiguration.optToken(authorization, token));
-				}
-			} else {
+			bodyPart = null;
+		}
+		if (bodyPart == null) {
+			return new OperationResult<>();
+		}
+		try (FileData fileData = new FileData(bodyPart.getValueAs(InputStream.class))) {
+			if (fileData.getStream() == null) {
 				return new OperationResult<>();
+			}
+			try (FileRepository fileRepository = new FileRepository("$$")) {
+				fileRepository.setRepositoryFolder(MyConfiguration.getTempFolder());
+				IOperationResult<FileItem> opRsltFile = fileRepository.save(fileData);
+				if (opRsltFile.getError() != null) {
+					throw opRsltFile.getError();
+				}
+				FileItem fileItem = opRsltFile.getResultObjects().firstOrDefault();
+				if (fileItem == null) {
+					throw new Exception(I18N.prop("msg_ig_package_parsing_failure"));
+				}
+				return this.registerPackage(new File(fileItem.getPath()),
+						MyConfiguration.optToken(authorization, token));
 			}
 		} catch (Exception e) {
 			return new OperationResult<>(e);
@@ -227,7 +227,7 @@ public class ActionService extends FileRepositoryAction {
 			}
 			ICriteria criteria = new Criteria();
 			ICondition condition = criteria.getConditions().create();
-			condition.setAlias(FileRepositoryAction.CONDITION_ALIAS_FILE_NAME);
+			condition.setAlias(CONDITION_ALIAS_FILE_NAME);
 			condition.setValue(stringBuilder.toString());
 			IOperationResult<FileItem> operationResult = this.fetch(criteria,
 					MyConfiguration.optToken(authorization, token));
@@ -236,13 +236,19 @@ public class ActionService extends FileRepositoryAction {
 				throw new FileNotFoundException(stringBuilder.toString());
 			}
 			// 序列化内容
-			ISerializer serializer = SerializationFactory.createManager().create("xml");
-			Object data = serializer.deserialize(new FileInputStream(fileItem.getPath()), BOStatusAction.class,
-					BOPropertyValue.class, Condition.class);
-			if (!(data instanceof BOStatusAction)) {
-				throw new Exception(I18N.prop("msg_bobas_invalid_data"));
+			BOStatusAction action = null;
+			try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+				fileItem.writeTo(outputStream);
+				try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
+					ISerializer serializer = SerializationFactory.createManager().create("xml");
+					Object data = serializer.deserialize(inputStream, BOStatusAction.class, BOPropertyValue.class,
+							Condition.class);
+					if (!(data instanceof BOStatusAction)) {
+						throw new Exception(I18N.prop("msg_bobas_invalid_data"));
+					}
+					action = (BOStatusAction) data;
+				}
 			}
-			BOStatusAction action = (BOStatusAction) data;
 			// 设置参数
 			action.addConfig(BOStatusAction.CONFIG_ITEM_USER_TOKEN, MyConfiguration.optToken(authorization, token));
 			for (List<FormDataBodyPart> items : formData.getFields().values()) {

@@ -138,7 +138,7 @@ namespace integration {
                                                         growingThreshold: 99,
                                                         items: {
                                                             path: "/rows",
-                                                            templateShareable: true,
+                                                            templateShareable: false,
                                                             template: new sap.m.CustomListItem("", {
                                                                 content: [
                                                                     new sap.m.Panel("", {
@@ -183,6 +183,7 @@ namespace integration {
                                                                                         }
                                                                                     },
                                                                                 }),
+                                                                                new sap.m.ToolbarSpacer(""),
                                                                                 new sap.m.Button("", {
                                                                                     type: sap.m.ButtonType.Transparent,
                                                                                     icon: "sap-icon://notes",
@@ -226,7 +227,6 @@ namespace integration {
                                                                                         }
                                                                                     },
                                                                                 }),
-                                                                                new sap.m.ToolbarSpacer(""),
                                                                                 new sap.m.Button("", {
                                                                                     type: sap.m.ButtonType.Transparent,
                                                                                     icon: "sap-icon://decline",
@@ -245,7 +245,7 @@ namespace integration {
                                                                                 growingThreshold: 99,
                                                                                 items: {
                                                                                     path: "actions",
-                                                                                    templateShareable: true,
+                                                                                    templateShareable: false,
                                                                                     template: new sap.m.StandardListItem("", {
                                                                                         title: "{name}",
                                                                                         description: "{remark}",
@@ -314,10 +314,10 @@ namespace integration {
                                                                         message: ibas.i18n.prop("integration_continue_upload_package", event.getParameters().newValue),
                                                                         onCompleted(action: ibas.emMessageAction): void {
                                                                             if (action === ibas.emMessageAction.YES) {
+                                                                                if (source instanceof sap.ui.unified.FileUploader) {
+                                                                                    source.clear();
+                                                                                }
                                                                                 that.fireViewEvents(that.uploadPackageEvent, fileData);
-                                                                            }
-                                                                            if (source instanceof sap.ui.unified.FileUploader) {
-                                                                                source.clear();
                                                                             }
                                                                         }
                                                                     });
@@ -346,6 +346,10 @@ namespace integration {
                 /** 显示包 */
                 showPackages(datas: bo.ActionPackage[] | bo.ActionPackage): void {
                     if (datas instanceof Array) {
+                        if (this.leftList.hasModel()) {
+                            this.leftList.setModel(undefined);
+                            this.leftList.destroyItems();
+                        }
                         this.leftList.setModel(new sap.extension.model.JSONModel({ rows: datas }));
                     } else if (datas instanceof bo.ActionPackage) {
                         this.leftList.getModel().refresh(true);
@@ -354,6 +358,9 @@ namespace integration {
                 /** 显示动作 */
                 showAction(data: bo.Action): void {
                     this.rightList.destroyContent();
+                    if (ibas.objects.isNull(data)) {
+                        return;
+                    }
                     let form: sap.ui.layout.form.SimpleForm = new sap.ui.layout.form.SimpleForm("", {
                         editable: true,
                         content: [

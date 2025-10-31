@@ -76,7 +76,7 @@ namespace integration {
              * @param onCompleted 完成事件
              * @param sign 类型标记
              */
-            export function uploadFile(storage: Storage, onCompleted: (result: ibas.FileData | Error) => void, sign: string = undefined): void {
+            export function uploadFile(storage: Storage, onCompleted: (result: ibas.FileItem | Error) => void, sign: string = undefined): void {
                 let formData: FormData = new FormData();
                 formData.append("file", createFile(storage, true, sign));
                 let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
@@ -103,7 +103,7 @@ namespace integration {
                 export function file(clear: boolean, sign: string = undefined): Blob {
                     return createFile(localStorage, clear, sign);
                 }
-                export function upload(onCompleted: (result: ibas.FileData | Error) => void, sign: string = undefined): void {
+                export function upload(onCompleted: (result: ibas.FileItem | Error) => void, sign: string = undefined): void {
                     uploadFile(localStorage, onCompleted, sign);
                 }
             }
@@ -114,7 +114,7 @@ namespace integration {
                 export function file(clear: boolean, sign: string = undefined): Blob {
                     return createFile(sessionStorage, clear, sign);
                 }
-                export function upload(onCompleted: (result: ibas.FileData | Error) => void, sign: string = undefined): void {
+                export function upload(onCompleted: (result: ibas.FileItem | Error) => void, sign: string = undefined): void {
                     uploadFile(sessionStorage, onCompleted, sign);
                 }
             }

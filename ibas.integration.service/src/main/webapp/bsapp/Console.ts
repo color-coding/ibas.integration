@@ -11,8 +11,6 @@
 /// <reference path="./integrationjob/index.ts" />
 namespace integration {
     export namespace app {
-        /** 属性-导航 */
-        const PROPERTY_NAVIGATION: symbol = Symbol("navigation");
         /** 模块控制台 */
         export class Console extends ibas.ModuleConsole {
             /** 构造函数 */
@@ -22,10 +20,6 @@ namespace integration {
                 this.name = CONSOLE_NAME;
                 this.version = CONSOLE_VERSION;
                 this.copyright = ibas.i18n.prop("shell_license");
-            }
-            /** 创建视图导航 */
-            navigation(): ibas.IViewNavigation {
-                return this[PROPERTY_NAVIGATION];
             }
             /** 初始化 */
             protected registers(): void {
@@ -46,9 +40,9 @@ namespace integration {
             /** 运行 */
             run(): void {
                 // 加载语言-框架默认
-                ibas.i18n.load([
-                    this.rootUrl + "resources/languages/integration.json",
-                    this.rootUrl + "resources/languages/bos.json"
+                this.loadResources([
+                    "resources/languages/integration.json",
+                    "resources/languages/bos.json"
                 ], () => {
                     // 设置资源属性
                     this.description = ibas.i18n.prop(this.name.toLowerCase());
@@ -69,7 +63,7 @@ namespace integration {
                     // 加载视图库
                     this.loadUI(uiModules, (ui) => {
                         // 设置导航
-                        this[PROPERTY_NAVIGATION] = new ui.Navigation();
+                        this.setNavigation(new ui.Navigation());
                         // 调用初始化
                         this.initialize();
                     });
@@ -99,10 +93,6 @@ namespace integration {
                 this.version = CONSOLE_VERSION_DEV;
                 this.copyright = ibas.i18n.prop("shell_license");
             }
-            /** 创建视图导航 */
-            navigation(): ibas.IViewNavigation {
-                return this[PROPERTY_NAVIGATION];
-            }
             /** 初始化 */
             protected registers(): void {
                 // 注册功能
@@ -116,9 +106,9 @@ namespace integration {
             /** 运行 */
             run(): void {
                 // 加载语言-框架默认
-                ibas.i18n.load([
-                    this.rootUrl + "resources/languages/integration.json",
-                    this.rootUrl + "resources/languages/bos.json"
+                this.loadResources([
+                    "resources/languages/integration.json",
+                    "resources/languages/bos.json"
                 ], () => {
                     // 设置资源属性
                     this.description = ibas.i18n.prop(this.name.toLowerCase());
@@ -139,7 +129,7 @@ namespace integration {
                     // 加载视图库
                     this.loadUI(uiModules, (ui) => {
                         // 设置导航
-                        this[PROPERTY_NAVIGATION] = new ui.Navigation();
+                        this.setNavigation(new ui.Navigation());
                         // 调用初始化
                         this.initialize();
                     });
