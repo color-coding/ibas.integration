@@ -22,7 +22,7 @@ import org.colorcoding.ibas.bobas.core.fields.IFieldData;
 import org.colorcoding.ibas.bobas.core.fields.IManagedFields;
 import org.colorcoding.ibas.bobas.data.DataConvert;
 import org.colorcoding.ibas.bobas.expression.BOJudgmentLinkCondition;
-import org.colorcoding.ibas.bobas.expression.JudmentOperationException;
+import org.colorcoding.ibas.bobas.expression.JudgmentOperationException;
 import org.colorcoding.ibas.bobas.message.Logger;
 import org.colorcoding.ibas.bobas.message.MessageLevel;
 import org.colorcoding.ibas.integration.MyConfiguration;
@@ -165,7 +165,7 @@ public class BOStatusAction extends Action {
 	}
 
 	protected void setPropertyValue(IBusinessObject bo, String property, String value, List<ICondition> conditions)
-			throws JudmentOperationException {
+			throws JudgmentOperationException {
 		if (!(bo instanceof IManagedFields)) {
 			return;
 		}

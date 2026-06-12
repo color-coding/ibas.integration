@@ -139,7 +139,7 @@ export class BORepositorySOAP {
     protected getAddress(method: string = undefined): string {
         let address: string = this.address;
         if (ibas.strings.isEmpty(address)) {
-            throw new Error("invaild address.");
+            throw new Error("invalid address.");
         }
         return address;
     }

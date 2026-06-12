@@ -54,7 +54,7 @@ namespace integration {
                 condition.value = ibas.variablesManager.getValue(ibas.VARIABLE_NAME_USER_ID);
                 condition = criteria.conditions.create();
                 condition.alias = bo.IntegrationJob.PROPERTY_FREQUENCY_NAME;
-                condition.operation = ibas.emConditionOperation.GRATER_THAN;
+                condition.operation = ibas.emConditionOperation.GREATER_THAN;
                 condition.value = "0";
                 let boRepository: bo.BORepositoryIntegration = new bo.BORepositoryIntegration();
                 boRepository.fetchIntegrationJob({

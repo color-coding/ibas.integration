@@ -34,7 +34,7 @@ class BORepository4Action extends BORepositoryServiceApplication {
 		try {
 			// 加载命名空间的类
 			if (criteria == null || criteria.getBusinessObject() == null || criteria.getBusinessObject().isEmpty()) {
-				throw new Exception(I18N.prop("msg_ig_invaild_fetch_criteria"));
+				throw new Exception(I18N.prop("msg_ig_invalid_fetch_criteria"));
 			}
 			Class<?> boClass = BOFactory.loadClass(criteria.getBusinessObject());
 			if (boClass == null) {

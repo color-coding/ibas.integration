@@ -78,7 +78,7 @@ namespace integration {
                             if (opRslt.resultObjects.length === 0) {
                                 that.proceeding(ibas.emMessageType.INFORMATION, ibas.i18n.prop("shell_data_fetched_none"));
                             }
-                            that.messages(ibas.emMessageType.SUCCESS, ibas.i18n.prop("integration_upload_package") + ibas.i18n.prop("shell_sucessful"));
+                            that.messages(ibas.emMessageType.SUCCESS, ibas.i18n.prop("integration_upload_package") + ibas.i18n.prop("shell_successful"));
                             that.view.showPackages(opRslt.resultObjects);
                         } catch (error) {
                             that.messages(error);
@@ -143,7 +143,7 @@ namespace integration {
                             } else {
                                 that.view.showAction(undefined);
                                 that.messages(ibas.emMessageType.SUCCESS,
-                                    ibas.i18n.prop("shell_data_delete") + ibas.i18n.prop("shell_sucessful"));
+                                    ibas.i18n.prop("shell_data_delete") + ibas.i18n.prop("shell_successful"));
                             }
                             that.busy(false);
                         });

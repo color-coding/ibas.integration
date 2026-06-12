@@ -31,7 +31,7 @@ export default class SyncMaterials extends integration.action.IntegrationAction 
             let condition: ibas.ICondition = criteria.conditions.create();
             condition.alias = "ItemCode";
             condition.value = LAST_FETCHED_DATA.itemCode;
-            condition.operation = ibas.emConditionOperation.GRATER_THAN;
+            condition.operation = ibas.emConditionOperation.GREATER_THAN;
         }
         let that: this = this;
         b1Repository.fetchItems({

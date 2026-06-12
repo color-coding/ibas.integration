@@ -53,14 +53,13 @@
     "integration_integrationjoblist_batch_update_job_isnot": "This job does not exist in the update package",
     "integration_integrationjoblist_choose_package_title": "Please choose update package",
     "integration_integrationjoblist_continue_update_all": "If no tasks are selected for update on the interface, all will be updated by default. Continue?",
-    "integration_closing_delimiter": "----End----",
     "integrationdevelopment": "Data Integration - Development",
     "integrationdevelopment_icon": "sap-icon://developer-settings",
     "integrationdevelopment_func_development_terminal": "Development Terminal",
     "integrationdevelopment_app_development_terminal": "Integration Development Terminal",
     "integrationdevelopment_actions_url": "URL",
     "integrationdevelopment_please_actions_url": "Please enter integration action URL",
-    "integrationdevelopment_run_action_faild": "Failed to run action [{0}]",
+    "integrationdevelopment_run_action_failed": "Failed to run action [{0}]",
     "integrationdevelopment_display_console": "Display Console",
-    "integrationdevelopment_closing_delimiter": "----End----"
+    "integration_sql_code_pretty": "Beautify"
 }
