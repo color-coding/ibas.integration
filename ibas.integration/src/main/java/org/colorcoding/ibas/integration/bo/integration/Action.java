@@ -1,11 +1,11 @@
 package org.colorcoding.ibas.integration.bo.integration;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 import org.colorcoding.ibas.bobas.data.ArrayList;
 import org.colorcoding.ibas.bobas.core.Serializable;
@@ -113,7 +113,7 @@ public class Action extends Serializable {
 	}
 
 	@XmlElementWrapper(name = "dependencies")
-	@XmlElement(name = "dependencies", type = String.class)
+	@XmlElement(name = "dependency", type = String.class)
 	private String[] dependencies;
 
 	public final String[] getDependencies() {
