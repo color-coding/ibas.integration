@@ -384,8 +384,8 @@ public class FileRepositoryAction extends FileRepositoryService
 		try {
 			this.setUserToken(token);
 			try (ByteArrayInputStream inputStream = new ByteArrayInputStream(
-					Strings.isNullOrEmpty(content.getText()) ? Strings.VALUE_EMPTY.getBytes()
-							: content.getText().getBytes())) {
+					Strings.isNullOrEmpty(content.getText()) ? Strings.VALUE_EMPTY.getBytes(StandardCharsets.UTF_8)
+							: content.getText().getBytes(StandardCharsets.UTF_8))) {
 				try (FileData fileData = new FileData(inputStream)) {
 					fileData.setName(content.getKey() + File.separator + PACKAGE_INTEGRATION_REMARKS_FILE);
 					IOperationResult<FileItem> opRslt = this.save(fileData);

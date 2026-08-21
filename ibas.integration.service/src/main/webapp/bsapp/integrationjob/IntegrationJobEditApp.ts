@@ -9,7 +9,7 @@ namespace integration {
     export namespace app {
 
         /** 编辑应用-集成任务 */
-        export class IntegrationJobEditApp extends ibas.BOEditApplication<IIntegrationJobEditView, bo.IntegrationJob> {
+        export class IntegrationJobEditApp extends ibas.BOEditService<IIntegrationJobEditView, bo.IntegrationJob> {
 
             /** 应用标识 */
             static APPLICATION_ID: string = "8b8892ec-3b73-44b6-83cd-3d048a60c010";
@@ -397,6 +397,21 @@ namespace integration {
             showIntegrationJobActionCfgs(datas: bo.IntegrationJobActionCfg[]): void;
             /** 选择任务动作配置-配置项目 */
             chooseJobActionCfgConfigItemEvent: Function;
+        }
+        /** IntegrationJob编辑服务映射 */
+        export class IntegrationJobEditServiceMapping extends ibas.BOEditServiceMapping {
+            /** 构造函数 */
+            constructor() {
+                super();
+                this.id = IntegrationJobEditApp.APPLICATION_ID;
+                this.name = IntegrationJobEditApp.APPLICATION_NAME;
+                this.boCode = IntegrationJobEditApp.BUSINESS_OBJECT_CODE;
+                this.description = ibas.i18n.prop(this.name);
+            }
+            /** 创建服务实例 */
+            create(): ibas.IService<ibas.IBOEditServiceCaller<bo.IntegrationJob>> {
+                return new IntegrationJobEditApp();
+            }
         }
     }
 }
