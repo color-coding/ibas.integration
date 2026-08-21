@@ -31,6 +31,7 @@ namespace integration {
                     this.register(new IntegrationActionFunc());
                 }
                 // 注册服务应用
+                this.register(new IntegrationJobEditServiceMapping());
                 this.register(new IntegrationJobChooseServiceMapping());
                 this.register(new IntegrationActionChooseServiceMapping());
                 this.register(new IntegrationJobAppMapping());
